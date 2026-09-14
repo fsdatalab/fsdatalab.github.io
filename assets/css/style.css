@@ -125,7 +125,7 @@ a:hover { opacity: 0.75; }
   list-style: none;
   margin-left: 0 !important;
   padding-left: 1.25rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.65;
   margin-bottom: 1rem;
 }
@@ -184,7 +184,7 @@ a:hover { opacity: 0.75; }
 /* ── intro (home page) ────────────────────────────── */
 .intro {
   font-family: var(--body);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.65;
   color: #333;
   margin-bottom: 1rem;
