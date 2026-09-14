@@ -140,7 +140,8 @@ a:hover { opacity: 0.75; }
   font-size: 1em;
   position: absolute;
   left: -1.1rem;
-  top: 0.15em;
+  top: 0;
+  line-height: 1.65;
 }
 .prose code {
   font-family: var(--mono);
