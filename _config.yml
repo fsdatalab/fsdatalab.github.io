@@ -2,6 +2,7 @@ title: Full Stack Data Lab
 description: A CS research lab at Carnegie Mellon University led by Shreya Shankar.
 url: https://fsdatalab.github.io
 baseurl: ""
+image: /assets/og-image.png
 
 defaults:
   - scope:
