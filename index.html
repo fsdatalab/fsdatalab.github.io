@@ -1,0 +1,30 @@
+---
+layout: default
+title: Home
+---
+<div class="content">
+  <p class="intro">
+    We are a CS research lab led by <a href="https://sh-reya.com">Shreya Shankar</a>, moving to Carnegie Mellon University in 2027. <strong>Our goal is to make unstructured data (e.g., free-form text, documents) as easy to process, explore, and understand as relational data.</strong> We take a <em>user-centered</em> and <em>full-stack</em> approach — we talk to people and build open-source data systems and user interfaces.
+  </p>
+  <p class="intro">We have three projects going on:</p>
+  <ul class="intro project-list">
+    <li><a href="https://docetl.org">DocETL</a>, an agentic map-reduce system for processing large unstructured datasets with LLMs (with our friends at the <a href="https://epic.berkeley.edu">EPIC Data Lab</a> at UC Berkeley).</li>
+    <li><a href="https://github.com/fsdatalab/quail">Quail</a>, an open-source execution engine for DocETL and AI-SQL, with open-source models, that KV-cache-hitmaxxes and throughputmaxxes on GPUs.</li>
+    <li><a href="https://docwriter.org">DocWriter</a>, an IDE for AI-assisted writing (or is it human-assisted AI writing?).</li>
+  </ul>
+  <div style="background: rgba(196, 18, 48, 0.04); border: 1px solid rgba(196, 18, 48, 0.15); border-radius: 6px; padding: 0.875rem 1rem; margin-bottom: 2.5rem; font-size: 0.9375rem; line-height: 1.65;">
+    <strong>We are hiring!</strong> We are looking for highly motivated and ambitious database, HCI, or AI researchers. PhD applicants: apply through the <a href="https://csd.cmu.edu/academics/doctoral/admissions">CMU CSD</a> or <a href="https://www.hcii.cmu.edu/academics/phd-hci/admissions">HCII</a> PhD applications. Postdocs, undergrads, and masters students: email <a href="mailto:shreyashankar@cmu.edu">shreyashankar@cmu.edu</a> with why you want to work with us, your CV, and transcript. Don't write your email with AI, please!
+  </div>
+
+  <h2 class="section-heading">Blog</h2>
+  {% if site.posts.size > 0 %}
+  {% for post in site.posts %}
+  <a href="{{ post.url | relative_url }}" class="post-item">
+    <div class="post-title">{{ post.title }}</div>
+    <div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}{% if post.author %} | {{ post.author }}{% endif %}</div>
+  </a>
+  {% endfor %}
+  {% else %}
+  <p class="intro" style="color: var(--muted);">Coming soon.</p>
+  {% endif %}
+</div>

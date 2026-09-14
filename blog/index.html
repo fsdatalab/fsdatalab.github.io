@@ -1,0 +1,17 @@
+---
+layout: default
+title: Blog
+---
+<div class="content">
+  <h2 class="section-heading">Blog</h2>
+  {% if site.posts.size > 0 %}
+  {% for post in site.posts %}
+  <a href="{{ post.url | relative_url }}" class="post-item">
+    <div class="post-title">{{ post.title }}</div>
+    <div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}{% if post.author %} | {{ post.author }}{% endif %}</div>
+  </a>
+  {% endfor %}
+  {% else %}
+  <p class="intro" style="color: var(--muted);">Coming soon.</p>
+  {% endif %}
+</div>

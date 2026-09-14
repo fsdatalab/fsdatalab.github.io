@@ -1,0 +1,25 @@
+title: Full Stack Data Lab
+description: A CS research lab at Carnegie Mellon University led by Shreya Shankar.
+url: https://fsdatalab.github.io
+baseurl: ""
+
+defaults:
+  - scope:
+      path: "_posts"
+      type: posts
+    values:
+      layout: post
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md

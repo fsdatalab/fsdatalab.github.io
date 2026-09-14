@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23C41230'/><rect x='16' y='16' width='68' height='16' rx='4' fill='%23fff'/><rect x='16' y='40' width='40' height='14' rx='4' fill='%23fff'/><rect x='16' y='62' width='18' height='14' rx='4' fill='%23fff'/><rect x='16' y='80' width='14' height='12' rx='3' fill='%23fff'/></svg>">
+  {% seo %}
+</head>
+<body>
+  {% include nav.html %}
+  {{ content }}
+  {% include footer.html %}
+</body>
+</html>
