@@ -22,8 +22,9 @@ title: Home
   </div>
 
   <h2 class="section-heading">Blog</h2>
-  {% if site.posts.size > 0 %}
-  {% for post in site.posts %}
+  {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" %}
+  {% if listed_posts.size > 0 %}
+  {% for post in listed_posts %}
   <a href="{{ post.url | relative_url }}" class="post-item">
     <div class="post-title">{{ post.title }}</div>
     <div class="post-meta">

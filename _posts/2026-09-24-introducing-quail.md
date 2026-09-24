@@ -4,6 +4,8 @@ title: "Building an Ultra-High Throughput AI-SQL Engine"
 date: 2026-09-24
 author: "Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, Meryem Arik"
 permalink: /blog/introducing-quail/
+unlisted: true
+sitemap: false
 description: "Quail jointly plans AI-SQL queries and model inference. Across 29 QUAIL-B queries, it is 1.84x faster on average than well-tuned vLLM baselines."
 image:
   path: /assets/blog/introducing-quail/quail-throughput-by-dataset.png
