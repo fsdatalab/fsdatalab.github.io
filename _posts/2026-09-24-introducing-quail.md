@@ -33,7 +33,7 @@ For the big picture, read our companion post, *Hitting a Billion Tokens per Minu
   </li>
   <li><a href="#4-we-evaluate-quail-against-vllm">We evaluate Quail against vLLM.</a>
     <ol>
-      <li><a href="#41-metrics-and-baselines-for-ai-sql-performance">Metrics and Baselines for AI-SQL Performance</a></li>
+      <li><a href="#41-metrics-and-baselines-for-ai-sql-performance">Metrics and baselines for AI-SQL performance.</a></li>
       <li><a href="#42-overall-quail-is-184x-faster-across-quail-b">Overall, Quail is 1.84x faster across QUAIL-B.</a></li>
       <li><a href="#43-quail-dominates-vllm-on-bio-4-1404x-faster">Quail dominates vLLM on BIO-4: 14.04x faster!</a></li>
       <li><a href="#44-but-vllm-dominates-quail-on-agent-1-quail-takes-232x-as-long">But, vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.</a></li>
@@ -625,7 +625,7 @@ computation and GPU memory use by the output head.
 
 <aside class="tldr result-callout">Quail is faster than a &quot;stock&quot; vLLM baseline on 27 of the 29 QUAIL-B queries. The <strong>(geometric) mean speedup is 1.84x</strong>, and the <strong>maximum speedup is 11.22x</strong> on BIO-2. The two queries where stock vLLM wins expose one missing feature clearly: Quail does not yet reuse matching prefixes across different rows.</aside>
 
-## 4.1 Metrics and Baselines for AI-SQL Performance
+## 4.1 Metrics and baselines for AI-SQL performance.
 
 **Metrics.** We report three metrics for each query: KV regret,
 \$/query, and input tokens/second. KV regret is repeated model work:
