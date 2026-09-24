@@ -653,6 +653,13 @@ a:hover { opacity: 0.75; }
   font-style: italic;
 }
 
+@media (max-width: 640px) {
+  .prose #table-3 table {
+    width: 44rem;
+    min-width: 44rem;
+  }
+}
+
 /* Rouge syntax highlighting */
 .prose .highlight .c,
 .prose .highlight .c1,
