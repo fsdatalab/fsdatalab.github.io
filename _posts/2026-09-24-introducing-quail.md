@@ -1020,14 +1020,10 @@ in inference engines.
 <span id="note-5"><strong>5.</strong></span> The IMDB dataset was already on disk, so the measurement excludes
 the time and cost of downloading it.
 
-<span id="note-6"><strong>6.</strong></span> As of September 2026, [OpenAI lists GPT-5
-nano](https://developers.openai.com/api/docs/models/gpt-5-nano) at
-\$0.05 per million input tokens, \$0.005 per million cached input
-tokens, and \$0.40 per million output tokens. The estimate applies the
-regular rate to 32.50 million input tokens, the cached rate to 8.41
-million document tokens reused by the second filter, and the output rate
-to 200,000 tokens. We assume an infinite cache, so every reusable
-document token receives the cached rate.
+<span id="note-6"><strong>6.</strong></span> We use OpenAI’s [cached-token
+price](https://developers.openai.com/api/docs/models/gpt-5-nano) in this
+estimate and assume an “infinite” cache, so every reusable document token
+receives that rate.
 
 <span id="note-7"><strong>7.</strong></span> Marcel Rød built the fast
 [Gigatoken](https://github.com/marcelroed/gigatoken) tokenizer;
