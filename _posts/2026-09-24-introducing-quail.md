@@ -620,12 +620,17 @@ computation and GPU memory use by the output head.
 
 At scale factor 0.1, Quail is faster than a "stock" vLLM baseline on 27
 of the 29 QUAIL-B queries. The **(geometric) mean speedup is 1.84x**, and
-the **maximum speedup is 11.22x** on BIO-2. The two queries where stock
+the **maximum speedup is 11.22x** on BIO-2. At scale factor 1.0, we find
+a query for which Quail is 14.04x faster! The two queries where stock
 vLLM wins expose one missing feature clearly: Quail does not yet reuse
 matching prefixes across different rows.
 
-At scale factor 1.0, we find a query for which Quail is 14.04x faster!
-We describe this result in [Section 4.3](#43-quail-dominates-vllm-on-bio-4-1404x-faster).
+In this section, we first describe our [metrics and
+baselines](#41-metrics-and-baselines-for-ai-sql-performance), then
+present the [full QUAIL-B results](#42-overall-quail-is-184x-faster-across-quail-b),
+and finally examine [BIO-4](#43-quail-dominates-vllm-on-bio-4-1404x-faster)
+and [AGENT-1](#44-but-vllm-dominates-quail-on-agent-1-quail-takes-232x-as-long)
+in detail.
 
 ## 4.1 Metrics and baselines for AI-SQL performance.
 
