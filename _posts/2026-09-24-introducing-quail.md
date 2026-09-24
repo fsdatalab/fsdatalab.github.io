@@ -178,9 +178,6 @@ inference for AI-SQL!
 
 # 3. We built Quail to run AI-SQL queries faster.
 
-Quail’s physical query plans specify when model calls run, which calls
-share a batch, and how long their KV remains in memory.
-
 We will first show you how you can get started. To skip to read about
 how Quail works, skip to [Section 3.2](#32-quail-jointly-plans-queries-and-inference).
 
