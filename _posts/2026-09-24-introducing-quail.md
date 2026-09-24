@@ -31,12 +31,12 @@ For the big picture, read our companion post, *Hitting a Billion Tokens per Minu
       <li><a href="#32-quail-jointly-plans-queries-and-inference">How Quail plans queries and inference.</a></li>
     </ol>
   </li>
-  <li><a href="#4-we-evaluate-quail-against-stock-vllm-on-quail-b">We evaluate Quail against stock vLLM on QUAIL-B.</a>
+  <li><a href="#4-we-evaluate-quail-against-vllm">We evaluate Quail against vLLM.</a>
     <ol>
       <li><a href="#41-metrics-and-baselines-for-ai-sql-performance">Metrics and Baselines for AI-SQL Performance</a></li>
       <li><a href="#42-overall-quail-is-184x-faster-across-quail-b">Overall, Quail is 1.84x faster across QUAIL-B.</a></li>
-      <li><a href="#43-quail-dominates-stock-vllm-on-bio-4-1404x-faster">Quail dominates stock vLLM on BIO-4: 14.04x faster!</a></li>
-      <li><a href="#44-but-stock-vllm-dominates-quail-on-agent-1-quail-takes-232x-as-long">But, stock vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.</a></li>
+      <li><a href="#43-quail-dominates-vllm-on-bio-4-1404x-faster">Quail dominates vLLM on BIO-4: 14.04x faster!</a></li>
+      <li><a href="#44-but-vllm-dominates-quail-on-agent-1-quail-takes-232x-as-long">But, vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.</a></li>
     </ol>
   </li>
   <li><a href="#5-put-another-way-quail-brings-jev-like-speeds-and-intelligence-to-database-scale-workloads">Put another way: Quail brings Jev-like speeds and intelligence to database-scale workloads.</a></li>
@@ -621,7 +621,7 @@ final hidden state by only the corresponding rows of the output/language
 modeling head matrix. By using the smaller matrix, Quail reduces
 computation and GPU memory use by the output head.
 
-# 4. We evaluate Quail against stock vLLM on QUAIL-B.
+# 4. We evaluate Quail against vLLM.
 
 <aside class="tldr result-callout">Quail is faster than a &quot;stock&quot; vLLM baseline on 27 of the 29 QUAIL-B queries. The <strong>(geometric) mean speedup is 1.84x</strong>, and the <strong>maximum speedup is 11.22x</strong> on BIO-2. The two queries where stock vLLM wins expose one missing feature clearly: Quail does not yet reuse matching prefixes across different rows.</aside>
 
@@ -757,7 +757,7 @@ Stock vLLM is faster than Quail only on AGENT-1 and AGENT-2. Quail does
 not yet reuse matching prefixes across rows, so it recomputes far more
 KV tokens on each query. Section 4.4 examines AGENT-1.
 
-## 4.3 Quail dominates stock vLLM on BIO-4: 14.04x faster!
+## 4.3 Quail dominates vLLM on BIO-4: 14.04x faster!
 
 BIO-4 contains the kind of reuse Quail currently handles well: long
 shared documents, two joins, and millions of related model calls whose
@@ -792,7 +792,7 @@ vLLM.
 Quail also recomputes less KV. It recomputes 18.0 million tokens,
 compared with 50.3 million for stock vLLM.
 
-## 4.4 But, stock vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.
+## 4.4 But, vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.
 
 AGENT-1 contains a different kind of reuse. It filters 1,772 cumulative
 snapshots from software agent runs. Separate rows contain overlapping
