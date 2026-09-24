@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Building an Ultra-High Throughput AI-SQL Engine"
-date: 2026-09-23
+date: 2026-09-24
 author: "Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, Meryem Arik"
 permalink: /blog/introducing-quail/
 description: "Quail jointly plans AI-SQL queries and model inference. Across 29 QUAIL-B queries, it is 1.84x faster on average than well-tuned vLLM baselines."
@@ -311,32 +311,21 @@ Quail session and runs it:
 
 ```python
 import modal
-import quail
 
 app = modal.App("quail-engine")
-IMAGE_REQUIREMENTS = (
-    "sqlglot==30.17.0",
-    "transformers==5.15.0",
-    "huggingface-hub==1.27.0",
-    "pyarrow==25.0.1",
-    "numpy==2.3.5",
-    "gigatoken==0.10.0",
-    "datasets==5.0.1",
-    "vllm==0.26.0",
-)
-
 image = (
     modal.Image.from_registry(
         "nvidia/cuda:13.0.1-devel-ubuntu24.04",
         add_python="3.12",
     )
     .entrypoint([])
-    .pip_install(*IMAGE_REQUIREMENTS)
-    .add_local_python_source("quail")
+    .uv_pip_install("quail-engine==0.1.0")
 )
 
-@app.function(image=image, gpu="H100!", timeout=1200)
+@app.function(image=image, gpu="H100!", memory=32768, timeout=1200)
 def run_query(sql, documents):
+    import quail
+
     config = quail.EngineConfig(
         gpus=1,
         model="qwen3-4b-fp8",
@@ -632,7 +621,7 @@ computation and GPU memory use by the output head.
 
 # 4. We evaluate Quail against stock vLLM on QUAIL-B.
 
-<aside class="tldr result-callout"><strong>Quail is faster than a stock vLLM baseline on 27 of the 29 QUAIL-B queries.</strong> The (geometric) mean speedup is 1.84x, and the maximum speedup is 11.22x on BIO-2. The two queries where stock vLLM wins expose one missing feature clearly: Quail does not yet reuse matching prefixes across different rows.</aside>
+<aside class="tldr result-callout">Quail is faster than a &quot;stock&quot; vLLM baseline on 27 of the 29 QUAIL-B queries. The <strong>(geometric) mean speedup is 1.84x</strong>, and the <strong>maximum speedup is 11.22x</strong> on BIO-2. The two queries where stock vLLM wins expose one missing feature clearly: Quail does not yet reuse matching prefixes across different rows.</aside>
 
 ## 4.1 Metrics and Baselines for AI-SQL Performance
 
@@ -977,10 +966,8 @@ AND AI.IF(PROMPT(
 </div>
 
 <span id="note-2"><strong>2.</strong></span> Prompts use numbered placeholders, such as `{0}` and `{1}`, to refer to
-their document arguments. The SQL call and the model input it produces
-are shown below. The report
-comes first, so Quail can reuse its KV when it compares the same report
-with another reaction term.
+the arguments after the prompt string in the `PROMPT` call. The SQL call
+and the model input it produces are shown below.
 
 <div class="note-2-example" markdown="1">
 
@@ -991,6 +978,10 @@ AI.IF(PROMPT(
     n.term
 ))
 ```
+
+The documents do not have to appear exactly where their placeholders
+occur in the question. Quail can place the report first so its KV can be
+reused when the same report is compared with another reaction term.
 
 The model receives the following input:
 
@@ -1007,6 +998,9 @@ DOCUMENT {1}:
 [contents of n.term]
 ANSWER:
 ```
+
+Of course, whether other prompt layouts affect accuracy remains an open
+question, though we expect this to matter less as models improve.
 
 </div>
 

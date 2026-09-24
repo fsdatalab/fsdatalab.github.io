@@ -458,6 +458,10 @@ a:hover { opacity: 0.75; }
   margin: 0.5rem 0 0.25rem;
   font-size: inherit;
 }
+.prose .sidenote .note-2-example p {
+  color: inherit;
+  line-height: inherit;
+}
 .prose .note-2-example pre {
   margin: 0.4rem 0;
   padding: 0.5rem;
