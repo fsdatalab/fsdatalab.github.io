@@ -875,9 +875,6 @@ dataset, and Quail plans and runs them together. This makes Quail a good
 fit for LLM judge workflows, trace compaction, labeling, and other
 large-scale data transformations.
 
-For an inference-engine view, read the companion post by Charles Frye
-and Shreya Shankar, *Hitting a Billion Tokens per Minute on One GPU*.
-
 # 6. We are just getting started with Quail!
 
 Some next steps are obvious. E.g., we want to support more AI-SQL
@@ -916,6 +913,14 @@ index entry? A document from the other relation could then search those
 entries for matches, like probing a hash table, without recomputing the
 indexed documents. This may require removing or separating the position
 information that RoPE adds to KV.
+
+**New methods for using AI agents to build systems.** We used AI coding
+agents heavily to build the current version of Quail. We expect to keep using agents to build many of
+the features above. How do we do this correctly? We want better ways to specify what the system must do, and to
+check that every agent-written change keeps answers correct and runtime
+close to SoL. It feels inevitable that agents will do the bulk of the
+coding, and we are excited to build Quail in public and share the
+meta-learnings from building it with agents.
 
 More blog posts, and eventually a technical report, are coming soon. For
 now, please try [Quail](https://github.com/fsdatalab/quail)! If these ideas sound interesting, reach out to
