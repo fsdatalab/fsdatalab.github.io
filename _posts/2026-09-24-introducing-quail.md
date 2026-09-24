@@ -14,10 +14,6 @@ image:
   alt: "Quail throughput compared with stock vLLM across five AI-SQL datasets."
 ---
 
-For the big picture, read our companion post, *Hitting a Billion Tokens per Minute on One GPU* (link coming soon). This post explains how Quail plans and runs AI-SQL queries.
-
-<!-- TODO: Add the companion post URL after publication. -->
-
 <aside class="tldr"><strong>TL;DR:</strong> AI functions in SQL, and fast LLM-powered classifiers in general, are having their day in the sun. But they typically rely on costly, closed LLM APIs. We’re building <a href="https://github.com/fsdatalab/quail">Quail</a>, the <strong>QU</strong>ery-<strong>A</strong>ware <strong>I</strong>nference <strong>L</strong>ayer, to jointly optimize query planning and model inference for open-weight models. Across 29 <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> queries, Quail is 1.84x faster on average than well-tuned vLLM baselines. <a href="https://github.com/fsdatalab/quail">Star us on GitHub</a> and try it out!</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
