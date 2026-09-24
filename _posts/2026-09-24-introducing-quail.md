@@ -618,7 +618,11 @@ computation and GPU memory use by the output head.
 
 # 4. We evaluate Quail against vLLM.
 
-<aside class="tldr result-callout">At scale factor 0.1, Quail is faster than a &quot;stock&quot; vLLM baseline on 27 of the 29 QUAIL-B queries. The <strong>(geometric) mean speedup is 1.84x</strong>, and the <strong>maximum speedup is 11.22x</strong> on BIO-2. The two queries where stock vLLM wins expose one missing feature clearly: Quail does not yet reuse matching prefixes across different rows.</aside>
+At scale factor 0.1, Quail is faster than a "stock" vLLM baseline on 27
+of the 29 QUAIL-B queries. The **(geometric) mean speedup is 1.84x**, and
+the **maximum speedup is 11.22x** on BIO-2. The two queries where stock
+vLLM wins expose one missing feature clearly: Quail does not yet reuse
+matching prefixes across different rows.
 
 At scale factor 1.0, we find a query for which Quail is 14.04x faster!
 We describe this result in [Section 4.3](#43-quail-dominates-vllm-on-bio-4-1404x-faster).

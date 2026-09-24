@@ -314,14 +314,6 @@ a:hover { opacity: 0.75; }
   line-height: 1.65;
   color: var(--text);
 }
-.prose .result-callout {
-  margin-top: 1rem;
-  margin-bottom: 0;
-  font-size: 0.9375rem;
-}
-.prose .result-callout + h2 {
-  margin-top: 1rem;
-}
 .prose .query-statement {
   max-width: 42rem;
   margin: 1.5rem auto;
