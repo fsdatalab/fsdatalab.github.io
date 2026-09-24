@@ -2,10 +2,100 @@
 layout: default
 ---
 <article class="content-narrow prose">
-  <a href="{{ '/blog/' | relative_url }}" class="back-link">← Blog</a>
+  <a href="{{ '/blog/' | relative_url }}" class="back-link">Back to blog</a>
   <div class="post-header">
     <h1>{{ page.title }}</h1>
-    <div class="post-meta">{{ page.date | date: "%b %-d, %Y" }}{% if page.author %} | {{ page.author }}{% endif %}</div>
+    <div class="post-meta">
+      <div>{{ page.date | date: "%b %-d, %Y" }}</div>
+      {% if page.author %}<div class="post-authors">{{ page.author }}</div>{% endif %}
+    </div>
   </div>
   {{ content }}
 </article>
+<script>
+  (() => {
+    const article = document.querySelector("article.prose");
+    const references = article?.querySelectorAll('sup a[href^="#note-"]');
+    if (!article || !references?.length) return;
+
+    const sidenotes = [];
+    for (const reference of references) {
+      const noteId = reference.getAttribute("href").slice(1);
+      const source = document.getElementById(noteId)?.closest("p");
+      if (!source) continue;
+
+      const sidenote = document.createElement("aside");
+      sidenote.className = "sidenote";
+      sidenote.setAttribute("aria-label", `Note ${reference.textContent.trim()}`);
+      sidenote.innerHTML = source.innerHTML;
+      const marker = sidenote.querySelector(`[id="${noteId}"]`);
+      marker?.removeAttribute("id");
+      marker?.classList.add("sidenote-number");
+
+      if (noteId === "note-1") {
+        const sql = article.querySelector(".note-1-sql");
+        if (sql) {
+          const details = document.createElement("details");
+          details.className = "sidenote-sql";
+          const summary = document.createElement("summary");
+          summary.textContent = "Show AI-SQL";
+          details.append(summary, sql.cloneNode(true));
+          sidenote.appendChild(details);
+        }
+      }
+
+      if (noteId === "note-2") {
+        const example = article.querySelector(".note-2-example");
+        if (example) sidenote.appendChild(example.cloneNode(true));
+      }
+
+      article.appendChild(sidenote);
+      sidenotes.push({ reference, sidenote });
+    }
+
+    const wideScreen = window.matchMedia("(min-width: 1650px)");
+    const layoutSidenotes = () => {
+      const enabled = wideScreen.matches;
+      article.classList.toggle("has-sidenotes", enabled);
+      let previousBottom = 0;
+      const articleTop = article.getBoundingClientRect().top + window.scrollY;
+
+      for (const { reference, sidenote } of sidenotes) {
+        const closedSection = reference.closest("details:not([open])");
+        if (!enabled || reference.offsetParent === null || closedSection) {
+          sidenote.hidden = true;
+          continue;
+        }
+        sidenote.hidden = false;
+        const referenceTop =
+          reference.getBoundingClientRect().top + window.scrollY - articleTop;
+        const top = Math.max(referenceTop, previousBottom + 16);
+        sidenote.style.top = `${top}px`;
+        previousBottom = top + sidenote.offsetHeight;
+      }
+    };
+
+    window.addEventListener("resize", layoutSidenotes);
+    window.addEventListener("load", layoutSidenotes);
+    article.querySelectorAll("details").forEach((details) => {
+      details.addEventListener("toggle", layoutSidenotes);
+    });
+    document.fonts?.ready.then(layoutSidenotes);
+    layoutSidenotes();
+
+    const copyButton = article.querySelector(".copy-bibtex");
+    const bibtex = article.querySelector(".bibtex-block code");
+    copyButton?.addEventListener("click", async () => {
+      if (!bibtex) return;
+      try {
+        await navigator.clipboard.writeText(bibtex.textContent.trim());
+        copyButton.textContent = "Copied";
+        window.setTimeout(() => {
+          copyButton.textContent = "Copy BibTeX";
+        }, 1500);
+      } catch {
+        copyButton.textContent = "Select and copy below";
+      }
+    });
+  })();
+</script>

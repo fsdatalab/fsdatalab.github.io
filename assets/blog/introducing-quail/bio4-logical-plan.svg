@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">BIO-4 plan used by the vLLM baseline</title>
+  <desc id="desc">The plan filters medical reports and two aliases of reaction terms. It joins the reports with cardiovascular reaction terms, then joins the surviving reports with neurological reaction terms.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/>
+    </marker>
+    <style>
+      .node { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+      .ai-node { fill: #dcebd3; stroke: #667085; stroke-width: 2; }
+      .edge { fill: none; stroke: #667085; stroke-width: 2.5; marker-end: url(#arrow); }
+      .label { fill: #101828; font: 600 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .detail { fill: #344054; font: 400 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .small { fill: #475467; font: 400 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .stage { fill: #3b6ea8; font: 600 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </defs>
+
+  <text class="stage" x="462" y="25">Second join</text>
+  <rect class="ai-node" x="450" y="40" width="300" height="96" rx="10"/>
+  <text class="label" x="600" y="77">AI_JOIN</text>
+  <text class="detail" x="600" y="105">neurological reaction experienced?</text>
+  <text class="small" x="600" y="127">anchor: report</text>
+
+  <text class="stage" x="282" y="184">First join</text>
+  <rect class="ai-node" x="270" y="198" width="300" height="96" rx="10"/>
+  <text class="label" x="420" y="235">AI_JOIN</text>
+  <text class="detail" x="420" y="263">cardiovascular reaction experienced?</text>
+  <text class="small" x="420" y="285">anchor: report</text>
+
+  <path class="edge" d="M 420 198 C 420 165, 510 166, 555 142"/>
+  <path class="edge" d="M 950 396 C 950 240, 740 210, 646 142"/>
+  <path class="edge" d="M 250 396 C 250 345, 340 337, 382 300"/>
+  <path class="edge" d="M 600 396 C 600 345, 500 337, 458 300"/>
+
+  <rect x="318" y="323" width="204" height="31" rx="10" fill="#ffffff"/>
+  <text class="small" x="420" y="344">materialized survivors</text>
+  <rect x="498" y="151" width="204" height="31" rx="10" fill="#ffffff"/>
+  <text class="small" x="600" y="172">materialized join rows</text>
+
+  <text class="stage" x="122" y="382">Filter stage</text>
+  <rect class="ai-node" x="100" y="396" width="300" height="88" rx="10"/>
+  <text class="label" x="250" y="431">AI_FILTER</text>
+  <text class="detail" x="250" y="461">serious adverse event?</text>
+
+  <text class="stage" x="472" y="382">Filter stage</text>
+  <rect class="ai-node" x="450" y="396" width="300" height="88" rx="10"/>
+  <text class="label" x="600" y="431">AI_FILTER</text>
+  <text class="detail" x="600" y="461">cardiovascular reaction?</text>
+
+  <text class="stage" x="822" y="382">Filter stage</text>
+  <rect class="ai-node" x="800" y="396" width="300" height="88" rx="10"/>
+  <text class="label" x="950" y="431">AI_FILTER</text>
+  <text class="detail" x="950" y="461">neurological reaction?</text>
+
+  <path class="edge" d="M 250 570 L 250 490"/>
+  <path class="edge" d="M 600 570 L 600 490"/>
+  <path class="edge" d="M 950 570 L 950 490"/>
+
+  <rect class="node" x="125" y="570" width="250" height="72" rx="10"/>
+  <text class="label" x="250" y="602">Scan</text>
+  <text class="detail" x="250" y="627">reports</text>
+
+  <rect class="node" x="475" y="570" width="250" height="72" rx="10"/>
+  <text class="label" x="600" y="602">Scan</text>
+  <text class="detail" x="600" y="627">reaction terms as c</text>
+
+  <rect class="node" x="825" y="570" width="250" height="72" rx="10"/>
+  <text class="label" x="950" y="602">Scan</text>
+  <text class="detail" x="950" y="627">reaction terms as n</text>
+</svg>

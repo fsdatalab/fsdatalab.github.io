@@ -50,7 +50,7 @@ a:hover { opacity: 0.75; }
 .nav-brand span {
   font-family: var(--display);
   font-weight: 600;
-  font-size: 1.0625rem;
+  font-size: 0.875rem;
   color: var(--heading);
 }
 .nav-links {
@@ -77,6 +77,9 @@ a:hover { opacity: 0.75; }
   max-width: 45rem;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 6.25rem;
+}
+.content-narrow.prose {
+  position: relative;
 }
 
 /* ── prose ─────────────────────────────────────────── */
@@ -161,8 +164,8 @@ a:hover { opacity: 0.75; }
 .prose pre code {
   background: none;
   padding: 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
 }
 .prose blockquote {
   border-left: 3px solid var(--red);
@@ -297,3 +300,372 @@ a:hover { opacity: 0.75; }
   .content { padding: 3rem 1.125rem 3.75rem; }
   .content-narrow { padding: 1.75rem 1.125rem 3.75rem; }
 }
+
+/* ── long-form technical posts ───────────────────── */
+.prose .tldr {
+  display: block;
+  margin: 1.5rem 0 2rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(196, 18, 48, 0.15);
+  border-radius: 6px;
+  background: rgba(196, 18, 48, 0.04);
+  font-family: var(--body);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+.prose .result-callout {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  font-size: 0.9375rem;
+}
+.prose .result-callout + h2 {
+  margin-top: 1rem;
+}
+.prose .query-statement {
+  max-width: 42rem;
+  margin: 1.5rem auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 5px;
+  background: #fafafa;
+  font-family: var(--display);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--heading);
+  text-align: center;
+}
+.prose figure {
+  width: min(70rem, calc(100vw - 3rem));
+  margin: 2rem 50%;
+  transform: translateX(-50%);
+}
+.prose figure.figure-medium {
+  width: min(50rem, calc(100vw - 3rem));
+}
+.prose figure.figure-plot-compact {
+  width: min(48rem, calc(100vw - 3rem));
+}
+.prose figure.figure-join-attention {
+  width: min(56rem, calc(100vw - 3rem));
+}
+.prose figure.figure-profile {
+  width: min(60rem, calc(100vw - 3rem));
+}
+.prose figure.figure-architecture {
+  width: min(62rem, calc(100vw - 3rem));
+}
+.prose figure.figure-execution {
+  width: min(58rem, calc(100vw - 3rem));
+}
+.prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+.prose figcaption {
+  max-width: 50rem;
+  margin-top: 0.625rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--faint);
+  font-style: italic;
+}
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-family: var(--body);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.prose th,
+.prose td {
+  min-width: 9rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d8d8d8;
+  text-align: left;
+  vertical-align: top;
+}
+.prose th,
+.prose table tr:first-child td {
+  background: #f5f5f5;
+  color: var(--heading);
+  font-weight: 600;
+}
+.prose td p {
+  margin: 0 0 0.25rem;
+  font-size: inherit;
+  line-height: inherit;
+}
+.prose td p:last-child {
+  margin-bottom: 0;
+}
+.prose sup {
+  position: relative;
+  top: -0.35em;
+  font-size: 1em;
+  line-height: 0;
+  vertical-align: baseline;
+}
+.prose sub {
+  font-size: 0.8em;
+}
+.prose .space-symbol {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 1.3em;
+  font-weight: 500;
+  line-height: 0.75;
+  vertical-align: -0.08em;
+}
+.prose .sidenote {
+  display: none;
+}
+.prose .sidenote-sql {
+  margin-top: 0.5rem;
+}
+.prose .sidenote-sql summary {
+  color: var(--red);
+  cursor: pointer;
+  font-family: var(--body);
+  font-size: 0.75rem;
+}
+.prose .sidenote-sql .note-1-sql,
+.prose .sidenote-sql pre {
+  margin: 0.5rem 0 0;
+}
+.prose .sidenote-sql pre,
+.prose .sidenote-sql code {
+  font-size: 0.625rem;
+  line-height: 1.35;
+}
+.prose .sidenote-sql pre {
+  padding: 0.625rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.prose .note-2-example {
+  margin-top: 0.5rem;
+}
+.prose .note-2-example p {
+  margin: 0.5rem 0 0.25rem;
+  font-size: inherit;
+}
+.prose .note-2-example pre {
+  margin: 0.4rem 0;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.prose .note-2-example pre,
+.prose .note-2-example code {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+.prose .copy-bibtex {
+  border: 1px solid #c8c8c8;
+  border-radius: 4px;
+  background: #fff;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.prose .bibtex-block {
+  position: relative;
+}
+.prose .bibtex-block pre {
+  padding-top: 2.75rem;
+}
+.prose .copy-bibtex {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  padding: 0.4rem 0.65rem;
+}
+
+@media (min-width: 1650px) {
+  .prose .sidenote {
+    position: absolute;
+    left: calc(100% + 8rem);
+    display: block;
+    width: 20rem;
+    font-family: var(--body);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .prose .sidenote[hidden] {
+    display: none;
+  }
+.prose .sidenote-number strong {
+    color: var(--red);
+  }
+  .prose .sidenote > code {
+    color: var(--red);
+    font-size: 0.6875rem;
+    padding: 0.0625rem 0.25rem;
+  }
+  .prose .sidenote:has(.sidenote-sql[open]) {
+    left: calc(100% + 0.5rem);
+    width: 28rem;
+  }
+  .prose.has-sidenotes > #notes,
+  .prose.has-sidenotes p:has(> #note-1),
+  .prose.has-sidenotes > .note-1-sql,
+  .prose.has-sidenotes p:has(> #note-2),
+  .prose.has-sidenotes > .note-2-example,
+  .prose.has-sidenotes p:has(> #note-3),
+  .prose.has-sidenotes p:has(> #note-4),
+  .prose.has-sidenotes p:has(> #note-5),
+  .prose.has-sidenotes p:has(> #note-6),
+  .prose.has-sidenotes p:has(> #note-7),
+  .prose.has-sidenotes p:has(> #note-8),
+  .prose.has-sidenotes p:has(> #note-9),
+  .prose.has-sidenotes p:has(> #note-10),
+  .prose.has-sidenotes p:has(> #note-11) {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .prose th,
+  .prose td {
+    min-width: 8rem;
+  }
+}
+
+.prose .collapsible-section {
+  margin: 2rem 0;
+}
+.prose .collapsible-section summary {
+  cursor: pointer;
+  font-family: var(--display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--heading);
+}
+.prose .collapsible-section .collapsible-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--body);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--faint);
+}
+.prose .collapsible-section[open] summary {
+  margin-bottom: 0.875rem;
+}
+
+.prose .post-toc {
+  margin: 0 0 2.25rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 5px;
+}
+.prose .post-toc > strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--display);
+  font-size: 1.125rem;
+  color: var(--heading);
+}
+.prose .post-toc ol {
+  margin-bottom: 0;
+}
+.prose .post-toc ol ol {
+  margin: 0.25rem 0 0.375rem 1.25rem;
+}
+.prose .post-toc li {
+  margin-bottom: 0.2rem;
+}
+
+.prose figure {
+  text-align: center;
+}
+.prose figure img {
+  width: auto;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.prose figcaption,
+.prose .table-caption {
+  text-align: center;
+}
+.prose .table-wrap {
+  width: 100%;
+  margin: 2rem auto;
+  overflow-x: auto;
+}
+.prose .table-wrap table {
+  display: table;
+  width: auto;
+  min-width: min(100%, 32rem);
+  margin: 0 auto;
+  overflow: visible;
+}
+.prose #table-3 table {
+  width: 100%;
+  table-layout: fixed;
+}
+.prose #table-3 th,
+.prose #table-3 td {
+  min-width: 0;
+}
+.prose #table-3 th:nth-child(1),
+.prose #table-3 td:nth-child(1) {
+  width: 22%;
+}
+.prose #table-3 th:nth-child(2),
+.prose #table-3 td:nth-child(2) {
+  width: 18%;
+}
+.prose #table-3 th:nth-child(3),
+.prose #table-3 td:nth-child(3) {
+  width: 14%;
+}
+.prose #table-3 th:nth-child(4),
+.prose #table-3 td:nth-child(4) {
+  width: 46%;
+}
+.prose .table-caption {
+  margin: 0.625rem auto 0;
+  font-family: var(--body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--faint);
+  font-style: italic;
+}
+
+/* Rouge syntax highlighting */
+.prose .highlight .c,
+.prose .highlight .c1,
+.prose .highlight .cm { color: #6a737d; font-style: italic; }
+.prose .highlight .k,
+.prose .highlight .kc,
+.prose .highlight .kd,
+.prose .highlight .kn,
+.prose .highlight .kp,
+.prose .highlight .kr,
+.prose .highlight .kt { color: #a31545; font-weight: 500; }
+.prose .highlight .s,
+.prose .highlight .s1,
+.prose .highlight .s2,
+.prose .highlight .se { color: #287a4d; }
+.prose .highlight .mi,
+.prose .highlight .mf { color: #7b4da1; }
+.prose .highlight .nf,
+.prose .highlight .nc { color: #245f9e; }
+.prose .highlight .o { color: #8a3b12; }

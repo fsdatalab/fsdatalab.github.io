@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">How vLLM turns a PyTorch model into GPU work</title>
+  <desc id="desc">Inside vLLM, a PyTorch model contains ordinary PyTorch operations and custom operations. Torch compile and TorchInductor JIT-compile the ordinary operations. vLLM selects specialized implementations for custom operations. Both paths run GPU kernels.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+      <path d="M 1 1 L 8.5 5 L 1 9" fill="none" stroke="#667085" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .outer { fill: #ffffff; stroke: #667085; stroke-width: 2.5; }
+      .model { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+      .branch { fill: #ffffff; stroke: #98a2b3; stroke-width: 2; }
+      .compile { fill: #dbe7f7; stroke: #8ba6c9; stroke-width: 2; }
+      .custom { fill: #f7e7cc; stroke: #c99a54; stroke-width: 2; }
+      .gpu { fill: #dcebd3; stroke: #8fad7d; stroke-width: 2.5; }
+      .line { fill: none; stroke: #667085; stroke-width: 2.5; }
+      .edge { fill: none; stroke: #667085; stroke-width: 2.5; marker-end: url(#arrow); }
+      .heading { fill: #101828; font: 600 27px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .label { fill: #101828; font: 500 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .small { fill: #344054; font: 400 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <rect class="outer" x="30" y="20" width="1140" height="535" rx="14"/>
+  <text class="heading" x="600" y="59">vLLM</text>
+
+  <rect class="model" x="390" y="82" width="420" height="68" rx="10"/>
+  <text class="label" x="600" y="117">PyTorch model forward pass</text>
+
+  <rect class="branch" x="80" y="190" width="460" height="64" rx="10"/>
+  <text class="label" x="310" y="222">Ordinary PyTorch operations</text>
+
+  <rect class="branch" x="660" y="190" width="460" height="64" rx="10"/>
+  <text class="label" x="890" y="211">Custom operations</text>
+  <text class="small" x="890" y="237">including attention</text>
+
+  <rect class="compile" x="80" y="286" width="460" height="78" rx="10"/>
+  <text class="label" x="310" y="315">torch.compile and TorchInductor</text>
+  <text class="small" x="310" y="344">capture and JIT-compile the graph</text>
+
+  <rect class="custom" x="660" y="286" width="460" height="78" rx="10"/>
+  <text class="label" x="890" y="315">vLLM backend selection</text>
+  <text class="small" x="890" y="344">chooses an implementation</text>
+
+  <rect class="compile" x="80" y="396" width="460" height="98" rx="10"/>
+  <text class="label" x="310" y="430">Generated GPU kernels</text>
+  <text class="small" x="310" y="460">often generated with Triton</text>
+
+  <rect class="custom" x="660" y="396" width="460" height="98" rx="10"/>
+  <text class="label" x="890" y="426">Specialized GPU kernels</text>
+  <text class="small" x="890" y="455">vLLM Triton or CUDA</text>
+  <text class="small" x="890" y="479">FlashAttention or CUTLASS</text>
+
+  <rect class="gpu" x="390" y="600" width="420" height="60" rx="10"/>
+  <text class="label" x="600" y="631">GPU</text>
+
+  <path class="line" d="M 600 150 L 600 170 M 310 170 L 890 170"/>
+  <path class="edge" d="M 310 170 L 310 188"/>
+  <path class="edge" d="M 890 170 L 890 188"/>
+  <path class="edge" d="M 310 254 L 310 284"/>
+  <path class="edge" d="M 890 254 L 890 284"/>
+  <path class="edge" d="M 310 364 L 310 394"/>
+  <path class="edge" d="M 890 364 L 890 394"/>
+  <path class="line" d="M 310 494 L 310 530 L 890 530 L 890 494"/>
+  <path class="edge" d="M 600 530 L 600 598"/>
+</svg>

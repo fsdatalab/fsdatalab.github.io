@@ -12,12 +12,13 @@ title: Home
     <li><a href="https://github.com/fsdatalab/quail">Quail</a>, an execution engine for AI functions in SQL (and DocETL), with open source LLMs. The goal is to KV-cache-hitmaxx and throughputmaxx on GPUs.</li>
     <li><a href="https://docwriter.org">DocWriter</a>, an IDE for AI-assisted writing (or is it human-assisted AI writing?).</li>
   </ul>
+  <p class="intro"><strong>Contact:</strong> <a href="mailto:shreyashankar@cmu.edu">shreyashankar@cmu.edu</a></p>
   <div style="background: rgba(196, 18, 48, 0.04); border: 1px solid rgba(196, 18, 48, 0.15); border-radius: 6px; padding: 0.875rem 1rem; margin-bottom: 0.625rem; font-size: 1rem; line-height: 1.65;">
-    <strong>We are hiring!</strong> We are looking for highly motivated and ambitious database, HCI, or AI researchers. PhD applicants: apply through the <a href="https://csd.cmu.edu/academics/doctoral/admissions">CMU CSD</a> or <a href="https://www.hcii.cmu.edu/academics/phd-hci/admissions">HCII</a> PhD applications. Postdocs, undergrads, and masters students: email <a href="mailto:shreyashankar@cmu.edu">shreyashankar@cmu.edu</a> with why you want to work with us, your CV, and transcript. Don't write your email with AI, please!
+    <strong>We are hiring!</strong> We are looking for highly motivated and ambitious database, HCI, or AI researchers. PhD applicants: apply through the <a href="https://csd.cmu.edu/academics/doctoral/admissions">CMU CSD</a> or <a href="https://www.hcii.cmu.edu/academics/phd-hci/admissions">HCII</a> PhD applications. Postdocs, undergrads, and masters students: please reach out with why you want to work with us, your CV, and transcript. Don't write your email with AI, please!
   </div>
 
   <div style="background: #f7f7f7; border: 1px solid #ddd; border-radius: 6px; padding: 0.875rem 1rem; margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.65;">
-    <strong>Want to use our systems?</strong> We love to work directly with users. If any of the projects above are interesting to you as a <em>user</em>, please reach out to <a href="mailto:shreyashankar@cmu.edu">shreyashankar@cmu.edu</a> (e.g., if you are a medical researcher and want to run LLMs on all your documents; if you are a journalist who wants to write with AI without ceding your agency). We run user studies year-round.
+    <strong>Want to use our systems?</strong> We love to work directly with users. If any of the projects above are interesting to you as a <em>user</em>, please reach out.
   </div>
 
   <h2 class="section-heading">Blog</h2>
@@ -25,7 +26,10 @@ title: Home
   {% for post in site.posts %}
   <a href="{{ post.url | relative_url }}" class="post-item">
     <div class="post-title">{{ post.title }}</div>
-    <div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}{% if post.author %} | {{ post.author }}{% endif %}</div>
+    <div class="post-meta">
+      <div>{{ post.date | date: "%b %-d, %Y" }}</div>
+      {% if post.author %}<div>{{ post.author }}</div>{% endif %}
+    </div>
   </a>
   {% endfor %}
   {% else %}

@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 620" role="img" aria-labelledby="title desc">
+  <title id="title">BIO-4 physical plan and Quail execution engine</title>
+  <desc id="desc">The BIO-4 physical plan appears on the left. It has three filters and two joins. On the right, a CPU region contains document tokenization, the physical plan executor, AI filter and AI join execution, other physical operators, and the KV manager. The AI physical operators send model inputs to Quail's inference program on the GPU and receive scores. A GPU region also contains one model copy and one KV pool in HBM.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/>
+    </marker>
+    <style>
+      .frame { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+      .cpu-zone { fill: #f5f8fd; stroke: #8ba6c9; stroke-width: 2; }
+      .gpu-zone { fill: #f5faf2; stroke: #8fad7d; stroke-width: 2; }
+      .cpu { fill: #dbe7f7; stroke: #667085; stroke-width: 2; }
+      .gpu { fill: #dcebd3; stroke: #667085; stroke-width: 2; }
+      .input { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+      .edge { fill: none; stroke: #667085; stroke-width: 2.5; marker-end: url(#arrow); }
+      .edge-light { fill: none; stroke: #98a2b3; stroke-width: 2.25; marker-end: url(#arrow); }
+      .edge-both { fill: none; stroke: #98a2b3; stroke-width: 2.25; marker-start: url(#arrow); marker-end: url(#arrow); }
+      .heading { fill: #101828; font: 600 30px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .zone-heading { fill: #344054; font: 600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+      .label { fill: #101828; font: 500 23px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .small { fill: #344054; font: 400 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+      .plan-small { font-size: 18px; }
+      .tiny { fill: #475467; font: 400 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="1560" height="570" rx="12"/>
+  <line x1="600" y1="20" x2="600" y2="590" stroke="#d0d5dd" stroke-width="2"/>
+
+  <g aria-label="BIO-4 physical plan">
+    <text class="heading" x="305" y="65">BIO-4 Physical Plan</text>
+
+    <rect class="cpu" x="205" y="82" width="200" height="44" rx="9"/>
+    <text class="label" x="305" y="105">Project</text>
+
+    <rect class="gpu" x="205" y="154" width="200" height="44" rx="9"/>
+    <text class="label" x="305" y="177">AiJoin: n</text>
+
+    <rect class="gpu" x="92" y="238" width="200" height="44" rx="9"/>
+    <text class="label" x="192" y="261">AiJoin: c</text>
+
+    <rect class="gpu" x="318" y="238" width="200" height="44" rx="9"/>
+    <text class="small" x="418" y="261">AiFilter: neurological</text>
+
+    <rect class="gpu" x="30" y="338" width="175" height="44" rx="9"/>
+    <text class="small plan-small" x="117.5" y="361">AiFilter: serious</text>
+
+    <rect class="gpu" x="220" y="338" width="175" height="44" rx="9"/>
+    <text class="small plan-small" x="307.5" y="361">AiFilter: cardiovascular</text>
+
+    <rect class="input" x="30" y="438" width="175" height="44" rx="9"/>
+    <text class="small" x="117.5" y="461">Scan reports</text>
+
+    <rect class="input" x="220" y="438" width="175" height="44" rx="9"/>
+    <text class="small" x="307.5" y="461">Scan terms as c</text>
+
+    <rect class="input" x="410" y="338" width="175" height="44" rx="9"/>
+    <text class="small" x="497.5" y="361">Scan terms as n</text>
+
+    <path class="edge" d="M 305 154 L 305 132"/>
+    <path class="edge" d="M 192 238 C 192 215, 255 217, 280 204"/>
+    <path class="edge" d="M 418 238 C 418 215, 355 217, 330 204"/>
+    <path class="edge" d="M 117.5 338 C 117.5 310, 155 309, 175 288"/>
+    <path class="edge" d="M 307.5 338 C 307.5 310, 240 309, 210 288"/>
+    <path class="edge" d="M 117.5 438 L 117.5 388"/>
+    <path class="edge" d="M 307.5 438 L 307.5 388"/>
+    <path class="edge" d="M 497.5 338 L 455 288"/>
+  </g>
+
+  <g aria-label="Execution engine">
+    <text class="heading" x="1090" y="70">Execution Engine</text>
+
+    <rect class="cpu-zone" x="630" y="90" width="560" height="465" rx="12"/>
+    <text class="zone-heading" x="910" y="120">CPU</text>
+
+    <rect class="gpu-zone" x="1220" y="90" width="330" height="465" rx="12"/>
+    <text class="zone-heading" x="1385" y="120">GPU</text>
+
+    <rect class="input" x="665" y="140" width="490" height="50" rx="9"/>
+    <text class="label" x="920" y="166">Tokenize Documents</text>
+
+    <rect class="cpu" x="665" y="225" width="490" height="52" rx="9"/>
+    <text class="label" x="910" y="252">Physical Plan Executor</text>
+
+    <rect class="cpu" x="665" y="315" width="490" height="145" rx="9"/>
+    <text class="label" x="920" y="343">AiFilter Execution</text>
+    <line x1="690" y1="366" x2="1130" y2="366" stroke="#a5b4c8" stroke-width="2"/>
+    <text class="label" x="920" y="391">AiJoin Execution</text>
+    <line x1="690" y1="414" x2="1130" y2="414" stroke="#a5b4c8" stroke-width="2"/>
+    <text class="small" x="910" y="438">Other: Project, Limit, Exchange, Recombine</text>
+
+    <rect class="cpu" x="665" y="495" width="490" height="50" rx="9"/>
+    <text class="label" x="920" y="521">KV Manager</text>
+
+    <rect class="gpu" x="1250" y="140" width="270" height="50" rx="9"/>
+    <text class="label" x="1385" y="166">Model Copy</text>
+
+    <rect class="gpu" x="1250" y="315" width="270" height="100" rx="9"/>
+    <text class="small" x="1385" y="351">Quail Inference Program</text>
+    <text class="small" x="1385" y="380">GPU operator graph</text>
+
+    <rect class="gpu" x="1250" y="495" width="270" height="50" rx="9"/>
+    <text class="label" x="1385" y="521">KV Pages in HBM</text>
+
+    <path class="edge-light" d="M 910 196 L 910 219"/>
+    <path class="edge-light" d="M 910 283 L 910 309"/>
+    <path class="edge-light" d="M 1161 350 L 1244 350"/>
+    <path class="edge-light" d="M 1244 380 L 1161 380"/>
+    <path class="edge-light" d="M 1161 520 L 1244 520"/>
+    <path class="edge-light" d="M 1385 196 L 1385 309"/>
+    <path class="edge-light" d="M 1385 489 L 1385 421"/>
+  </g>
+</svg>
