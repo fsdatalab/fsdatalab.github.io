@@ -4,8 +4,6 @@ title: "Building an Ultra-High Throughput AI-SQL Engine"
 date: 2026-09-24
 author: "Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, Meryem Arik"
 permalink: /blog/introducing-quail/
-unlisted: true
-sitemap: false
 description: "Quail jointly plans AI-SQL queries and model inference. Across 29 QUAIL-B queries, it is 1.84x faster on average than well-tuned vLLM baselines."
 image:
   path: /assets/blog/introducing-quail/quail-throughput-by-dataset.png
@@ -14,7 +12,7 @@ image:
   alt: "Quail throughput compared with stock vLLM across five AI-SQL datasets."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> AI functions in SQL, and fast LLM-powered classifiers in general, are having their day in the sun. But they typically rely on costly, closed LLM APIs. We’re building <a href="https://github.com/fsdatalab/quail">Quail</a>, the <strong>QU</strong>ery-<strong>A</strong>ware <strong>I</strong>nference <strong>L</strong>ayer, to jointly optimize query planning and model inference for open-weight models. Across 29 <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> queries, Quail is 1.84x faster on average than well-tuned vLLM baselines. <a href="https://github.com/fsdatalab/quail">Star us on GitHub</a> and try it out!</aside>
+<aside class="tldr"><strong>TL;DR:</strong> AI functions in SQL, and fast LLM-powered classifiers in general, are having their day in the sun. But they typically rely on costly, closed LLM APIs. We’re building <a href="https://github.com/fsdatalab/quail">Quail</a>, the <strong>QU</strong>ery-<strong>A</strong>ware <strong>I</strong>nference <strong>L</strong>ayer, to jointly optimize query planning and model inference for open-weight models. Across 29 <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> queries, Quail is 1.84x faster on average than well-tuned vLLM baselines &mdash; up to 14x! <a href="https://github.com/fsdatalab/quail">Star us on GitHub</a>, and try it out in our <a href="https://fsdatalab--quail-playground-page.modal.run/">live demo</a>!</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
