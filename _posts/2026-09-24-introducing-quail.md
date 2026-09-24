@@ -584,10 +584,15 @@ reduces kernel launches and intermediate HBM traffic.<sup><a href="#note-8">8</a
 **Second, specialize attention for joins.** An AI join compares one
 anchor with many partners. Standard vLLM treats each anchor and partner
 as a separate sequence. Attention therefore reads the same anchor KV
-again for every partner.
+again for every partner, as the left side of [Figure 6](#figure-6) shows.
+
+<figure class="figure-medium" id="figure-6">
+  <img src="{{ '/assets/blog/introducing-quail/join-anchor-kv-reads.svg' | relative_url }}" alt="Anchor KV reads in vLLM and Quail for an AI join.">
+  <figcaption>Figure 6. In vLLM, each anchor and partner pair is a separate sequence, so attention reads the same anchor KV once per partner. Quail groups the partners that share an anchor, so attention reads the anchor KV once.</figcaption>
+</figure>
 
 Quail groups all partners that share an anchor and computes the anchor
-KV once. [Figure 6](#figure-6) shows how Quail evaluates attention in two parts. One
+KV once (right side of [Figure 6](#figure-6)). [Figure 7](#figure-7) shows how Quail evaluates attention in two parts. One
 [FlashAttention 3](https://arxiv.org/abs/2407.08608) call
 computes causal attention within each partner. A second call applies all
 partner queries to the shared anchor KV, reducing repeated reads. Quail
@@ -598,9 +603,9 @@ sequence. This is one level of “tree”-based attention.<sup><a href="#note-9"
 Triton kernel combines the BF16 outputs and converts them to the FP8
 format expected by the output projection.
 
-<figure class="figure-join-attention" id="figure-6">
+<figure class="figure-join-attention" id="figure-7">
   <img src="{{ '/assets/blog/introducing-quail/quail-join-attention.svg' | relative_url }}" alt="How Quail evaluates attention for an AI join.">
-  <figcaption>Figure 6. Quail evaluates join attention with two FlashAttention 3 calls. One computes attention within each partner suffix. The other applies the suffix queries to the shared anchor KV. A Triton kernel combines both results and converts the output to FP8 before the output projection.</figcaption>
+  <figcaption>Figure 7. Quail evaluates join attention with two FlashAttention 3 calls. One computes attention within each partner suffix. The other applies the suffix queries to the shared anchor KV. A Triton kernel combines both results and converts the output to FP8 before the output projection.</figcaption>
 </figure>
 
 **Third, restrict the output head to** TRUE **and** FALSE. Normally, a
@@ -730,30 +735,30 @@ each dataset at scale factor 0.1. Cost multipliers are relative to Quail.
 <p class="table-caption">Table 1. Average QUAIL-B results by dataset at scale factor 0.1. Cost multipliers are relative to Quail.</p>
 </div>
 
-[Figure 7](#figure-7) summarizes throughput by dataset, and [Figure 8](#figure-8) reports latency
+[Figure 8](#figure-8) summarizes throughput by dataset, and [Figure 9](#figure-9) reports latency
 for all 29 queries. The geometric mean of Quail’s per-query speedups
 over stock vLLM is 1.84x. In total, Quail completes the benchmark in
 1,643.74 seconds, compared with 4,451.95 seconds for stock vLLM. Quail
 takes 3.35x longer than the combined SoL estimate of 491.17 seconds, so
 there is substantial room to improve.
 
-<figure class="figure-plot-compact" id="figure-7">
+<figure class="figure-plot-compact" id="figure-8">
   <img src="{{ '/assets/blog/introducing-quail/quail-throughput-by-dataset.png' | relative_url }}" alt="Quail throughput by QUAIL-B dataset.">
-  <figcaption>Figure 7. Average requested input tokens per second on QUAIL-B, shown as a percentage of the Speed-of-Light estimate (i.e., theoretical hardware limits) for each dataset. We use Qwen3 4B FP8 and one H100.</figcaption>
+  <figcaption>Figure 8. Average requested input tokens per second on QUAIL-B, shown as a percentage of the Speed-of-Light estimate (i.e., theoretical hardware limits) for each dataset. We use Qwen3 4B FP8 and one H100.</figcaption>
 </figure>
 
-<figure id="figure-8">
+<figure id="figure-9">
   <img src="{{ '/assets/blog/introducing-quail/quail-query-latency.png' | relative_url }}" alt="Latency for all 29 QUAIL-B queries.">
-  <figcaption>Figure 8. Query latency at scale factor 0.1. Bars show Quail and stock vLLM; horizontal lines show SoL estimates. The vertical axis uses a log scale because the query times span more than three orders of magnitude.</figcaption>
+  <figcaption>Figure 9. Query latency at scale factor 0.1. Bars show Quail and stock vLLM; horizontal lines show SoL estimates. The vertical axis uses a log scale because the query times span more than three orders of magnitude.</figcaption>
 </figure>
 
-[Figure 9](#figure-9) focuses on the eight queries where pipelining changes how vLLM
+[Figure 10](#figure-10) focuses on the eight queries where pipelining changes how vLLM
 submits requests. Pipelined vLLM is faster than stock vLLM on seven of
 them, by 1.12x on average and up to 1.27x on IMDB-6.
 
-<figure class="figure-plot-compact" id="figure-9">
+<figure class="figure-plot-compact" id="figure-10">
   <img src="{{ '/assets/blog/introducing-quail/vllm-pipelining-throughput.png' | relative_url }}" alt="Stock and pipelined vLLM throughput on eight QUAIL-B queries.">
-  <figcaption>Figure 9. Requested input tokens per second as a percentage of each query’s SoL estimate. Stock vLLM finishes one filter stage before submitting the next. Pipelined vLLM submits the next filter for each document as soon as the previous filter returns TRUE.</figcaption>
+  <figcaption>Figure 10. Requested input tokens per second as a percentage of each query’s SoL estimate. Stock vLLM finishes one filter stage before submitting the next. Pipelined vLLM submits the next filter for each document as soon as the previous filter returns TRUE.</figcaption>
 </figure>
 
 Stock vLLM is faster than Quail only on AGENT-1 and AGENT-2. Quail does
