@@ -34,10 +34,10 @@
   <path class="edge" d="M 250 396 C 250 345, 340 337, 382 300"/>
   <path class="edge" d="M 600 396 C 600 345, 500 337, 458 300"/>
 
-  <rect x="318" y="323" width="204" height="31" rx="10" fill="#ffffff"/>
+  <rect x="342" y="323" width="158" height="31" rx="10" fill="#ffffff"/>
   <text class="small" x="420" y="344">materialized survivors</text>
-  <rect x="498" y="151" width="204" height="31" rx="10" fill="#ffffff"/>
-  <text class="small" x="600" y="172">materialized join rows</text>
+<rect x="525" y="163" width="150" height="25" rx="10" fill="#ffffff"/>
+  <text class="small" x="600" y="180">materialized join rows</text>
 
   <text class="stage" x="122" y="382">Filter stage</text>
   <rect class="ai-node" x="100" y="396" width="300" height="88" rx="10"/>
