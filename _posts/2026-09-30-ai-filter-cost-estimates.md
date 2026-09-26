@@ -46,17 +46,18 @@ description: "A roofline-based cost model for AI-powered SQL filters that estima
       <li><a href="#53-speed-of-light-estimate">Speed-of-Light Estimate.</a></li>
     </ol>
   </li>
-  <li><a href="#6-conclusion">Conclusion.</a></li>
+  <li><a href="#6-filter-chain-playground">Filter Chain Playground.</a></li>
+  <li><a href="#7-conclusion">Conclusion.</a></li>
 </ol>
 </nav>
 
 # 1. Introduction
 
-Recent work has motivated the use of LLMs to analyze documents, where a query can filter rows using an arbitrary natural language predicate rather than a simple comparison. Consider the BioDEX dataset, a corpus of biomedical papers, each annotated with the adverse drug reactions mentioned within the paper. An analyst may want papers that report female patients. AI SQL can be used for such an analysis task, `AI_FILTER("The paper reports a female patient", fulltext)`, however, it raises a practical question: *how fast can such a query run?* Developers require a cost model to understand the theoretical latency of a similar query because without one they cannot determine whether hardware or poor configurations bound the query latency. We use an NVIDIA H100 SXM GPU and a Qwen3-4B LLM for our cost model. Our cost model estimates four quantities for a query on a given LLM and GPU: computations (FLOPs), HBM (High Bandwidth Memory) traffic, KV-cache storage, and latency.
+Recent work has motivated the use of LLMs to analyze documents, where a query can filter rows using an arbitrary natural language predicate rather than a simple comparison. Consider the BioDEX dataset, a corpus of biomedical papers, each annotated with the adverse drug reactions mentioned within the paper. An analyst may want papers that report female patients. AI SQL can be used for such an analysis task, `AI_IF("The paper reports a female patient", fulltext)`, however, it raises a practical question: *how fast can such a query run?* Developers require a cost model to understand the theoretical latency of a similar query because without one they cannot determine whether hardware or poor configurations bound the query latency. We use an NVIDIA H100 SXM GPU and a Qwen3-4B LLM for our cost model. Our cost model estimates four quantities for a query on a given LLM and GPU: computations (FLOPs), HBM (High Bandwidth Memory) traffic, KV-cache storage, and latency.
 
 The evaluation of our cost model with peak hardware performance and ideal execution yields the *Speed of Light* (SoL) estimate: an optimistic lower bound that an implementation on a particular GPU cannot beat. The SoL need not be achievable as its value lies in showing room for improvement. If there is room for improvement, it informs whether data movement or computation can be improved.
 
-We outline a cost model to compute SoL estimates specifically for AI-powered filter queries, extend it to filter chains where we have multiple predicates in a sequence which we need to optimally order to avoid latency overestimation. [Section 2](#2-background) provides a background on AI-powered filters, GPU, and LLM, [Section 3](#3-cost-model-for-one-filter) introduces the cost model for a single AI-powered filter query, [Section 4](#4-cost-model-for-a-conjunction-of-filters) extends the cost model to a conjunction of AI-powered filter query, and finally [Section 5](#5-example-biodex-query) demonstrates the conjunction query on a given example query.
+We outline a cost model to compute SoL estimates specifically for AI-powered filter queries, extend it to filter chains where we have multiple predicates in a sequence which we need to optimally order to avoid latency overestimation. [Section 2](#2-background) provides a background on AI-powered filters, GPU, and LLM, [Section 3](#3-cost-model-for-one-filter) introduces the cost model for a single AI-powered filter query, [Section 4](#4-cost-model-for-a-conjunction-of-filters) extends the cost model to a conjunction of AI-powered filter query, [Section 5](#5-example-biodex-query) demonstrates the conjunction query on a given example query, and finally [Section 6](#6-filter-chain-playground) lets you build your own filter chain in an interactive playground and compute its SoL.
 
 # 2. Background
 
@@ -68,8 +69,8 @@ Here we define AI-powered filters, our example's structure for both cost models,
 
 **AI_SQL Filter.** An AI_SQL filter is a SQL-style predicate, i.e a simple comparison like `WHERE price > 10`, where the condition is instead answered by an LLM, which reads each row (or document) and returns a true/false, one token, judgment on whether it satisfies the predicate. AI-powered filters can handle conditions that SQL can't express, although at the cost of running a model call per row instead of a cheap comparison.
 
-<figure class="figure-medium" id="figure-1">
-  <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-1.svg' | relative_url }}" alt="A database instance of four BioDEX reports, an AI_FILTER chain query applying three predicates, and the resulting table of TRUE/FALSE/— outcomes per report.">
+<figure class="figure-full" id="figure-1">
+  <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-1.svg' | relative_url }}" alt="A database instance of four BioDEX reports, an AI_IF chain query applying three predicates, and the resulting table of TRUE/FALSE/— outcomes per report.">
   <figcaption>Figure 1. Simplified BioDEX instance and query with results for 3 predicates.</figcaption>
 </figure>
 
@@ -81,7 +82,7 @@ The formatting of the preamble, document, and filter instruction together, influ
 
 We introduce the hardware associated with the cost model, its relevance, and the configuration we will later use for SoLs in the examples.
 
-<figure class="figure-medium" id="gpu">
+<figure class="figure-full" id="gpu">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/gpu.svg' | relative_url }}" alt="H100 memory hierarchy diagram showing HBM3, L2 cache, and an SM with registers, shared memory, and tensor cores.">
   <figcaption>Figure 2. H100 memory layout and forward-pass data movement.</figcaption>
 </figure>
@@ -108,7 +109,7 @@ Here, we explain how an LLM processes input tokens, and where it is stored withi
 
 Each model has a different architecture, for our purposes we pick the Qwen3-4B FP8 model.
 
-<figure class="figure-medium" id="model">
+<figure class="figure-full" id="model">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/model.svg' | relative_url }}" alt="Diagram of a token passing through one Qwen3-4B layer: QKV projection, attention with a KV cache, output projection, and the gate/up/SwiGLU/down MLP block.">
   <figcaption>Figure 3. Path of a single token through one Qwen3-4B layer. The QKV and output projections are per-token matrix multiplications; only the attention step reads the KV cache of all <em>T</em> tokens.</figcaption>
 </figure>
@@ -167,7 +168,7 @@ For every byte pulled out of the HBM we can theoretically do 590.75 FLOPs before
 
 In associated literature the ridge point is represented by rooflines that we illustrate in [Figure 4](#figure-4): on the left-side we are memory-bound, while on the right-side we are compute-bound. The compute-bound is a roofline because we can never exceed the attainable throughput, even if our operational intensity increases.
 
-<figure class="figure-medium" id="figure-4">
+<figure class="figure-full" id="figure-4">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-4.svg' | relative_url }}" alt="Log-log roofline plot for an NVIDIA H100 SXM showing the memory-bound and compute-bound regions, the ridge point, and the operating point of the example AI filter query.">
   <figcaption>Figure 4. Roofline for an NVIDIA H100 SXM (&Pi; = 1.979&times;10<sup>15</sup> FLOP/s at FP8, &beta; = 3.35&times;10<sup>12</sup> bytes/s). The red marker shows the operational intensity of the query in Section 2.1 and its derivation is given in Section 3.6.</figcaption>
 </figure>
@@ -662,17 +663,26 @@ $$
 
 For an implementation of the chained example query on Qwen3-4B and an H100, the observed runtime can now be compared with $$4.19$$~s where a large gap points to inefficiency such as lost KV reuse or idle tensor cores.
 
-# 6. Conclusion
+# 6. Filter Chain Playground
+
+Build a filter chain below and see its Speed-of-Light latency. Drag filters into the chain, reorder them, and tune each filter's selectivity $$s_i$$ and instruction length $$q_{\text{tail}}$$. The prefix $$q_{\text{pre}}$$ is shared by the whole chain because the filters reuse one prefix KV ([Section 4.1](#41-execution-model-and-kv-reuse)). The playground applies the ordering rule of [Section 4.3](#43-filter-ordering) and, for up to six filters, compares it against every possible order. It is fixed to Qwen3-4B on an H100, and the default is the BioDEX query of [Section 5](#5-example-biodex-query), entered in reverse.
+
+<div class="pg" id="filter-chain-playground" data-filter-chain-calculator>
+  <noscript>The playground needs JavaScript. The worked example in Section 5 gives the same numbers for the BioDEX query.</noscript>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js" defer></script>
+<script src="{{ '/assets/js/filter-chain-calculator.js' | relative_url }}" defer></script>
+
+All numbers are lower bounds at peak rates, with expected survivors rounded to whole documents and every document at the mean length.
+
+# 7. Conclusion
 
 The cost model allows the estimation of the latency for a given hardware, model specification and workload. An instance of the cost model is SoL estimates which are optimistic lower bounds that are derived from the model. We demonstrated the above cost model to compute the SoL for a single filter and a filter chain query on the BioDEX dataset. Observed runtime can be compared with the SoL to identify any headroom, giving way for further optimizations to inch closer to the SoL. Understanding cost models for different AI-powered operators and over different models and accelerators is crucial for building a holistic understanding of how to optimize systems for any workload.
 
 # Acknowledgements
 
-TODO.
-
-# Notes
-
-TODO.
+We thank [Modal](https://modal.com/) for sponsoring the compute used in
+this research.
 
 # Cite this post
 
