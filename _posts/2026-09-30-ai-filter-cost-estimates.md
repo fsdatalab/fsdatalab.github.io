@@ -5,10 +5,10 @@ date: 2026-09-30
 author: "Arnav Dhariya, Shreya Shankar"
 permalink: /blog/ai-filter-cost-estimates/
 math: true
-description: "A roofline-based cost model for AI-powered SQL filters that estimates FLOPs, HBM traffic, KV-cache storage, and latency, and extends to chains of filters with an optimal ordering rule."
+description: "A roofline-based cost model for AI-powered SQL filters that estimates FLOPs, HBM traffic, KV-cache storage, and latency, and extends to conjunctions of filters with an optimal ordering rule."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> Running AI-SQL queries efficiently on a given LLM and GPU is crucial, but can we know the lower bound on latency? We present a cost model for a single filter and for a chain of filters, and implement it in <a href="https://github.com/fsdatalab/quail">Quail</a>. Combined with peak memory-transfer and peak arithmetic-throughput rates, the model yields Speed-of-Light (SoL) latency estimates (<a href="#3-cost-model-for-one-filter">Sec. 3</a> and <a href="#5-example-biodex-query">Sec. 5</a>). We also provide an interactive visualization for building AI filter chains and computing their optimal ordering, demonstrated on Qwen3-4B running on an H100 GPU.</aside>
+<aside class="tldr"><strong>TL;DR:</strong> How fast could an AI-SQL query run on a given LLM and GPU? We walk through how to estimate speed-of-light (SoL) latency for individual filters and conjunctions of filters, providing a baseline for evaluating system performance. SoL estimates power <a href="https://github.com/fsdatalab/quail">Quail</a>'s cost models. You can try out our <a href="#6-conjunction-of-filters-playground">interactive playground</a> to explore how filter ordering affects estimated latency on Qwen3-4B and an H100.</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -24,19 +24,19 @@ description: "A roofline-based cost model for AI-powered SQL filters that estima
   </li>
   <li><a href="#3-cost-model-for-one-filter">Cost Model for One Filter.</a>
     <ol>
-      <li><a href="#31-cost-model">Cost Model.</a></li>
+      <li><a href="#31-workload-and-notation">Workload and Notation.</a></li>
       <li><a href="#32-projection-cost">Projection Cost.</a></li>
       <li><a href="#33-attention-cost">Attention Cost.</a></li>
       <li><a href="#34-mlp-cost">MLP Cost.</a></li>
       <li><a href="#35-total-cost">Total Cost.</a></li>
-      <li><a href="#36-example-single-filter-query-sol">Example: Single Filter Query SoL.</a></li>
+      <li><a href="#36-cost-of-one-biodex-filter">Cost of One BioDEX Filter.</a></li>
     </ol>
   </li>
   <li><a href="#4-cost-model-for-a-conjunction-of-filters">Cost Model for a Conjunction of Filters.</a>
     <ol>
-      <li><a href="#41-execution-model-and-kv-reuse">Execution Model and KV Reuse.</a></li>
+      <li><a href="#41-kv-reuse-and-hbm-capacity">KV Reuse and HBM Capacity.</a></li>
       <li><a href="#42-cost-of-a-fixed-filter-order">Cost of a Fixed Filter Order.</a></li>
-      <li><a href="#43-filter-ordering">Filter Ordering.</a></li>
+      <li><a href="#43-choosing-the-filter-order">Choosing the Filter Order.</a></li>
     </ol>
   </li>
   <li><a href="#5-example-biodex-query">Example: BioDEX Query.</a>
@@ -46,58 +46,70 @@ description: "A roofline-based cost model for AI-powered SQL filters that estima
       <li><a href="#53-speed-of-light-estimate">Speed-of-Light Estimate.</a></li>
     </ol>
   </li>
-  <li><a href="#6-filter-chain-playground">Filter Chain Playground.</a></li>
+  <li><a href="#6-conjunction-of-filters-playground">Conjunction of Filters Playground.</a></li>
   <li><a href="#7-conclusion">Conclusion.</a></li>
 </ol>
 </nav>
 
 # 1. Introduction
 
-Recent work has motivated the use of LLMs to analyze documents, where a query can filter rows using an arbitrary natural language predicate rather than a simple comparison. Consider the BioDEX dataset, a corpus of biomedical papers, each annotated with the adverse drug reactions mentioned within the paper. An analyst may want papers that report female patients. AI SQL can be used for such an analysis task, `AI_IF("The paper reports a female patient", fulltext)`, however, it raises a practical question: *how fast can such a query run?* Developers require a cost model to understand the theoretical latency of a similar query because without one they cannot determine whether hardware or poor configurations bound the query latency. We use an NVIDIA H100 SXM GPU and a Qwen3-4B LLM for our cost model. Our cost model estimates four quantities for a query on a given LLM and GPU: computations (FLOPs), HBM (High Bandwidth Memory) traffic, KV-cache storage, and latency.
+We recently released [Quail](/blog/introducing-quail/), an execution engine for AI-SQL, which extends SQL with functions that call LLMs. To compare query plans, Quail needs to estimate the latency of each AI operation. The latency depends on the input length, the model, the GPU, and how much of the KV cache can be reused.
 
-The evaluation of our cost model with peak hardware performance and ideal execution yields the *Speed of Light* (SoL) estimate: an optimistic lower bound that an implementation on a particular GPU cannot beat. The SoL need not be achievable as its value lies in showing room for improvement. If there is room for improvement, it informs whether data movement or computation can be improved.
+**How can we estimate the latency of an AI operation on a given LLM and GPU?**
 
-We outline a cost model to compute SoL estimates specifically for AI-powered filter queries, extend it to filter chains where we have multiple predicates in a sequence which we need to optimally order to avoid latency overestimation. [Section 2](#2-background) provides a background on AI-powered filters, GPU, and LLM, [Section 3](#3-cost-model-for-one-filter) introduces the cost model for a single AI-powered filter query, [Section 4](#4-cost-model-for-a-conjunction-of-filters) extends the cost model to a conjunction of AI-powered filter query, [Section 5](#5-example-biodex-query) demonstrates the conjunction query on a given example query, and finally [Section 6](#6-filter-chain-playground) lets you build your own filter chain in an interactive playground and compute its SoL.
+In this post, we focus on AI-powered filters, which use an LLM to decide whether each document satisfies a natural language predicate.
+
+One approach is to profile the system by running representative queries and fitting a latency model to the measurements. A profile has to be redone for every new model, GPU, or workload. Instead, we use the roofline model to estimate filter latency.<sup><a href="#note-1">1</a></sup> We count the arithmetic and HBM traffic required by a filter, then divide by the GPU's peak compute throughput and memory bandwidth. The roofline estimate is a lower bound because it assumes that the GPU sustains these peak rates. Quail uses this *speed-of-light* (SoL) latency to compare query plans.
+
+In this article, we'll discuss:
+
+- The GPU and transformer concepts behind the cost model.
+- How to derive the work and latency of a single AI filter.
+- How reuse, selectivity, and filter order affect a conjunction of filters.
+- An example of applying our cost model to a query running Qwen3-4B on an NVIDIA H100.
+- An interactive playground for building conjunctions of filters and comparing their estimated latency.
 
 # 2. Background
 
-We now define the AI-powered filter and the general hardware. We specifically focus on the hardware and model specific to our examples and demonstrate a forward pass on them. Lastly, we describe the roofline model for SoL estimates.
+We first define AI-powered filters. We then describe the H100 GPU and Qwen3-4B model used in our examples, including the parts of a transformer forward pass that affect cost. Finally, we introduce the roofline model we use to estimate SoL latency.
 
 ## 2.1 AI-powered filters
 
-Here we define AI-powered filters, our example's structure for both cost models, and describe the cost models.
+We define AI-powered filters and introduce the single-filter query and the conjunction of filters used throughout the article.
 
-**AI_SQL Filter.** An AI_SQL filter is a SQL-style predicate, i.e a simple comparison like `WHERE price > 10`, where the condition is instead answered by an LLM, which reads each row (or document) and returns a true/false, one token, judgment on whether it satisfies the predicate. AI-powered filters can handle conditions that SQL can't express, although at the cost of running a model call per row instead of a cheap comparison.
+**AI-SQL filter.** An AI-SQL filter is a SQL-style predicate, i.e a simple comparison like `WHERE price > 10`, where the condition is instead answered by an LLM, which reads each row (or document) and returns a true/false, one token, judgment on whether it satisfies the predicate. AI-powered filters can handle conditions that SQL can't express, although at the cost of running a model call per row instead of a cheap comparison.
 
 <figure class="figure-full" id="figure-1">
-  <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-1.svg' | relative_url }}" alt="A database instance of four BioDEX reports, an AI_IF chain query applying three predicates, and the resulting table of TRUE/FALSE/— outcomes per report.">
+  <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-1.svg' | relative_url }}" alt="A database instance of four BioDEX reports, an AI_IF query applying a conjunction of three predicates, and the resulting table of TRUE/FALSE outcomes per report.">
   <figcaption>Figure 1. Simplified BioDEX instance and query with results for 3 predicates.</figcaption>
 </figure>
 
-[Figure 1](#figure-1) displays the general prompt structure for the AI-powered filter query, its structure is similar to that of a SQL query. Within each invocation of the operator there exists a preamble, "Document: ", the actual document, and the filter instruction "question: [...]". The output of each predicate is a single token output of true or false. Only the surviving documents pass through to subsequent filters. We display a chain query in [Figure 1](#figure-1). The first predicate within the chained query example is used as a single AI-powered filter query example in [Section 3](#3-cost-model-for-one-filter).
+[Figure 1](#figure-1) displays the general prompt structure for the AI-powered filter query, its structure is similar to that of a SQL query. Within each invocation of the operator there exists a preamble, "Document: ", the actual document, and the filter instruction "question: [...]". The output of each predicate is a single token output of true or false. Only the surviving documents pass through to subsequent filters. [Figure 1](#figure-1) shows a query with a conjunction of filters. We use the first predicate as the single AI-powered filter example in [Section 3](#3-cost-model-for-one-filter).
 
 The formatting of the preamble, document, and filter instruction together, influence the cost model as each predicate carries the same amount of tokens around the variable-length document.
 
 ## 2.2 GPU Execution
 
-We introduce the hardware associated with the cost model, its relevance, and the configuration we will later use for SoLs in the examples.
+We run our examples on an NVIDIA H100 SXM GPU. Our cost model depends on three properties of the GPU: its peak arithmetic throughput, HBM bandwidth, and HBM capacity.
 
 <figure class="figure-full" id="gpu">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/gpu.svg' | relative_url }}" alt="H100 memory hierarchy diagram showing HBM3, L2 cache, and an SM with registers, shared memory, and tensor cores.">
   <figcaption>Figure 2. H100 memory layout and forward-pass data movement.</figcaption>
 </figure>
 
-[Figure 2](#gpu) displays an abstraction of the parts in a GPU, specifically the NVIDIA H100. The HBM is the GPU's main memory where model weight matrices and the embedding table reside. It's huge and slower in comparison to the Streaming Multiprocessor's (SM) shared memory (L1) and L2 cache. The L2 cache sits between the HBM and SMs. It caches the data which is reused, thereby reducing the back and forth from the HBM. An SM has registers which are the fastest possible storage that hold values throughout computation and L1 memory where smaller tiles are staged for tensor core accesses. Each SM has 4 tensor cores that actually perform the matrix multiplications (matmuls). Tensor cores are where floating point operations (FLOPs) happen and everything upstream is tasked with feeding the data fast enough into them. In sizes, the HBM for an H100 is the largest at 80 GB, and the L2 cache follows with 50 MB shared for all 132 of the SMs. Each SM has a register and L1 which are up to 256 KB in size.
+[Figure 2](#gpu) shows the parts of the H100 that affect our cost model. *High-bandwidth memory (HBM)* is the GPU's main memory. It stores the model's weight matrices, embedding table, and KV cache. Data read from HBM passes through the shared L2 cache before reaching one of the GPU's 132 *streaming multiprocessors (SMs)*. Within each SM, registers and the combined shared memory and L1 cache hold small tiles of data close to the Tensor Cores. Each SM has four Tensor Cores, which perform the matrix multiplications used by the model. The H100 SXM has 80 GB of HBM3 and a 50 MB L2 cache shared by all of its SMs.<sup><a href="#note-2">2</a></sup>
 
-The GPU constants that matter for our cost model are outlined in [Table 1](#table-1). $$A_{f\_fp16}$$ and $$A_{f\_fp8}$$ are the peak arithmetic throughput rates for the two quantizations within the GPU, i.e. how many FLOPs per second the GPU can perform. The differences in quantization throughput rates is attributed to precision, as $$A_{f\_fp16}$$ is double the precision, 16-bit, as $$A_{f\_fp8}$$, which is 8-bit. We need both quantizations because we model attention in FP16, as in FlashAttention. However, General Matrix Multiplications (GEMMs) run in FP8.
+Our cost model does not model each level of the cache separately. It counts the bytes read from or written to HBM and divides that amount by the HBM bandwidth. It also counts the *floating-point operations (FLOPs)* performed by the Tensor Cores and divides that amount by their arithmetic throughput.
+
+[Table 1](#table-1) lists the hardware constants used in our examples. *Arithmetic throughput* is the number of FLOPs that the GPU can perform per second, and *memory bandwidth* is the number of bytes that it can transfer from HBM per second. $$\Pi_{fp16}$$ and $$\Pi_{fp8}$$ are the peak arithmetic throughput rates for FP16 and FP8 operations, while $$\beta$$ is the peak HBM bandwidth. We use the FP8 rate for the projection and MLP matrix multiplications, and the FP16 rate for attention in our FlashAttention setup.
 
 <div class="table-wrap" id="table-1" markdown="1">
 
 | Symbol | Value |
 |--------|-------|
-| $$A_{f\_fp16}$$ | $$989.5\times10^{12}$$ FLOP/s |
-| $$A_{f\_fp8}$$ | $$1.979\times10^{15}$$ FLOP/s |
-| $$A_{bm}$$ | $$3.35\times10^{12}$$ bytes/s |
+| $$\Pi_{fp16}$$ | $$989.5\times10^{12}$$ FLOP/s |
+| $$\Pi_{fp8}$$ | $$1.979\times10^{15}$$ FLOP/s |
+| $$\beta$$ | $$3.35\times10^{12}$$ bytes/s |
 | Capacity | 80 GB |
 
 <p class="table-caption">Table 1. H100 SXM hardware constants.</p>
@@ -105,22 +117,24 @@ The GPU constants that matter for our cost model are outlined in [Table 1](#tabl
 
 ## 2.3 Transformer Forward Pass
 
-Here, we explain how an LLM processes input tokens, and where it is stored within the GPU. We also introduce KV-caches to reuse previously processed prefixes.
+The architecture of the LLM determines how many operations it performs and how much data it moves. We also need to account for the KV cache, which allows the model to reuse previously processed prefixes.
 
-Each model has a different architecture, for our purposes we pick the Qwen3-4B FP8 model.
+We use the Qwen3-4B FP8 model in our examples.<sup><a href="#note-3">3</a></sup>
 
 <figure class="figure-full" id="model">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/model.svg' | relative_url }}" alt="Diagram of a token passing through one Qwen3-4B layer: QKV projection, attention with a KV cache, output projection, and the gate/up/SwiGLU/down MLP block.">
   <figcaption>Figure 3. Path of a single token through one Qwen3-4B layer. The QKV and output projections are per-token matrix multiplications; only the attention step reads the KV cache of all <em>T</em> tokens.</figcaption>
 </figure>
 
-[Figure 3](#model) helps visualize the projection and MLP weight matrices and their dimensions for the Qwen3-4B model.
+[Figure 3](#model) follows one token through a layer of Qwen3-4B. Each layer contains four attention projection matrices and three MLP matrices.
 
-We have 7 matrices in total. A token's hidden size is projected through matrices, here that is 2560. The query weight matrix projects the token's hidden state into a query vector that describes what a token is looking for in other tokens, the key weight matrix does the same and projects it to a key vector that represents what a token offers for other tokens being matched, and the value matrix projects on the actual content that would be retrieved when a match is found. The query matrix dimensions are different than the key and value matrix dimensions because of grouped query attention (GQA) where 4 query heads share one K/V head instead of having their own, so the KV matrices are a quarter of the size of the query and output matrices.
+The query, key, and value matrices project the token's 2,560-element hidden state into three vectors. The *query vector* contains the information used to search the current and earlier tokens. Each *key vector* contains the information used to match a token, and each *value vector* contains the information returned by that match. During attention, the model compares the query vector with the key vectors and uses the resulting scores to combine their value vectors. The output projection then maps the attention result back to the model's hidden width.
 
-The attention matrices help understand information across tokens and what information is relevant. The MLP on the other hand is concerned with the information within a single token, and not cross token interactions. The gate, up, and down matrices have a set cost to process a token which does not increase due to the past tokens like in attention. The gate and up run in parallel on the same input producing two vectors that are combined using the SwiGLU activation and then projected back using the down matrix. Both, attention and MLP blocks, repeat identically for all 36 layers passing the output of one layer to the next, representing one forward pass.
+Qwen3-4B uses *grouped query attention (GQA)* {% include shreya-comment.html text="cite" %}. It has 32 query heads and eight key and value heads, so every four query heads share one key and value head. The key and value matrices are therefore one quarter of the size of the query and output matrices. The smaller key and value matrices also reduce the size of the KV cache.
 
-[Table 2](#table-2) represents the constants for the Qwen3-4B model. Here $$d_{model}$$ is the width of each token's hidden-state vector as it flows through the stream; $$n_{heads}$$, $$n_{kv}$$, and $$d_{head}$$ describe how attention splits that vector that goes through the weight matrices for query, key, and value. $$d_{mlp}$$ is the intermediate width of the MLP, the largest that we expand to internally, and vocab is the number of distinct tokens the model can embed and predict over.
+The MLP processes each token independently through the gate, up, and down matrices. The gate and up matrices operate on the same input. The model combines their outputs with the SwiGLU activation and uses the down matrix to project the result back to the hidden width. The MLP cost per token does not grow with the number of earlier tokens, while the attention cost does. Qwen3-4B repeats the attention and MLP blocks across all 36 layers.
+
+[Table 2](#table-2) lists the model constants used by our cost model. $$d_{model}$$ is the *hidden-state width*. $$n_{heads}$$ and $$n_{kv}$$ are the numbers of query heads and key-value heads, while $$d_{head}$$ is the width of each attention head. $$d_{mlp}$$ is the *MLP intermediate width*, and vocab is the *vocabulary size*.
 
 <div class="table-wrap" id="table-2" markdown="1">
 
@@ -138,46 +152,48 @@ The attention matrices help understand information across tokens and what inform
 <p class="table-caption">Table 2. Qwen3-4B architecture constants.</p>
 </div>
 
-The KV cache allows for state reuse from a previously processed prefixes. It is crucial to our cost model and especially for conjunction queries.
+The *KV cache* stores the key and value vectors of tokens that the model has already processed. When two requests share a prefix, the second request can read the prefix's KV from the cache instead of processing the prefix again. This reuse is central to the cost model for a conjunction of filters in [Section 4](#4-cost-model-for-a-conjunction-of-filters).
 
 ## 2.4 Roofline Model & Speed of Light
 
-We define compute and memory transfer time, the roofline equation, and discuss boundedness. We also define how a cost model produces a SoL estimate.
+The transformer forward pass determines how many FLOPs the model performs and how many bytes it moves from HBM. The roofline model converts these two quantities into a latency estimate.
 
-A GPU has two main responsibilities: (1) to perform operations, and (2) to transfer the data necessary from HBM for those operations, referred to as compute and memory transfer time. Both compute and memory transfer are carried out in parallel, but differ in completion times. Hence, we are either bounded by the memory transfer or compute. Our cost model can be characterized by the equation,
+A GPU spends time performing arithmetic and moving data from HBM. We call these *compute time* and *memory transfer time*. The roofline model assumes that the GPU can overlap computation with data transfer, so the slower of the two determines the latency:
 
 $$
 T = \max\!\left(\frac{\text{FLOPs}}{\Pi},\; \frac{\text{Bytes Moved}}{\beta}\right),
 $$
 
-where $$\Pi$$ is the arithmetic throughput in FLOP/s, that is, how many operations we can do per second, and $$\beta$$ is the memory bandwidth that captures how fast the HBM delivers data. When both $$\Pi$$ and $$\beta$$ are the peak arithmetic throughput and peak memory bandwidth rates, we achieve the SoL estimate. In our example evaluations of this cost model we use the peak rates.
+Here, $$\Pi$$ is the arithmetic throughput in FLOP/s and $$\beta$$ is the HBM bandwidth in bytes/s. Compute time is the number of FLOPs divided by $$\Pi$$, while memory transfer time is the number of bytes moved divided by $$\beta$$. When we use the GPU's peak arithmetic throughput and peak HBM bandwidth, the equation gives the *speed-of-light (SoL) latency*. The SoL latency is a lower bound because an implementation may not sustain both peak rates or overlap computation and data transfer perfectly. We use the peak rates in our examples.
 
-The ridge point, $$I^*$$ is the operational intensity at which a workload transitions from being memory-bound to being compute-bound:
+An operation's *operational intensity*, $$I$$, is the number of FLOPs it performs per byte moved from HBM. The *ridge point*, $$I^*$$, is the operational intensity at which compute time and memory transfer time are equal:
 
 $$
 \mathrm{Ridge} = I^{*} = \frac{\Pi}{\beta}.
 $$
 
-By substituting peak arithmetic throughput and peak memory bandwidth rates, we achieve the ridge point,
+For the H100's peak FP8 throughput and HBM bandwidth, the ridge point is
 
 $$
-I^{*} = \frac{A_{f\_fp8}}{A_{bm}} = \frac{1.979\times10^{15}}{3.35\times10^{12}} \approx 590.746\ \text{FLOP/byte}.
+I^{*} = \frac{\Pi_{fp8}}{\beta} = \frac{1.979\times10^{15}}{3.35\times10^{12}} \approx 590.746\ \text{FLOP/byte}.
 $$
 
-For every byte pulled out of the HBM we can theoretically do 590.75 FLOPs before the tensor cores would be idle, and wait for the next byte. If the operational intensity, $$I$$ is less than 590.75 we do fewer FLOPs per byte than the H100 GPU can sustain, meaning that the data transfer is the bottleneck, while if it is greater than 590.75 FLOPs, the H100 has enough data in queue to not be idle.
+An operation below 590.75 FLOP/byte is *memory-bound* because memory transfer takes longer than computation. An operation above 590.75 FLOP/byte is *compute-bound* because computation takes longer than memory transfer.
 
-In associated literature the ridge point is represented by rooflines that we illustrate in [Figure 4](#figure-4): on the left-side we are memory-bound, while on the right-side we are compute-bound. The compute-bound is a roofline because we can never exceed the attainable throughput, even if our operational intensity increases.
+[Figure 4](#figure-4) plots attainable compute throughput against operational intensity. The sloped region contains memory-bound operations, whose throughput increases as they perform more FLOPs per byte. The horizontal region contains compute-bound operations, whose throughput cannot exceed the GPU's peak arithmetic rate. The point where the two regions meet is the ridge point.
 
 <figure class="figure-full" id="figure-4">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-4.svg' | relative_url }}" alt="Log-log roofline plot for an NVIDIA H100 SXM showing the memory-bound and compute-bound regions, the ridge point, and the operating point of the example AI filter query.">
   <figcaption>Figure 4. Roofline for an NVIDIA H100 SXM (&Pi; = 1.979&times;10<sup>15</sup> FLOP/s at FP8, &beta; = 3.35&times;10<sup>12</sup> bytes/s). The red marker shows the operational intensity of the query in Section 2.1 and its derivation is given in Section 3.6.</figcaption>
 </figure>
 
+With the H100 limits and Qwen3-4B architecture defined, we can now derive the cost of one AI-powered filter.
+
 # 3. Cost Model for One Filter
 
-We provide an overview of the cost model and derive the associated costs for projection, attention and MLP. All three of them together help build the total filter costs. We demonstrate the filter costs through the single AI-powered filter query for the BioDEX dataset.
+Section 2 described the three components included in our cost model: projections, attention, and the MLP. We now derive the computation and HBM traffic for each component and use the roofline equation to estimate its latency. The sum of the three latency estimates is the cost of one AI-powered filter. We finish by working through the cost of one filter from our example query.
 
-## 3.1 Cost Model
+## 3.1 Workload and Notation
 
 Here, we define equations for the workload giving the request length and total token count, and introduce the notion of the chunk budget.
 
@@ -193,7 +209,7 @@ L_2' &= \sum_i r_i^2.
 \end{aligned}
 $$
 
-In case that per-document lengths are unavailable, one can approximate $$r_i$$ by the document length mean. $$L_2$$ is necessary for self-attention computations in [Section 3.3](#33-attention-cost). Weights are re-streamed from the HBM once per forward pass, and each pass is bounded by the chunk budget which is essential to compute the amount of passes that will occur. Below, we provide the formula to compute the chunk budget, $$C$$, and as a result, the number of forward passes, $$K$$,
+In case that per-document lengths are unavailable, one can approximate $$r_i$$ by the document length mean. $$L_2'$$ is necessary for self-attention computations in [Section 3.3](#33-attention-cost). Weights are re-streamed from the HBM once per forward pass, and each pass is bounded by the chunk budget which is essential to compute the amount of passes that will occur. Below, we provide the formula to compute the chunk budget, $$C$$, and as a result, the number of forward passes, $$K$$,
 
 $$
 \begin{aligned}
@@ -244,7 +260,7 @@ $$
 
 where $$L_1' = \sum_i r_i$$ and $$L_2' = \sum_i r_i^2$$.
 
-We introduced $$L_2$$ in the prior section as it is crucial for the closed form of self-attention computations.
+We introduced $$L_2'$$ in the prior section because it is needed for the closed form of the self-attention computation.
 
 One comparison, for one head in one layer, costs $$2\,d_{\text{head}}$$ FLOPs for the query--key dot product ($$QK^\top$$), because we do a multiply and addition per number and another $$2\,d_{\text{head}}$$ for the weighted sum over value vectors. Repeating across all $$n_{\text{heads}}$$ and all layers gives,
 
@@ -309,27 +325,48 @@ $$
 
 ## 3.5 Total Cost
 
-A forward pass runs projections, attention, and the MLP one after another, so their times add, and each component takes its own maximum of compute and memory time:
+A forward pass runs the projections, attention, and the MLP in sequence, so the three component times add:
 
 $$
 T_{\text{filter}} = T_{\text{proj}} + T_{\text{attn}} + T_{\text{mlp}}.
 $$
 
-The particular bound, memory or compute, depends on operational intensity. For projections and the MLP, $$F/B = 2\,n_{\text{tok}}P/(b_w P K)$$, which is the number of tokens per forward pass. If $$F/B$$ exceeds the ridge point, $$I^*$$, we will be compute bound, otherwise we will be memory transfer bound. Similarly for attention, $$F/B$$, being either below or above the, $$I^*$$, threshold tells us whether what we will be bound by. $$I^*$$ can also help us compute the $$n_{\text{tok}}$$ at which we transition from memory transfer boundedness to compute boundedness.
+Each component is compute-bound or memory-bound depending on its operational intensity, as described in Section 2.4.
 
-## 3.6 Example: Single Filter Query SoL
+## 3.6 Cost of One BioDEX Filter
 
-Below we substitute the BioDEX, H100, and Qwen3-4B values and report the optimistic latency lower bound for a single AI-powered filter query. We use the first predicate from [Figure 1](#figure-1) which has $$q_{\text{pre}}=2$$ and $$q_{\text{tail}}=47$$. For the arithmetic throughput and memory transfer rate we use peak rates in the above cost model, which in return makes our computation a SoL estimate.
+We now estimate the SoL latency of one filter from our example query. We use the H100's peak arithmetic throughput and HBM bandwidth, along with the following batch and prompt values:
 
-We batch $$N = 200$$ documents averaging $$\bar{\ell} = 4{,}145.96$$ tokens, so $$L_1 = 829{,}192$$. We approximate every document by the average length. Each request is then
+$$
+N = 200, \qquad
+\bar{\ell} = 4{,}145.96 \ \text{tokens}, \qquad
+q_{\text{pre}} = 2 \ \text{tokens}, \qquad
+q_{\text{tail}} = 47 \ \text{tokens}.
+$$
+
+We approximate every document by the mean length, which gives
+
+$$
+L_1 = N\bar{\ell} = 829{,}192 \ \text{tokens}.
+$$
+
+**Request and batch sizes.** Each request contains the prefix, one document, and the filter instruction:
 
 $$
 \begin{aligned}
-r &= 4{,}145.96 + 2 + 47 \\
+r &= q_{\text{pre}} + \bar{\ell} + q_{\text{tail}} \\
+  &= 2 + 4{,}145.96 + 47 \\
     &= 4{,}194.96 \ \text{tokens}, \\
-n_{\text{tok}} &= L_1 + N(q_{\text{pre}} + q_{\text{tail}}) \\
-    &= 829{,}192 + 200 \times 49 \\
-    &= 838{,}992, \\
+n_{\text{tok}} &= N r \\
+    &= 200 \times 4{,}194.96 \\
+    &= 838{,}992.
+\end{aligned}
+$$
+
+**Attention comparisons.** The attention calculation also needs the sum of squared request lengths:
+
+$$
+\begin{aligned}
 L_2' &= N r^2 \\
     &= 200 \times 4{,}194.96^2 \\
     &= 3{,}519{,}537{,}880.32, \\
@@ -338,7 +375,7 @@ A &= \frac{n_{\text{tok}} + L_2'}{2} \\
 \end{aligned}
 $$
 
-The widest intermediate is the SwiGLU input, $$2\,d_{\text{mlp}} = 19{,}456$$ slots per token, and slots are indexed by a signed 32-bit counter:
+**Forward passes.** The widest intermediate is the SwiGLU input, with $$2\,d_{\text{mlp}} = 19{,}456$$ slots per token. The slots are indexed by a signed 32-bit counter:
 
 $$
 \begin{aligned}
@@ -349,7 +386,18 @@ K &= \left\lceil \frac{838{,}992}{110{,}376} \right\rceil \\
 \end{aligned}
 $$
 
-With $$d_{\text{model}}=2560$$, $$n_{\text{heads}}=32$$, $$n_{kv}=8$$, $$d_{\text{head}}=128$$, $$d_{\text{mlp}}=9728$$ and 36 layers:
+**Model parameters.** We substitute the Qwen3-4B dimensions from Table 2:
+
+$$
+\begin{aligned}
+d_{\text{model}} &= 2560, &
+d_{\text{mlp}} &= 9728, &
+d_{\text{head}} &= 128, \\
+n_{\text{heads}} &= 32, &
+n_{kv} &= 8, &
+\text{layers} &= 36.
+\end{aligned}
+$$
 
 $$
 \begin{aligned}
@@ -435,31 +483,37 @@ $$
 
 # 4. Cost Model for a Conjunction of Filters
 
-Here we explain the execution model for a conjunction of filters, give the cost of a fixed filter order, and present the rule for choosing the order that minimizes it.
+Section 3 estimates the cost of one filter with an empty KV cache. In a conjunction of filters, each successive filter processes only the documents that passed the preceding filters. Successive filters also reuse the prefix KV computed by the first filter. We first describe KV reuse and the HBM capacity needed to support it, then derive the cost of a fixed filter order and explain how to choose the order with the lowest cost.
 
-## 4.1 Execution Model and KV Reuse
+## 4.1 KV Reuse and HBM Capacity
 
-Taking a closer look at [Figure 1](#figure-1), the filters in a chain all read the same document, so all the requests share the prefix, $$q_{\text{pre}} + \text{document}$$, and only the filter instruction differs. The first filter pays for computing and storing the prefix KV, in addition to processing its own filter instruction. All of the subsequent filters operate on the first filter's selected set, pay for fetching the documents' KV from the HBM, and process only their filter instructions. Their instruction tokens attend to the cached prefix.
-
-Documents can be pipelined through the filters in batches, which lets their KV remain in the cache until all filters have executed. The KV cache is limited by HBM capacity and model weights, so a batch must fit within the remaining space, otherwise evictions may happen resulting in prefix recomputations, thereby increasing cost. We compute the KV footprint and the batch size permitted by the HBM capacity below.
-
-The KV cost per token, $$B_{\text{kv}}$$, was derived as a part of the attention cost in the prior section. For a document with an average prefix of $$p = q_{\text{pre}} + \bar{\ell}$$ tokens, where $$\bar{\ell}$$ is the mean document length, the KV footprint is $$B_{\text{kv}}\,p$$ bytes. HBM holds the weights and the embedding table, and the remainder is available for KV:
+Taking a closer look at [Figure 1](#figure-1), every filter prompt for a given document contains the same preamble and document. Only the filter instruction changes. The average shared prefix length is therefore
 
 $$
-\begin{aligned}
-M_{\text{KV}} &= \text{Capacity} \\
-                &\quad - b_w(P_{\text{proj}} + P_{\text{mlp}}) - E, \\
-N_b &= \left\lfloor \frac{M_{\text{KV}}}{B_{\text{kv}}\,p} \right\rfloor .
-\end{aligned}
+p = q_{\text{pre}} + \bar{\ell},
 $$
 
-$$N_b$$ is the number of documents whose prefix KV fits at once. Pipelining in batches of $$N_b$$ never evicts KV, and therefore our cost model assumes an "infinite" KV cache. Keep in mind that we use mean document lengths so in practice the above KV cache size is an estimate.
+where $$\bar{\ell}$$ is the mean document length. The first filter processes the prefix and stores its KV. Each later filter that evaluates the document reads the stored KV and processes only its own instruction tokens. Our cost model therefore processes each document's prefix once and reuses its KV for any later filters that evaluate the document.
+
+To reuse the prefixes without recomputing them, we choose a batch small enough to keep every prefix KV in HBM while the later filters run. The HBM left after storing the model weights and embedding table is
+
+$$
+M_{\text{KV}} = \text{Capacity} - b_w(P_{\text{proj}} + P_{\text{mlp}}) - E.
+$$
+
+Here, $$E$$ is the size of the embedding table in bytes. {% include shreya-comment.html text="Is this true?" %} An average prefix uses $$B_{\text{kv}}p$$ bytes, so the maximum batch size is
+
+$$
+N_b = \left\lfloor \frac{M_{\text{KV}}}{B_{\text{kv}}\,p} \right\rfloor .
+$$
+
+We choose $$N \leq N_b$$ so that no prefix KV is evicted and recomputed.
+
+For our Qwen3-4B and H100 example, KV capacity limits a batch to about $$123$$ documents. We therefore run the $$200$$ documents as two batches. The chunk budget in Section 3 limits the number of tokens in one forward pass, while KV capacity limits the number of document prefixes that can remain cached between filters.
 
 ## 4.2 Cost of a Fixed Filter Order
 
-Any ordering of the filters, for example, any permutation of the already present order in [Figure 1](#figure-1), is valid for a query and will return the same result, because each filter judges a document independently of the others.
-
-Suppose a query applies $$m$$ filters to $$N$$ documents. Let $$\pi = (\pi_1,\ldots,\pi_m)$$ be an ordering, where $$\pi_j$$ is the filter in position $$j$$. Selectivity $$s_i$$ is the fraction of documents that survive filter $$F_i$$. Each filter runs only on the documents that survived the filters before it, so the expected number of documents entering position $$j$$ is
+Suppose a query applies $$m$$ filters to $$N$$ documents. Let $$\pi = (\pi_1,\ldots,\pi_m)$$ be an ordering, where $$\pi_j$$ is the filter in position $$j$$. *Selectivity*, $$s_i$$, is the fraction of documents that survive filter $$F_i$$, and $$q_i$$ is the number of instruction tokens for $$F_i$$. Each filter runs only on the documents that survived the filters before it, so the expected number of documents entering position $$j$$ is
 
 $$
 N_j = N \prod_{k<j} s_{\pi_{k}}.
@@ -467,33 +521,35 @@ $$
 
 Each filter depends on four quantities: the tokens processed $$n$$, the attention comparisons $$A$$, the KV tokens written $$W$$, and the KV tokens read $$R$$.
 
-The first filter processes each request as in the single-filter case, with $$r_i = q_{\text{pre}} + \ell_i + q_{\pi_1}$$:
+For the first filter, let $$\ell_d$$ be the length of document $$d$$. Its request length is $$r_d = q_{\text{pre}} + \ell_d + q_{\pi_1}$$, and the cost is
 
 $$
 \begin{aligned}
-n_1 &= \sum_i r_i, \\
-A_1 &= \sum\frac{r_i(r_i+1)}{2}, \\
+n_1 &= \sum_{d=1}^{N} r_d, \\
+A_1 &= \sum_{d=1}^{N}\frac{r_d(r_d+1)}{2}, \\
 W_1 &= n_1, \\
 R_1 &= 0 .
 \end{aligned}
 $$
 
-For any subsequent filter, only the $$N_j$$ surviving documents run, and only their $$q = q_{\pi_j}$$ instruction tokens are computed:
+For any subsequent filter, only the $$N_j$$ surviving documents run, and only the $$q_{\pi_j}$$ instruction tokens are computed:
 
 $$
 \begin{aligned}
-n_j &= N_j\,q, \\
-A_j &= N_j\left[\,q\,p + \frac{q(q+1)}{2}\right], \\
+n_j &= N_j\,q_{\pi_j}, \\
+A_j &= N_j\left[\,q_{\pi_j}\,p + \frac{q_{\pi_j}(q_{\pi_j}+1)}{2}\right], \\
 W_j &= n_j, \\
 R_j &= N_j\,p .
 \end{aligned}
 $$
 
-The first term of $$A_j$$ counts prefix comparisons and the second counts self comparisons. $$R_j$$ is the tokens to fetch documents from the KV cache.
+The first term of $$A_j$$ counts comparisons with the cached prefix, and the second counts comparisons among the instruction tokens. $$R_j$$ is the number of cached prefix tokens read from HBM.
 
-## 4.3 Filter Ordering
+## 4.3 Choosing the Filter Order
 
-Let's consider applying $$m$$ filters to $$N$$ documents. Let $$\pi = (\pi_1,\ldots,\pi_m)$$ denote an arbitrary ordering of the filters, where $$\pi_j$$ is the filter in position $$j$$. Each filter $$F_i$$ has a selectivity $$s_i$$, the fraction of documents it keeps, and can be priced in two ways per document, depending on whether the document is already in the KV cache. The selectivity for each predicate present in [Table 4](#table-4) is measured empirically as the fraction of documents for which the LLM returns True. A *scan* runs on an uncached document and it processes the prefix together with the filter's question and writes the prefix KV, at a cost of $$\text{scan}_i$$. An *ask* runs on a cached document and it processes only the question tokens, which attend to the cached prefix, at a cost of $$\text{ask}_i$$. In an ordering $$\pi$$, the first filter scans all $$N$$ documents and every later filter asks on the documents that survive the filters before it given by the formula below for the total cost.
+Reordering the filters can reduce the amount of work because later filters run on fewer documents. We therefore choose the filter order with the lowest estimated cost.
+
+Each filter has two per-document costs because its cost depends on whether the prefix KV is already cached. A *scan cost*, $$\text{scan}_i$$, is the cost of processing an uncached prefix together with filter $$F_i$$'s instruction and writing the prefix KV. An *ask cost*, $$\text{ask}_i$$, is the cost of processing only the instruction tokens for $$F_i$$ and reading the cached prefix KV. For an ordering $$\pi$$, the first filter scans all $$N$$ documents. Each later filter asks only on the documents that passed the preceding filters. The total cost is
 
 $$
 C(\pi) = N\,\text{scan}_{\pi_1} + \sum_{j=2}^{m} \text{ask}_{\pi_j}\,N\prod_{k<j} s_{\pi_k}.
@@ -501,31 +557,25 @@ $$
 
 The product is the fraction of documents that survive the filters preceding position $$j$$.
 
-The scan cost only prices the choice of first filter; it does not define a second ordering. We choose an ordering, $$\pi$$, in three steps.
+The ordering rule follows Hellerstein and Stonebraker's work on ordering expensive predicates.<sup><a href="#note-4">4</a></sup> For filters after the first position, the rule ranks each filter by its ask cost per document removed:
 
-1. Sort all filters by ascending $$\text{rank}_i$$.
+$$
+\text{rank}_i = \frac{\text{ask}_i}{1 - s_i}.
+$$
 
-   $$
-   \text{rank}_i = \frac{\text{ask}_i}{1 - s_i}.
-   $$
+Only the first filter pays a scan cost. For each filter $$f$$, we evaluate one ordering with $$f$$ first and the remaining filters sorted by ascending $$\text{rank}_i$$. We compute $$C(\pi)$$ for each ordering and choose the one with the lowest cost.
 
-   It is the cost paid per document removed, however it ignores scans in the ranking.
-2. Evaluate all filter chains with different filters first.
+We compute the scan and ask costs with the equations from [Section 3](#3-cost-model-for-one-filter).
 
-   For each filter $$f$$, form the chain $$\pi^f$$ with $$f$$ first and the other filters in the order of step 1, and compute $$C(\pi^f)$$ with the equation above: the scan of $$f$$ on all $$N$$ documents, plus the ask of each other filter weighted by the remaining documents.
-3. Select the cheapest chain. The filter with the smallest $$C(\pi^f)$$ goes first, and the others follow in their step 1 order.
-
-We evaluate $$m$$ chains, not all $$m!$$ orderings, because we only choose which filter goes first and keep the rest in the ask-cost rank order.
-
-We assign ask and scan cost both with the cost model of [Section 3](#3-cost-model-for-one-filter). The cost is sum of three parts, the projections, the MLP, and attention. Each part takes the maximum of its compute time and its memory time. Projections and the MLP compute at the FP8 rate and read their weights every pass. Attention computes at the FP16 rate and reads and writes KV.
+Overall, the cost equation estimates the latency of a fixed filter order, and the ordering rule selects the order with the lowest estimated latency.
 
 # 5. Example: BioDEX Query
 
-We apply the model to the BioDEX query of [Figure 1](#figure-1): choose the filter order, cost the ordered conjunction filter by filter, and read off the SoL estimate. All values are for Qwen3-4B on an H100, with weights in FP8 and attention and KV in FP16, $$N = 200$$ documents, and a cached prefix of $$p = 2 + 4{,}145.96 = 4{,}147.96$$ tokens per document.
+Our example runs the query over $$N = 200$$ documents using Qwen3-4B on an H100. The weights use FP8, while attention and KV use FP16. The cached prefix contains $$p = 2 + 4{,}145.96 = 4{,}147.96$$ tokens per document.
 
 ## 5.1 Filter Ordering
 
-[Table 4](#table-4) lists the three filters. Each ask and scan cost is the sum of the three components of [Section 3](#3-cost-model-for-one-filter):
+[Table 4](#table-4) lists the three filters. We measure each filter's selectivity as the fraction of documents for which the LLM returns True. Each ask and scan cost is the sum of the three components of [Section 3](#3-cost-model-for-one-filter):
 
 $$
 \text{cost} = T_{\text{proj}} + T_{\text{mlp}} + T_{\text{attn}},
@@ -620,22 +670,22 @@ The other filters follow the same way with their own $$q$$ ($$41$$ for $$F_8$$, 
 
 Ranking gives $$F_7 \to F_8 \to F_9$$. The ask costs are within 10% of each other, since each is processing a similar amount of tokens, so selectivity drives the ranking. $$F_9$$ keeps $$86.3\%$$ of documents and removes little for its cost, so it goes last.
 
-$$F_8$$ has the cheapest scan, so it is a real candidate for the first slot. [Table 5](#table-5) prices each chain with the equation from [Section 4.3](#43-filter-ordering). Starting with $$F_8$$ saves $$7.4$$~ms of scan cost but makes $$F_7$$ run later on more documents, for a net cost of $$2.4$$~ms, so $$F_7$$ stays first. The number of documents entering each stage is $$N_j = N\prod_{k<j} s_{\pi_k} = 200,\ 111,\ 73$$.
+$$F_8$$ has the cheapest scan, so it is a candidate for the first position. [Table 5](#table-5) prices each candidate ordering with the equation from [Section 4.3](#43-choosing-the-filter-order). Starting with $$F_8$$ saves $$7.4$$~ms of scan cost but makes $$F_7$$ run later on more documents, for a net cost of $$2.4$$~ms, so $$F_7$$ stays first. The number of documents entering each stage is $$N_j = N\prod_{k<j} s_{\pi_k} = 200,\ 111,\ 73$$.
 
 <div class="table-wrap" id="table-5" markdown="1">
 
-| First | Chain $$\pi^f$$ | $$C(\pi^f)$$ (s) |
+| First | Ordering $$\pi$$ | $$C(\pi)$$ (s) |
 |-------|---------------|----------------|
 | $$F_7$$ | $$F_7 \to F_8 \to F_9$$ | 4.1937 |
 | $$F_8$$ | $$F_8 \to F_7 \to F_9$$ | 4.1961 |
 | $$F_9$$ | $$F_9 \to F_7 \to F_8$$ | 4.2261 |
 
-<p class="table-caption">Table 5. Step 2 of the ordering procedure: the cost of each candidate chain.</p>
+<p class="table-caption">Table 5. Step 2 of the ordering procedure: the cost of each candidate ordering.</p>
 </div>
 
 ## 5.2 Cost of the Ordered Conjunction
 
-The prefix KV of a document takes $$147{,}456 \times 4{,}147.96 \approx 0.612$$~GB and must stay resident until its last filter runs. After weights and embeddings, $$75.59$$~GB of HBM remain for KV, so only $$\lfloor 75.59 / 0.612 \rfloor = 123$$ documents fit and the $$200$$ are pipelined as two batches.
+The capacity calculation in [Section 4.1](#41-kv-reuse-and-hbm-capacity) shows that only $$123$$ document prefixes fit in HBM at once, so the $$200$$ documents run as two batches.
 
 <div class="table-wrap" id="table-6" markdown="1">
 
@@ -644,14 +694,14 @@ The prefix KV of a document takes $$147{,}456 \times 4{,}147.96 \approx 0.612$$~
 | 1 ($$F_7$$, prefix) | 838,992 | $$1.760\times10^{9}$$ | 0 | 0.8002 s | 1.0492 s (compute) | 2.2805 s | 4.1299 s |
 | 2 ($$F_8$$) | 4,551 | $$1.897\times10^{7}$$ | 460,424 | 4.34 ms | 20.47 ms (memory) | 12.37 ms | 37.18 ms |
 | 3 ($$F_9$$) | 3,577 | $$1.493\times10^{7}$$ | 302,801 | 3.41 ms | 13.49 ms (memory) | 9.72 ms | 26.62 ms |
-| **Chain** | 847,120 | | 763,225 | **0.8079 s** | **1.0832 s** | **2.3026 s** | **4.1937 s** |
+| **Conjunction** | 847,120 | | 763,225 | **0.8079 s** | **1.0832 s** | **2.3026 s** | **4.1937 s** |
 
 <p class="table-caption">Table 6. Cost of the ordered BioDEX conjunction.</p>
 </div>
 
 ## 5.3 Speed-of-Light Estimate
 
-[Table 6](#table-6) cleanly provides all of the values computed for the filter chain to achieve its SoL estimate. At peak arithmetic throughput and peak memory bandwidth on an H100, with ideal scheduling and no avoidable KV recomputation,
+[Table 6](#table-6) provides the values used to compute the SoL estimate for the conjunction of filters. At peak arithmetic throughput and peak memory bandwidth on an H100, with ideal scheduling and no avoidable KV recomputation,
 
 $$
 \begin{aligned}
@@ -661,11 +711,11 @@ $$
 \end{aligned}
 $$
 
-For an implementation of the chained example query on Qwen3-4B and an H100, the observed runtime can now be compared with $$4.19$$~s where a large gap points to inefficiency such as lost KV reuse or idle tensor cores.
+For an implementation of the example query on Qwen3-4B and an H100, the observed runtime can now be compared with $$4.19$$~s. A large gap points to inefficiency such as lost KV reuse or idle tensor cores.
 
-# 6. Filter Chain Playground
+# 6. Conjunction of Filters Playground
 
-Build a filter chain below and see its Speed-of-Light latency. Drag filters into the chain, reorder them, and tune each filter's selectivity $$s_i$$ and instruction length $$q_{\text{tail}}$$. The prefix $$q_{\text{pre}}$$ is shared by the whole chain because the filters reuse one prefix KV ([Section 4.1](#41-execution-model-and-kv-reuse)). The playground applies the ordering rule of [Section 4.3](#43-filter-ordering) and, for up to six filters, compares it against every possible order. It is fixed to Qwen3-4B on an H100, and the default is the BioDEX query of [Section 5](#5-example-biodex-query), entered in reverse.
+Build a conjunction of filters below and see its speed-of-light latency. Drag the filters to reorder them, and tune each filter's selectivity $$s_i$$ and instruction length $$q_{\text{tail}}$$. The filters share the prefix $$q_{\text{pre}}$$ because they reuse one prefix KV, as described in [Section 4.1](#41-kv-reuse-and-hbm-capacity). The playground applies the ordering rule from [Section 4.3](#43-choosing-the-filter-order) and, for up to six filters, compares the result with every possible order. The playground uses Qwen3-4B on an H100. Its default values come from the BioDEX query in [Section 5](#5-example-biodex-query), entered in reverse order.
 
 <div class="pg" id="filter-chain-playground" data-filter-chain-calculator>
   <noscript>The playground needs JavaScript. The worked example in Section 5 gives the same numbers for the BioDEX query.</noscript>
@@ -677,12 +727,22 @@ All numbers are lower bounds at peak rates, with expected survivors rounded to w
 
 # 7. Conclusion
 
-The cost model allows the estimation of the latency for a given hardware, model specification and workload. An instance of the cost model is SoL estimates which are optimistic lower bounds that are derived from the model. We demonstrated the above cost model to compute the SoL for a single filter and a filter chain query on the BioDEX dataset. Observed runtime can be compared with the SoL to identify any headroom, giving way for further optimizations to inch closer to the SoL. Understanding cost models for different AI-powered operators and over different models and accelerators is crucial for building a holistic understanding of how to optimize systems for any workload.
+The cost model estimates latency for a given workload, model, and GPU. The resulting SoL estimate is an optimistic lower bound on latency. We applied our cost model to one filter and a conjunction of filters from a BioDEX query. Comparing the observed runtime with the SoL estimate shows how much room remains for improvements such as preserving KV reuse and keeping the tensor cores busy.
 
 # Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in
 this research.
+
+# Notes
+
+<span id="note-1"><strong>1.</strong></span> Roofline models are commonly used to analyze the computation and memory limits of LLM inference. See [LLM Inference Unveiled: Survey and Roofline Model Insights](https://arxiv.org/abs/2402.16363). We follow [NVIDIA](https://developer.nvidia.com/blog/unleashing-the-power-of-nvidia-ampere-architecture-with-nvidia-nsight-developer-tools/) in calling theoretical peak performance the "Speed of Light."
+
+<span id="note-2"><strong>2.</strong></span> The H100 SXM memory capacity, bandwidth, and Tensor Core throughput come from [NVIDIA's H100 specifications](https://www.nvidia.com/en-us/data-center/h100/). NVIDIA reports Tensor Core throughput with structured sparsity, while Table 1 uses the dense rates, which are half of the reported sparse rates. The L2 cache size, SM count, and number of Tensor Cores per SM come from [NVIDIA's Hopper architecture overview](https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/).
+
+<span id="note-3"><strong>3.</strong></span> We use [Qwen3-4B FP8](https://huggingface.co/Qwen/Qwen3-4B) because its grouped query attention reduces KV-cache storage and its FP8 weights use the H100's higher FP8 throughput. Its 32 query heads share eight key-value heads, making the KV cache one quarter the size of full multi-head attention. FP8 also halves raw weight storage relative to FP16, while the KV cache remains in FP16. See [NVIDIA's FP8 primer](https://docs.nvidia.com/deeplearning/transformer-engine-releases/release-2.5/user-guide/examples/fp8_primer.html).
+
+<span id="note-4"><strong>4.</strong></span> Joseph M. Hellerstein and Michael Stonebraker, ["Predicate Migration: Optimizing Queries with Expensive Predicates"](https://doi.org/10.1145/170035.170078), *Proceedings of the 1993 ACM SIGMOD International Conference on Management of Data*, 1993.
 
 # Cite this post
 
