@@ -192,37 +192,22 @@
   const MAX_BRUTE_FORCE = 6; // 720 orderings
   // One accent per filter so a row can be followed into the optimal order.
   const COLORS = ['#3b6fb6', '#d9822b', '#2f9e77', '#8e5fbf', '#c0508a', '#7a8b2e', '#2b8fa3', '#a5643c'];
+  // The three IMDB predicates from the post's worked example (Section 5),
+  // plus a blank slot for a custom filter.
   const PRESETS = [
-    { name: 'female patient', s: '0.555', q: '47' },
-    { name: 'combination therapy', s: '0.658', q: '41' },
-    { name: 'serious adverse event', s: '0.863', q: '49' },
+    { name: 'mentions a positive aspect', s: '0.4856', q: '51' },
+    { name: 'discusses the ending', s: '0.2273', q: '45' },
+    { name: 'mentions a named actor', s: '0.6123', q: '49' },
     { name: 'custom', s: '0.5', q: '45', custom: true },
   ];
-  const SCENARIOS = [
-    {
-      id: 'biodex',
-      label: 'BioDEX (Section 5)',
-      work: { N: '200', len: '4145.96', qpre: '2' },
-      filters: [['serious adverse event', '0.863', '49'], ['combination therapy', '0.658', '41'], ['female patient', '0.555', '47']],
-    },
-    {
-      id: 'selective',
-      label: 'One very selective filter',
-      work: { N: '1000', len: '2000', qpre: '20' },
-      filters: [['broad topic match', '0.95', '40'], ['mentions a dosage', '0.5', '40'], ['rare condition', '0.03', '40']],
-    },
-    {
-      id: 'long',
-      label: 'Long vs short instructions',
-      work: { N: '500', len: '1500', qpre: '10' },
-      filters: [['long rubric', '0.3', '600'], ['short question', '0.5', '20'], ['medium prompt', '0.4', '150']],
-    },
-    {
-      id: 'five',
-      label: 'Five filters',
-      work: { N: '2000', len: '3000', qpre: '30' },
-      filters: [['is English', '0.9', '25'], ['is a case report', '0.35', '60'], ['reports an outcome', '0.6', '80'], ['patient over 65', '0.25', '45'], ['mentions a drug', '0.8', '30']],
-    },
+  // The playground's only scenario: the IMDB conjunction of Section 5,
+  // entered in the reverse of the order it was written in (F5, F4, F1),
+  // so the ranked-order fix in the "Optimal order" lane is visible at load.
+  const DEFAULT_WORK = { N: '5000', len: '298.8466', qpre: '2' };
+  const DEFAULT_FILTERS = [
+    ['mentions a named actor', '0.6123', '49'],
+    ['discusses the ending', '0.2273', '45'],
+    ['mentions a positive aspect', '0.4856', '51'],
   ];
   let instances = 0;
 
@@ -244,10 +229,9 @@
     return { id, name: custom ? 'Filter ' + id : name, s, q, color: COLORS[(id - 1) % COLORS.length] };
   }
 
-  function scenarioState(id) {
-    const sc = SCENARIOS.find((x) => x.id === id) || SCENARIOS[0];
-    const state = Object.assign({ nextId: 1, filters: [] }, sc.work);
-    sc.filters.forEach((f) => state.filters.push(newFilter(state, f[0], f[1], f[2])));
+  function defaultState() {
+    const state = Object.assign({ nextId: 1, filters: [] }, DEFAULT_WORK);
+    DEFAULT_FILTERS.forEach((f) => state.filters.push(newFilter(state, f[0], f[1], f[2])));
     return state;
   }
 
@@ -288,9 +272,9 @@
 
   function skeleton(state) {
     return (
-      '<div class="pg-bar"><span class="pg-title">Filter chain playground <span class="pg-sub">H100 &middot; Qwen3-4B</span></span>' +
-      '<div class="pg-bar-actions"><select class="pg-select" data-scenario aria-label="Scenario">' +
-      SCENARIOS.map((sc) => '<option value="' + sc.id + '">' + esc(sc.label) + '</option>').join('') + '</select>' +
+      '<div class="pg-bar"><span class="pg-title">Filter chain playground <span class="pg-sub">H100 &middot; Qwen3-4B &middot; IMDB conjunction (Section 5)</span></span>' +
+      '<div class="pg-bar-actions">' +
+      '<button type="button" class="pg-btn" data-action="reset">Reset</button>' +
       '<button type="button" class="pg-btn" data-action="shuffle">Shuffle</button>' +
       '<button type="button" class="pg-btn pg-btn-primary" data-action="apply">Apply optimal order</button></div></div>' +
       '<div class="pg-body">' +
@@ -405,12 +389,11 @@
 
   function mount(el) {
     const uid = 'pg-filters-' + ++instances;
-    const state = scenarioState('biodex');
+    const state = defaultState();
     el.innerHTML = skeleton(state);
     const rowsEl = el.querySelector('.pg-rows');
     const presetsEl = el.querySelector('.pg-presets');
     const resultsEl = el.querySelector('.pg-results');
-    const scenarioEl = el.querySelector('[data-scenario]');
     const lastValue = {};
     let lastSol = null;
 
@@ -608,8 +591,8 @@
       return f;
     }
 
-    function loadScenario(id) {
-      Object.assign(state, scenarioState(id));
+    function loadDefault() {
+      Object.assign(state, defaultState());
       ['N', 'len', 'qpre'].forEach((k) => (el.querySelector('[data-global="' + k + '"]').value = state[k]));
       flip(rowsEl, '.pg-row', 'id', renderRows, 380);
       update();
@@ -648,10 +631,6 @@
       }
     });
 
-    el.addEventListener('change', (e) => {
-      if (e.target === scenarioEl) loadScenario(scenarioEl.value);
-    });
-
     el.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       const row = e.target.closest('.pg-row');
@@ -664,7 +643,9 @@
       }
       if (!btn) return;
       const action = btn.dataset.action;
-      if (action === 'apply' && lastSol) {
+      if (action === 'reset') {
+        loadDefault();
+      } else if (action === 'apply' && lastSol) {
         reorderTo(lastSol.best.order.map((f) => String(f.id)));
       } else if (action === 'shuffle' && state.filters.length > 1) {
         const before = state.filters.map((f) => f.id).join();

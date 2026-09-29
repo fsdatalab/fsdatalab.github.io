@@ -386,7 +386,7 @@ a:hover { opacity: 0.75; }
   vertical-align: top;
 }
 .prose th,
-.prose table tr:first-child td {
+.prose table thead tr td {
   background: #f5f5f5;
   color: var(--heading);
   font-weight: 600;
@@ -612,29 +612,59 @@ a:hover { opacity: 0.75; }
   margin: 0 auto;
   overflow: visible;
 }
-.prose #table-3 table {
+.prose #table-3,
+.prose #table-8 {
+  width: min(58rem, calc(100vw - 3rem));
+  margin: 2rem 50%;
+  transform: translateX(-50%);
+}
+.prose #table-3 table,
+.prose #table-8 table {
   width: 100%;
   table-layout: fixed;
 }
 .prose #table-3 th,
-.prose #table-3 td {
+.prose #table-3 td,
+.prose #table-8 th,
+.prose #table-8 td {
   min-width: 0;
+  text-align: center;
+}
+.prose #table-3 th:first-child,
+.prose #table-3 td:first-child,
+.prose #table-8 th:first-child,
+.prose #table-8 td:first-child {
+  text-align: left;
 }
 .prose #table-3 th:nth-child(1),
-.prose #table-3 td:nth-child(1) {
-  width: 22%;
+.prose #table-3 td:nth-child(1),
+.prose #table-8 th:nth-child(1),
+.prose #table-8 td:nth-child(1) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(2),
-.prose #table-3 td:nth-child(2) {
-  width: 18%;
+.prose #table-3 td:nth-child(2),
+.prose #table-8 th:nth-child(2),
+.prose #table-8 td:nth-child(2) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(3),
-.prose #table-3 td:nth-child(3) {
-  width: 14%;
+.prose #table-3 td:nth-child(3),
+.prose #table-8 th:nth-child(3),
+.prose #table-8 td:nth-child(3) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(4),
-.prose #table-3 td:nth-child(4) {
-  width: 46%;
+.prose #table-3 td:nth-child(4),
+.prose #table-8 th:nth-child(4),
+.prose #table-8 td:nth-child(4) {
+  width: 16%;
+}
+.prose #table-3 th:nth-child(5),
+.prose #table-3 td:nth-child(5),
+.prose #table-8 th:nth-child(5),
+.prose #table-8 td:nth-child(5) {
+  width: 21%;
 }
 .prose .table-caption {
   margin: 0.625rem auto 0;
@@ -646,9 +676,14 @@ a:hover { opacity: 0.75; }
 }
 
 @media (max-width: 640px) {
-  .prose #table-3 table {
-    width: 44rem;
-    min-width: 44rem;
+  .prose #table-3,
+  .prose #table-8 {
+    width: calc(100vw - 3rem);
+  }
+  .prose #table-3 table,
+  .prose #table-8 table {
+    width: 40rem;
+    min-width: 40rem;
   }
 }
 
