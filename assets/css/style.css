@@ -628,12 +628,13 @@ a:hover { opacity: 0.75; }
 .prose #table-8 th,
 .prose #table-8 td {
   min-width: 0;
+}
+.prose #table-3 th,
+.prose #table-3 td {
   text-align: center;
 }
 .prose #table-3 th:first-child,
-.prose #table-3 td:first-child,
-.prose #table-8 th:first-child,
-.prose #table-8 td:first-child {
+.prose #table-3 td:first-child {
   text-align: left;
 }
 .prose #table-3 th:nth-child(1),
@@ -979,10 +980,29 @@ a:hover { opacity: 0.75; }
 .prose .pg-plot-svg { display: block; width: 100%; height: auto; }
 .prose .pg-axis { stroke: #d0d0cd; stroke-width: 1; }
 .prose .pg-axis-label { fill: #77777a; font-size: 10.5px; font-family: var(--body); }
+.prose .pg-dot,
+.prose .pg-dot-yours,
+.prose .pg-dot-rule,
+.prose .pg-dot-best {
+  cursor: pointer;
+  transition: r 0.12s, opacity 0.12s;
+}
 .prose .pg-dot { fill: #b7b7b3; }
 .prose .pg-dot-yours { fill: none; stroke: var(--heading); stroke-width: 2; }
 .prose .pg-dot-rule { fill: var(--red); }
 .prose .pg-dot-best { fill: #2f9e77; }
+.prose .pg-dot:hover,
+.prose .pg-dot:focus-visible { r: 5; opacity: 0.85; }
+.prose .pg-dot-yours:hover,
+.prose .pg-dot-rule:hover,
+.prose .pg-dot-best:hover,
+.prose .pg-dot-yours:focus-visible,
+.prose .pg-dot-rule:focus-visible,
+.prose .pg-dot-best:focus-visible { opacity: 0.75; }
+.prose .pg-dot:focus-visible,
+.prose .pg-dot-yours:focus-visible,
+.prose .pg-dot-rule:focus-visible,
+.prose .pg-dot-best:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .prose .pg-plot-msg { font-size: 0.75rem; color: var(--muted); }
 .prose .pg-details { margin-top: 0.75rem; }
 .prose .pg-details summary { cursor: pointer; font-size: 0.75rem; font-weight: 500; color: var(--muted); }

@@ -79,7 +79,7 @@ We define AI-powered filters and introduce the single-filter query and the conju
 
 <figure class="figure-full" id="figure-1">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/figure-1.svg' | relative_url }}" alt="A database instance of four IMDB reviews, an AI_IF conjunction query applying three predicates, and the resulting table of TRUE/FALSE/— outcomes per review.">
-  <figcaption>Figure 1. Simplified IMDB instance and query with results for 3 predicates. The reviews are illustrative, and the predicates are evaluated in the order they are written.</figcaption>
+  <figcaption>Figure 1. Simplified IMDB instance and query with results for 3 predicates, evaluated in the order written; the reviews are illustrative.</figcaption>
 </figure>
 
 [Figure 1](#figure-1) displays the general prompt structure for the AI-powered filter query; its structure is similar to that of a SQL query. Within each invocation of the operator there exists a preamble, "DOCUMENT:\n", the actual document, and the filter instruction "Evaluate TRUE or FALSE for the following question: [...]". The output of each predicate is a single-token output of true or false. Only the surviving documents pass through to subsequent filters. [Figure 1](#figure-1) shows a query with a conjunction of filters: $$F_1$$ (mentions a positive aspect) &rarr; $$F_4$$ (discusses the ending) &rarr; $$F_5$$ (mentions a named actor), all three run over the `reviews` table. We use the first predicate as the single AI-powered filter example in [Section 3](#3-cost-model-for-one-filter).
@@ -121,7 +121,7 @@ We use the Qwen3-4B FP8 model<sup><a href="#note-17">17</a></sup> in our example
 
 <figure class="figure-full" id="model">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/model.svg' | relative_url }}" alt="Diagram of a token passing through one Qwen3-4B layer: QKV projection, attention with a KV cache, output projection, and the gate/up/SwiGLU/down MLP block.">
-  <figcaption>Figure 3. Path of a single token through one Qwen3-4B layer. The QKV and output projections are per-token matrix multiplications; only the attention step reads the KV cache of all <em>T</em> tokens.</figcaption>
+  <figcaption>Figure 3. Path of a single token through one Qwen3-4B layer. Only the attention step reads the KV cache of all <em>T</em> tokens.</figcaption>
 </figure>
 
 [Figure 3](#model) follows one token through a layer of Qwen3-4B. Each layer contains four attention projection matrices and three MLP matrices.
@@ -190,7 +190,7 @@ Attention is memory-bound below 295.37 FLOP/byte and compute-bound above it. The
 
 <figure class="figure-full" id="figure-4">
   <img src="{{ '/assets/blog/ai-filter-cost-estimates/roofline.svg' | relative_url }}" alt="Log-log roofline plot for an NVIDIA H100 SXM showing the memory-bound and compute-bound regions, the FP8 and BF16 ridge points, and the operating points of the example single filter and conjunction.">
-  <figcaption>Figure 4. Roofline for an NVIDIA H100 SXM (&Pi;<sub>fp8</sub> = 1.979&times;10<sup>15</sup> FLOP/s, &Pi;<sub>bf16</sub> = 989.5&times;10<sup>12</sup> FLOP/s, &beta; = 3.35&times;10<sup>12</sup> bytes/s). The BF16 roof applies only to attention. The &times; marks the single AI-powered filter of Section 3 (I = 4.08&times;10<sup>4</sup>), and the diamond marks the conjunction of AI-powered filters of Section 5 (I = 3.31&times;10<sup>4</sup>).</figcaption>
+  <figcaption>Figure 4. Roofline for an NVIDIA H100 SXM. The BF16 roof applies only to attention; &times; marks the single filter of Section 3, diamond marks the conjunction of Section 5.</figcaption>
 </figure>
 
 With the H100 limits and Qwen3-4B architecture defined, we can now derive the cost of one AI-powered filter.
@@ -725,10 +725,10 @@ The other filters follow the same way with their own $$q$$ ($$45$$ for $$F_4$$, 
 | $$F_1$$ | mentions a positive aspect | 51 | 0.4856 | 0.203 | 1.329 | 0.5144 | 0.394 |
 | $$F_5$$ | mentions a named actor | 49 | 0.6123 | 0.195 | 1.321 | 0.3877 | 0.504 |
 
-<p class="table-caption">Table 5. Filters sorted by ascending rank ask<sub>i</sub>/(1&minus;s<sub>i</sub>), giving the order F<sub>4</sub> &rarr; F<sub>1</sub> &rarr; F<sub>5</sub> in step 1. Each <em>s<sub>i</sub></em> is the fraction kept by that filter among the documents that reached it in the run order F<sub>1</sub> &rarr; F<sub>4</sub> &rarr; F<sub>5</sub> (5,000, 2,428, and 552 reviews entering each stage); when pricing other orders we treat these values as independent marginal selectivities. Under the chosen order, 5,000, 1,137, and 552 documents enter each stage in turn.</p>
+<p class="table-caption">Table 5. Filters sorted by ascending rank ask<sub>i</sub>/(1&minus;s<sub>i</sub>), giving the order F<sub>4</sub> &rarr; F<sub>1</sub> &rarr; F<sub>5</sub>. Each <em>s<sub>i</sub></em> is the fraction kept among documents reaching that filter, in run order F<sub>1</sub> &rarr; F<sub>4</sub> &rarr; F<sub>5</sub>.</p>
 </div>
 
-Ranking gives $$F_4 \to F_1 \to F_5$$ &mdash; a different order than the query was written in ($$F_1 \to F_4 \to F_5$$), because $$F_4$$ removes the most documents per token spent even though it isn't listed first. The ask costs are within 12% of each other, since each is processing a similar amount of tokens, so selectivity drives the ranking. $$F_5$$ keeps $$61.2\%$$ of documents and removes little for its cost, so it goes last.
+Ranking gives $$F_4 \to F_1 \to F_5$$ &mdash; a different order than the query was written in ($$F_1 \to F_4 \to F_5$$), because $$F_4$$ removes the most documents per token spent even though it isn't listed first. The ask costs are within 12% of each other, since each is processing a similar amount of tokens, so selectivity drives the ranking. $$F_5$$ keeps $$61.2\%$$ of documents and removes little for its cost, so it goes last. Pricing other orders treats each $$s_i$$ as an independent marginal selectivity of the filter itself, not of the position it runs in.
 
 $$F_4$$ also has the cheapest scan, so it is a natural candidate for the first position. [Table 6](#table-6) prices each candidate ordering with the equation from [Section 4.3](#43-choosing-the-filter-order). Starting with $$F_1$$, as the query is written, costs $$0.324$$~s (4.5%) more: $$F_1$$ has a more expensive scan (0.023 ms per document, 0.116 s over 5,000 documents), and it lets $$2{,}428$$ documents through to $$F_4$$, where the chosen order sends only $$1{,}137$$ documents to $$F_1$$. Starting with $$F_5$$ is the most expensive because $$F_5$$ removes the fewest documents before the other two filters run. The number of documents entering each stage under the chosen order is $$N_j = N\prod_{k<j} s_{\pi_k} = 5{,}000,\ 1{,}137,\ 552$$. These counts, unlike those of the run order, are estimates that rely on the independence assumption above.
 
@@ -796,7 +796,7 @@ Only attention differs from adding per-filter latencies. [Table 9](#table-9) sho
 | 3 ($$F_5$$) | 5.25 | 8.50 | 8.50 |
 | **Total** | **195.31** | **102.22** | **204.87** |
 
-<p class="table-caption">Table 9. Attention compute time <em>a<sub>j</sub></em> and memory time <em>b<sub>j</sub></em> per stage. Pricing the totals gives max(195.31, 102.22) = 195.31 ms, while adding per-stage latencies gives 204.87 ms.</p>
+<p class="table-caption">Table 9. Attention compute time <em>a<sub>j</sub></em> and memory time <em>b<sub>j</sub></em> per stage.</p>
 </div>
 
 ## 5.3 Speed-of-Light Estimate

@@ -386,12 +386,14 @@
     const best = dots.slice().sort((p, q) => p.a.total - q.a.total)[0];
     let svg = '<svg class="pg-plot-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Latency of every ordering of the chain">';
     svg += '<line x1="' + padL + '" y1="' + axisY + '" x2="' + (W - padR) + '" y2="' + axisY + '" class="pg-axis"/>';
+    const orderAttr = (order) => order.map((f) => f.id).join(',');
+    const dotTitle = (d) => esc(d.a.order.map((f) => f.name).join(' → ')) + ': ' + fmtTime(d.a.total) + ' (click to apply)';
     dots.forEach((d) => {
-      svg += '<circle cx="' + d.cx.toFixed(1) + '" cy="' + d.cy + '" r="3.4" class="pg-dot"><title>' + esc(d.a.order.map((f) => f.name).join(' → ')) + ': ' + fmtTime(d.a.total) + '</title></circle>';
+      svg += '<circle cx="' + d.cx.toFixed(1) + '" cy="' + d.cy + '" r="3.4" class="pg-dot" tabindex="0" role="button" data-order="' + orderAttr(d.a.order) + '"><title>' + dotTitle(d) + '</title></circle>';
     });
-    if (yours) svg += '<circle cx="' + yours.cx.toFixed(1) + '" cy="' + yours.cy + '" r="6.5" class="pg-dot-yours"/>';
-    if (rule) svg += '<circle cx="' + rule.cx.toFixed(1) + '" cy="' + rule.cy + '" r="4.6" class="pg-dot-rule"/>';
-    if (best && best !== rule) svg += '<circle cx="' + best.cx.toFixed(1) + '" cy="' + best.cy + '" r="4.6" class="pg-dot-best"/>';
+    if (yours) svg += '<circle cx="' + yours.cx.toFixed(1) + '" cy="' + yours.cy + '" r="6.5" class="pg-dot-yours" tabindex="0" role="button" data-order="' + orderAttr(yours.a.order) + '"><title>' + dotTitle(yours) + '</title></circle>';
+    if (rule) svg += '<circle cx="' + rule.cx.toFixed(1) + '" cy="' + rule.cy + '" r="4.6" class="pg-dot-rule" tabindex="0" role="button" data-order="' + orderAttr(rule.a.order) + '"><title>' + dotTitle(rule) + '</title></circle>';
+    if (best && best !== rule) svg += '<circle cx="' + best.cx.toFixed(1) + '" cy="' + best.cy + '" r="4.6" class="pg-dot-best" tabindex="0" role="button" data-order="' + orderAttr(best.a.order) + '"><title>' + dotTitle(best) + '</title></circle>';
     svg += '<text x="' + padL + '" y="' + (axisY + 16) + '" class="pg-axis-label">' + fmtTime(lo) + '</text>';
     svg += '<text x="' + (W - padR) + '" y="' + (axisY + 16) + '" text-anchor="end" class="pg-axis-label">' + fmtTime(hi) + '</text>';
     return svg + '</svg>';
@@ -642,6 +644,11 @@
     });
 
     el.addEventListener('click', (e) => {
+      const dot = e.target.closest('[data-order]');
+      if (dot) {
+        reorderTo(dot.dataset.order.split(','));
+        return;
+      }
       const btn = e.target.closest('button');
       const row = e.target.closest('.pg-row');
       const preset = e.target.closest('.pg-preset');
@@ -691,6 +698,11 @@
       if (preset && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         preset.click();
+      }
+      const dot = e.target.closest && e.target.closest('[data-order]');
+      if (dot && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        reorderTo(dot.dataset.order.split(','));
       }
     });
 
