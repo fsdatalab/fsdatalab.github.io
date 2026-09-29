@@ -539,7 +539,7 @@ C &= \max\big(\min(C_{\text{mem}}, C_{\text{idx}}),\ C_{\text{knee}}\big),
 \end{aligned}
 $$
 
-where $$\sigma = 2$$ is a slack factor. $$\text{IO}$$ is the number of activation elements the projections read in and write out per token: each projection's input width plus its output width, added up across all four projection matrices and all layers. $$b_{\text{act}} = 2$$ is the number of bytes each of those activation elements takes, since activations are stored in BF16.
+where $$\sigma = 2$$ is a slack factor. $$\text{IO}$$ is the number of activation elements the projections read in and write out per token: each projection's input width plus its output width, added up across all four projection matrices and all layers. $$b_{\text{act}} = 2$$ is the number of bytes each of those activation elements takes, since activations are stored in BF16. Intuitively, $$C_{\text{mem}}$$ and $$C_{\text{idx}}$$ are both ceilings on how large a chunk can be, one from leftover HBM and one from the kernel's addressing limit, while $$C_{\text{knee}}$$ is a floor on how small a chunk should be, below which the dense projections turn memory-bound; taking the minimum of the two ceilings picks whichever one actually constrains the chunk size, and taking the maximum with the floor then guarantees the engine never picks a chunk small enough to waste the GPU's compute.
 
 **Qwen3-4B on an H100.** [Table 4](#table-4) works through the numbers. Quail measures $$W_{\text{resident}} = 4.50$$ GB as the model's resident footprint: 3.63 GB of FP8 weights and 0.78 GB of BF16 embeddings from the parameter counts of [Section 3.6](#36-cost-of-one-imdb-filter), plus 0.09 GB of FP8 block scales<sup><a href="#note-9c">¶</a></sup>, so $$W_{\text{resident}} = 3.63 + 0.78 + 0.09 = 4.50$$ GB. For Qwen3-4B, $$\text{IO} = 1{,}787{,}904$$, so
 
@@ -547,7 +547,7 @@ $$
 C_{\text{knee}} = \frac{590.75 \times 3{,}633{,}315{,}840 \times 1}{2\times3{,}633{,}315{,}840 - 590.75\times1{,}787{,}904\times2} \approx 416.
 $$
 
-With $$a = 81{,}920$$ bytes per token, $$C_{\text{mem}} = 436{,}401$$ exceeds $$C_{\text{idx}} = 110{,}376$$, and $$C_{\text{knee}} \approx 416$$ is smaller than both, so $$C = C_{\text{idx}} = 110{,}376$$.
+With $$a = 81{,}920$$ bytes per token, $$C_{\text{mem}} = 436{,}401$$ exceeds $$C_{\text{idx}} = 110{,}376$$, and $$C_{\text{knee}} \approx 416$$ is smaller than both, so $$C = C_{\text{idx}} = 110{,}376$$. One chunk then reserves $$M_{\text{chunk}} = C\,a \approx 9.04$$ GB, and the activation reserve in [Table 4](#table-4) covers $$\gamma = 2$$ of these chunks at once.
 
 **Maximum batch size.** The maximum batch size is the number of average prefixes that fit in $$M_{\text{KV}}$$:
 
@@ -568,8 +568,6 @@ We choose $$N \leq N_b$$ so that no prefix KV is evicted and recomputed. We ther
 
 <p class="table-caption">Table 4. HBM budget for Qwen3-4B on an H100 SXM.</p>
 </div>
-
-The estimate is not sensitive to the activation constants. They enter only through $$M_{\text{act}}$$, and here $$C_{\text{mem}}$$ never binds. If the true per-token activation cost were half of $$32\,d_{\text{model}}$$, $$M_{\text{KV}}$$ would grow by about 9 GB and $$N_b$$ would rise to roughly 1,400, which changes the number of batches but not the per-token work that the roofline equations count.
 
 ## 4.2 Cost of a Fixed Filter Order
 

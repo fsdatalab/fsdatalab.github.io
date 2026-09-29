@@ -2,7 +2,7 @@
  * Interactive Speed-of-Light calculator for chains of AI-powered filters.
  *
  * Implements the cost model of "Estimating Costs for AI-Powered Filters"
- * (Sections 3-5) for one fixed configuration: Qwen3-4B (FP8 weights, FP16
+ * (Sections 3-5) for one fixed configuration: Qwen3-4B (FP8 weights, BF16
  * attention and KV) on an NVIDIA H100 SXM.
  */
 (function (root) {
@@ -11,7 +11,7 @@
   // ── Hardware (Table 1) and model (Table 2) ─────────────────────────────
   const HW = {
     pi8: 1.979e15, // FLOP/s, FP8 GEMMs
-    pi16: 989.5e12, // FLOP/s, FP16 attention
+    pi16: 989.5e12, // FLOP/s, BF16 attention
     beta: 3.35e12, // bytes/s, HBM bandwidth
     capacity: 80e9, // bytes, HBM capacity
   };
@@ -24,14 +24,14 @@
     dMlp: 9728,
     vocab: 151936,
     bw: 1, // bytes per weight (FP8)
-    bkv: 2, // bytes per KV element (FP16)
+    bkv: 2, // bytes per KV element (BF16)
   };
 
   const P_PROJ = LLM.layers * 2 * LLM.dModel * LLM.dHead * (LLM.nHeads + LLM.nKv);
   const P_MLP = 3 * LLM.layers * LLM.dModel * LLM.dMlp;
   const ATTN_FLOPS_PER_CMP = 4 * LLM.nHeads * LLM.dHead * LLM.layers;
   const B_KV = 2 * LLM.bkv * LLM.layers * LLM.nKv * LLM.dHead; // bytes/token
-  const EMBED_BYTES = 2 * LLM.vocab * LLM.dModel; // FP16 embedding table
+  const EMBED_BYTES = 2 * LLM.vocab * LLM.dModel; // BF16 embedding table
   const CHUNK = Math.floor((Math.pow(2, 31) - 1) / (2 * LLM.dMlp));
 
   // ── Roofline pieces ────────────────────────────────────────────────────
@@ -93,12 +93,18 @@
     return { ranked, candidates, best };
   }
 
-  // Stage-by-stage cost of a fixed order (Section 4.2, Table 6).
+  // Stage-by-stage work of a fixed order (Section 4.2, Table 7), and its
+  // Speed-of-Light: Quail sums each stage's tokens, attention comparisons,
+  // and KV traffic first, then applies the roofline once per component to
+  // the totals (Section 5.2, Table 8) rather than adding each stage's own
+  // roofline latency. Per-stage times are still kept for the breakdown
+  // table, matching Table 9's illustrative per-stage view.
   function evaluateOrder(order, cfg) {
     const { N, len, qpre } = cfg;
     const p = qpre + len;
     const stages = [];
     let expected = N;
+    let nTot = 0, ATot = 0, WTot = 0, RTot = 0;
     order.forEach((f, j) => {
       const q = f.q;
       let docsIn, n, A, W, R;
@@ -117,15 +123,19 @@
         R = docsIn * p;
       }
       stages.push(Object.assign({ filter: f, docsIn, n, A, W, R }, stageTimes(n, A, W, R)));
+      nTot += n;
+      ATot += A;
+      WTot += W;
+      RTot += R;
       expected *= f.s;
     });
-    const sum = (k) => stages.reduce((a, s) => a + s[k].t, 0);
+    const chain = stageTimes(nTot, ATot, WTot, RTot);
     return {
       stages,
-      proj: sum('proj'),
-      attn: sum('attn'),
-      mlp: sum('mlp'),
-      total: stages.reduce((a, s) => a + s.total, 0),
+      proj: chain.proj.t,
+      attn: chain.attn.t,
+      mlp: chain.mlp.t,
+      total: chain.total,
     };
   }
 
