@@ -164,7 +164,7 @@ $$
 T = \max\!\left(\frac{\text{FLOPs}}{\Pi},\; \frac{\text{Bytes Moved}}{\beta}\right).
 $$
 
-Here, $T$ is the estimated latency, $\Pi$ is the arithmetic throughput in FLOP/s, and $\beta$ is the HBM bandwidth in bytes/s. Using the GPU's peak rates gives the *speed-of-light (SoL) latency*. The estimate is a lower bound because an implementation may not sustain the peak rates or overlap arithmetic and memory transfers perfectly.
+Here, $T$ is the estimated latency, $\Pi$ is the arithmetic throughput in FLOP/s, and $\beta$ is the HBM bandwidth in bytes/s. Using the GPU's peak arithmetic throughput and memory bandwidth gives a *speed-of-light (SoL) latency estimate* for the operation. The estimate is a lower bound because an implementation may not sustain the peak rates or overlap arithmetic and memory transfers perfectly.
 
 The roofline model predates modern LLMs. Williams et al. introduced it in 2009 to relate arithmetic and memory traffic to hardware performance. We learned a lot about applying it to transformer inference from blog posts by Kipply<sup><a href="#note-10">10</a></sup>, Fergus Finn<sup><a href="#note-11">11</a></sup>, Ben Mayer<sup><a href="#note-12">12</a></sup>, and Modal<sup><a href="#note-13">13</a></sup>, which we recommend reading.
 
