@@ -148,7 +148,7 @@ a:hover { opacity: 0.75; }
 }
 .prose code {
   font-family: var(--mono);
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
   background: #f5f5f5;
   padding: 0.125rem 0.3125rem;
   border-radius: 3px;
@@ -335,6 +335,9 @@ a:hover { opacity: 0.75; }
 .prose figure.figure-medium {
   width: min(50rem, calc(100vw - 3rem));
 }
+.prose figure.figure-filter-query {
+  width: min(64rem, calc(100vw - 3rem));
+}
 .prose figure.figure-plot-compact {
   width: min(48rem, calc(100vw - 3rem));
 }
@@ -386,7 +389,7 @@ a:hover { opacity: 0.75; }
   vertical-align: top;
 }
 .prose th,
-.prose table tr:first-child td {
+.prose table thead tr td {
   background: #f5f5f5;
   color: var(--heading);
   font-weight: 600;
@@ -516,19 +519,10 @@ a:hover { opacity: 0.75; }
     width: 28rem;
   }
   .prose.has-sidenotes > #notes,
-  .prose.has-sidenotes p:has(> #note-1),
+  .prose.has-sidenotes > #references,
+  .prose.has-sidenotes p:has(> span[id^="note-"]),
   .prose.has-sidenotes > .note-1-sql,
-  .prose.has-sidenotes p:has(> #note-2),
-  .prose.has-sidenotes > .note-2-example,
-  .prose.has-sidenotes p:has(> #note-3),
-  .prose.has-sidenotes p:has(> #note-4),
-  .prose.has-sidenotes p:has(> #note-5),
-  .prose.has-sidenotes p:has(> #note-6),
-  .prose.has-sidenotes p:has(> #note-7),
-  .prose.has-sidenotes p:has(> #note-8),
-  .prose.has-sidenotes p:has(> #note-9),
-  .prose.has-sidenotes p:has(> #note-10),
-  .prose.has-sidenotes p:has(> #note-11) {
+  .prose.has-sidenotes > .note-2-example {
     display: none;
   }
 }
@@ -562,6 +556,40 @@ a:hover { opacity: 0.75; }
 }
 .prose .collapsible-section[open] summary {
   margin-bottom: 0.875rem;
+}
+.prose .proof-card {
+  margin: 1.25rem 0;
+  padding: 1rem 1.125rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+  background: #fafafa;
+}
+.prose .proof-card summary {
+  font-family: var(--body);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.prose .proof-card summary h5 {
+  display: inline;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+.prose .proof-card > p:last-child {
+  margin-bottom: 0;
+}
+.prose .algorithm-pseudocode {
+  margin: 1rem 0;
+  padding: 1rem 1.125rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+  background: #fafafa;
+  font-family: var(--body);
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+.prose .algorithm-pseudocode .algorithm-indent {
+  padding-left: 1.5rem;
 }
 
 .prose .post-toc {
@@ -612,29 +640,80 @@ a:hover { opacity: 0.75; }
   margin: 0 auto;
   overflow: visible;
 }
-.prose #table-3 table {
+.prose #table-5 table,
+.prose #table-7 table {
+  width: 100%;
+}
+.prose #table-5 th,
+.prose #table-5 td,
+.prose #table-7 th,
+.prose #table-7 td {
+  min-width: 0;
+  padding: 0.625rem 0.5rem;
+}
+.prose #table-3,
+.prose #table-8 {
+  width: min(58rem, calc(100vw - 3rem));
+  margin: 2rem 50%;
+  transform: translateX(-50%);
+}
+.prose #table-3,
+.prose #table-8 {
+  width: min(46rem, calc(100vw - 3rem));
+}
+.prose #table-8 {
+  width: 100%;
+  margin: 2rem auto;
+  transform: none;
+}
+.prose #table-3 table,
+.prose #table-8 table {
   width: 100%;
   table-layout: fixed;
 }
 .prose #table-3 th,
-.prose #table-3 td {
+.prose #table-3 td,
+.prose #table-8 th,
+.prose #table-8 td {
   min-width: 0;
 }
+.prose #table-3 th,
+.prose #table-3 td {
+  text-align: center;
+}
+.prose #table-3 th:first-child,
+.prose #table-3 td:first-child {
+  text-align: left;
+}
 .prose #table-3 th:nth-child(1),
-.prose #table-3 td:nth-child(1) {
-  width: 22%;
+.prose #table-3 td:nth-child(1),
+.prose #table-8 th:nth-child(1),
+.prose #table-8 td:nth-child(1) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(2),
-.prose #table-3 td:nth-child(2) {
-  width: 18%;
+.prose #table-3 td:nth-child(2),
+.prose #table-8 th:nth-child(2),
+.prose #table-8 td:nth-child(2) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(3),
-.prose #table-3 td:nth-child(3) {
-  width: 14%;
+.prose #table-3 td:nth-child(3),
+.prose #table-8 th:nth-child(3),
+.prose #table-8 td:nth-child(3) {
+  width: 21%;
 }
 .prose #table-3 th:nth-child(4),
-.prose #table-3 td:nth-child(4) {
-  width: 46%;
+.prose #table-3 td:nth-child(4),
+.prose #table-8 th:nth-child(4),
+.prose #table-8 td:nth-child(4) {
+  width: 16%;
+}
+.prose #table-3 th:nth-child(5),
+.prose #table-3 td:nth-child(5),
+.prose #table-8 th:nth-child(5),
+.prose #table-8 td:nth-child(5) {
+  width: 21%;
 }
 .prose .table-caption {
   margin: 0.625rem auto 0;
@@ -646,9 +725,14 @@ a:hover { opacity: 0.75; }
 }
 
 @media (max-width: 640px) {
-  .prose #table-3 table {
-    width: 44rem;
-    min-width: 44rem;
+  .prose #table-3,
+  .prose #table-8 {
+    width: calc(100vw - 3rem);
+  }
+  .prose #table-3 table,
+  .prose #table-8 table {
+    width: 40rem;
+    min-width: 40rem;
   }
 }
 
@@ -685,13 +769,13 @@ a:hover { opacity: 0.75; }
 
 /* ── filter-chain playground ─────────────────────── */
 .prose .pg {
-  --pg-line: #e6e6e3;
-  --pg-soft: #f7f7f5;
+  --pg-line: #d8d8d8;
+  --pg-soft: #f7f7f7;
   --pg-cols: 3.125rem minmax(8.5rem, 1.5fr) minmax(7.5rem, 1fr) 3.5rem 4.75rem 3.25rem;
   width: 100%;
   margin: 2rem 0;
   overflow: hidden;
-  border: 1px solid #d9d9d6;
+  border: 1px solid var(--red);
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 14px 32px -16px rgba(0, 0, 0, 0.16);
@@ -785,8 +869,7 @@ a:hover { opacity: 0.75; }
 .prose .pg.is-dragging .pg-rows { border-color: var(--red); background: rgba(196, 18, 48, 0.03); }
 .prose .pg-row {
   padding: 0.4375rem 0.5rem 0.4375rem 0.625rem;
-  border: 1px solid var(--pg-line);
-  border-left: 4px solid var(--c);
+  border: 1px solid var(--c);
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -932,7 +1015,7 @@ a:hover { opacity: 0.75; }
 .prose .pg-tile-label { font-size: 0.6875rem; font-weight: 500; color: var(--muted); }
 .prose .pg-tile-value { min-height: 2.25rem; font-family: var(--display); font-size: 1.875rem; font-weight: 600; line-height: 1.2; color: var(--heading); font-variant-numeric: tabular-nums; }
 .prose .pg-verdict { font-size: 0.75rem; color: var(--faint); }
-.prose .pg-verdict.is-gain { color: #1f6b3a; font-weight: 500; }
+.prose .pg-verdict.is-gain { color: var(--red); font-weight: 500; }
 .prose .pg-plot { margin-top: 0.75rem; padding: 0.625rem 0.875rem 0.5rem; border: 1px solid var(--pg-line); border-radius: 10px; }
 .prose .pg-plot-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 0.75rem; }
 .prose .pg-keys { display: inline-flex; gap: 0.75rem; font-size: 0.6875rem; color: var(--muted); }
@@ -940,14 +1023,33 @@ a:hover { opacity: 0.75; }
 .prose .pg-key { display: inline-block; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; }
 .prose .pg-key-yours { border: 2px solid var(--heading); }
 .prose .pg-key-rule { background: var(--red); }
-.prose .pg-key-best { background: #2f9e77; }
+.prose .pg-key-best { background: var(--heading); }
 .prose .pg-plot-svg { display: block; width: 100%; height: auto; }
 .prose .pg-axis { stroke: #d0d0cd; stroke-width: 1; }
 .prose .pg-axis-label { fill: #77777a; font-size: 10.5px; font-family: var(--body); }
+.prose .pg-dot,
+.prose .pg-dot-yours,
+.prose .pg-dot-rule,
+.prose .pg-dot-best {
+  cursor: pointer;
+  transition: r 0.12s, opacity 0.12s;
+}
 .prose .pg-dot { fill: #b7b7b3; }
 .prose .pg-dot-yours { fill: none; stroke: var(--heading); stroke-width: 2; }
 .prose .pg-dot-rule { fill: var(--red); }
-.prose .pg-dot-best { fill: #2f9e77; }
+.prose .pg-dot-best { fill: var(--heading); }
+.prose .pg-dot:hover,
+.prose .pg-dot:focus-visible { r: 5; opacity: 0.85; }
+.prose .pg-dot-yours:hover,
+.prose .pg-dot-rule:hover,
+.prose .pg-dot-best:hover,
+.prose .pg-dot-yours:focus-visible,
+.prose .pg-dot-rule:focus-visible,
+.prose .pg-dot-best:focus-visible { opacity: 0.75; }
+.prose .pg-dot:focus-visible,
+.prose .pg-dot-yours:focus-visible,
+.prose .pg-dot-rule:focus-visible,
+.prose .pg-dot-best:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .prose .pg-plot-msg { font-size: 0.75rem; color: var(--muted); }
 .prose .pg-details { margin-top: 0.75rem; }
 .prose .pg-details summary { cursor: pointer; font-size: 0.75rem; font-weight: 500; color: var(--muted); }

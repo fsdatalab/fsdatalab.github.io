@@ -1,8 +1,8 @@
 /*
  * Interactive Speed-of-Light calculator for chains of AI-powered filters.
  *
- * Implements the cost model of "Estimating Costs for AI-Powered Filters"
- * (Sections 3-5) for one fixed configuration: Qwen3-4B (FP8 weights, FP16
+ * Implements the cost model of "How to Cost Your AI-Powered Filters"
+ * (Sections 3-5) for one fixed configuration: Qwen3-4B (FP8 weights, BF16
  * attention and KV) on an NVIDIA H100 SXM.
  */
 (function (root) {
@@ -11,7 +11,7 @@
   // ── Hardware (Table 1) and model (Table 2) ─────────────────────────────
   const HW = {
     pi8: 1.979e15, // FLOP/s, FP8 GEMMs
-    pi16: 989.5e12, // FLOP/s, FP16 attention
+    pi16: 989.5e12, // FLOP/s, BF16 attention
     beta: 3.35e12, // bytes/s, HBM bandwidth
     capacity: 80e9, // bytes, HBM capacity
   };
@@ -24,15 +24,18 @@
     dMlp: 9728,
     vocab: 151936,
     bw: 1, // bytes per weight (FP8)
-    bkv: 2, // bytes per KV element (FP16)
+    bkv: 2, // bytes per KV element (BF16)
   };
 
   const P_PROJ = LLM.layers * 2 * LLM.dModel * LLM.dHead * (LLM.nHeads + LLM.nKv);
   const P_MLP = 3 * LLM.layers * LLM.dModel * LLM.dMlp;
   const ATTN_FLOPS_PER_CMP = 4 * LLM.nHeads * LLM.dHead * LLM.layers;
   const B_KV = 2 * LLM.bkv * LLM.layers * LLM.nKv * LLM.dHead; // bytes/token
-  const EMBED_BYTES = 2 * LLM.vocab * LLM.dModel; // FP16 embedding table
   const CHUNK = Math.floor((Math.pow(2, 31) - 1) / (2 * LLM.dMlp));
+  // Section 4.1 / Table 4: resident weights include embeddings and FP8 scales.
+  const RESIDENT_WEIGHT_BYTES = 4.5e9;
+  const USABLE_HBM_BYTES = 0.95 * HW.capacity;
+  const ACTIVATION_BYTES = 2 * CHUNK * 32 * LLM.dModel;
 
   // ── Roofline pieces ────────────────────────────────────────────────────
   function roof(compute, memory) {
@@ -67,7 +70,7 @@
     };
   }
 
-  // C(pi) = N scan_{pi1} + sum_{j>=2} ask_{pi_j} N prod_{k<j} s_{pi_k}  (Section 4.3)
+  // S(pi) = N scan_{pi1} + sum_{j>=2} ask_{pi_j} N prod_{k<j} s_{pi_k}  (Section 4.2)
   function orderCost(order, N) {
     let total = N * order[0].scan;
     let docs = N * order[0].s;
@@ -93,12 +96,18 @@
     return { ranked, candidates, best };
   }
 
-  // Stage-by-stage cost of a fixed order (Section 4.2, Table 6).
+  // Stage-by-stage work of a fixed order (Section 4.2, Table 7), and its
+  // Speed-of-Light: Quail sums each stage's tokens, attention comparisons,
+  // and KV traffic first, then applies the roofline once per component to
+  // the totals (Section 5.2, Table 8) rather than adding each stage's own
+  // roofline latency. Per-stage times are still kept for the breakdown
+  // table to show each filter's arithmetic and memory bottlenecks.
   function evaluateOrder(order, cfg) {
     const { N, len, qpre } = cfg;
     const p = qpre + len;
     const stages = [];
     let expected = N;
+    let nTot = 0, ATot = 0, WTot = 0, RTot = 0;
     order.forEach((f, j) => {
       const q = f.q;
       let docsIn, n, A, W, R;
@@ -117,22 +126,26 @@
         R = docsIn * p;
       }
       stages.push(Object.assign({ filter: f, docsIn, n, A, W, R }, stageTimes(n, A, W, R)));
+      nTot += n;
+      ATot += A;
+      WTot += W;
+      RTot += R;
       expected *= f.s;
     });
-    const sum = (k) => stages.reduce((a, s) => a + s[k].t, 0);
+    const chain = stageTimes(nTot, ATot, WTot, RTot);
     return {
       stages,
-      proj: sum('proj'),
-      attn: sum('attn'),
-      mlp: sum('mlp'),
-      total: stages.reduce((a, s) => a + s.total, 0),
+      proj: chain.proj.t,
+      attn: chain.attn.t,
+      mlp: chain.mlp.t,
+      total: chain.total,
     };
   }
 
   function kvBatching(cfg) {
     const p = cfg.qpre + cfg.len;
     const perDoc = B_KV * p;
-    const free = HW.capacity - LLM.bw * (P_PROJ + P_MLP) - EMBED_BYTES;
+    const free = USABLE_HBM_BYTES - RESIDENT_WEIGHT_BYTES - ACTIVATION_BYTES;
     const perBatch = Math.floor(free / perDoc);
     return {
       perDocBytes: perDoc,
@@ -191,38 +204,23 @@
   const MAX_FILTERS = 8;
   const MAX_BRUTE_FORCE = 6; // 720 orderings
   // One accent per filter so a row can be followed into the optimal order.
-  const COLORS = ['#3b6fb6', '#d9822b', '#2f9e77', '#8e5fbf', '#c0508a', '#7a8b2e', '#2b8fa3', '#a5643c'];
+  const COLORS = ['#C41230', '#555555', '#8B2332', '#777777', '#A6192E', '#444444', '#9B555F', '#666666'];
+  // The three IMDB predicates from the post's worked example (Section 5),
+  // plus a blank slot for a custom filter.
   const PRESETS = [
-    { name: 'female patient', s: '0.555', q: '47' },
-    { name: 'combination therapy', s: '0.658', q: '41' },
-    { name: 'serious adverse event', s: '0.863', q: '49' },
+    { name: 'mentions a positive aspect', s: '0.4856', q: '51' },
+    { name: 'discusses the ending', s: '0.2273', q: '45' },
+    { name: 'mentions a named actor', s: '0.6123', q: '49' },
     { name: 'custom', s: '0.5', q: '45', custom: true },
   ];
-  const SCENARIOS = [
-    {
-      id: 'biodex',
-      label: 'BioDEX (Section 5)',
-      work: { N: '200', len: '4145.96', qpre: '2' },
-      filters: [['serious adverse event', '0.863', '49'], ['combination therapy', '0.658', '41'], ['female patient', '0.555', '47']],
-    },
-    {
-      id: 'selective',
-      label: 'One very selective filter',
-      work: { N: '1000', len: '2000', qpre: '20' },
-      filters: [['broad topic match', '0.95', '40'], ['mentions a dosage', '0.5', '40'], ['rare condition', '0.03', '40']],
-    },
-    {
-      id: 'long',
-      label: 'Long vs short instructions',
-      work: { N: '500', len: '1500', qpre: '10' },
-      filters: [['long rubric', '0.3', '600'], ['short question', '0.5', '20'], ['medium prompt', '0.4', '150']],
-    },
-    {
-      id: 'five',
-      label: 'Five filters',
-      work: { N: '2000', len: '3000', qpre: '30' },
-      filters: [['is English', '0.9', '25'], ['is a case report', '0.35', '60'], ['reports an outcome', '0.6', '80'], ['patient over 65', '0.25', '45'], ['mentions a drug', '0.8', '30']],
-    },
+  // The playground's only scenario: the IMDB conjunction of Section 5,
+  // entered in the reverse of the order it was written in (F3, F2, F1),
+  // so the ranked-order fix in the "Optimal order" lane is visible at load.
+  const DEFAULT_WORK = { N: '5000', len: '298.8466', qpre: '2' };
+  const DEFAULT_FILTERS = [
+    ['mentions a named actor', '0.6123', '49'],
+    ['discusses the ending', '0.2273', '45'],
+    ['mentions a positive aspect', '0.4856', '51'],
   ];
   let instances = 0;
 
@@ -230,6 +228,7 @@
     String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
   function fmtTime(s) {
+    if (s < 0) return '\u2212' + fmtTime(-s);
     if (s >= 1) return s.toFixed(2) + ' s';
     if (s >= 1e-3) return (s * 1e3).toFixed(2) + ' ms';
     return (s * 1e6).toFixed(1) + ' µs';
@@ -244,10 +243,9 @@
     return { id, name: custom ? 'Filter ' + id : name, s, q, color: COLORS[(id - 1) % COLORS.length] };
   }
 
-  function scenarioState(id) {
-    const sc = SCENARIOS.find((x) => x.id === id) || SCENARIOS[0];
-    const state = Object.assign({ nextId: 1, filters: [] }, sc.work);
-    sc.filters.forEach((f) => state.filters.push(newFilter(state, f[0], f[1], f[2])));
+  function defaultState() {
+    const state = Object.assign({ nextId: 1, filters: [] }, DEFAULT_WORK);
+    DEFAULT_FILTERS.forEach((f) => state.filters.push(newFilter(state, f[0], f[1], f[2])));
     return state;
   }
 
@@ -288,16 +286,16 @@
 
   function skeleton(state) {
     return (
-      '<div class="pg-bar"><span class="pg-title">Filter chain playground <span class="pg-sub">H100 &middot; Qwen3-4B</span></span>' +
-      '<div class="pg-bar-actions"><select class="pg-select" data-scenario aria-label="Scenario">' +
-      SCENARIOS.map((sc) => '<option value="' + sc.id + '">' + esc(sc.label) + '</option>').join('') + '</select>' +
+      '<div class="pg-bar"><span class="pg-title">Filter Playground <span class="pg-sub">Qwen3-4B-fp8 on H100, IMDB conjunction (Section 5)</span></span>' +
+      '<div class="pg-bar-actions">' +
+      '<button type="button" class="pg-btn" data-action="reset">Reset</button>' +
       '<button type="button" class="pg-btn" data-action="shuffle">Shuffle</button>' +
-      '<button type="button" class="pg-btn pg-btn-primary" data-action="apply">Apply optimal order</button></div></div>' +
+      '<button type="button" class="pg-btn pg-btn-primary" data-action="apply">Apply ordering rule</button></div></div>' +
       '<div class="pg-body">' +
       '<div class="pg-workload">' +
       field('Documents <i>N</i>', 'min="1" data-global="N" value="' + esc(state.N) + '"') +
-      field('Doc length', 'min="1" data-global="len" value="' + esc(state.len) + '"') +
-      field('Prefix <i>q</i><sub>pre</sub>', 'min="0" data-global="qpre" value="' + esc(state.qpre) + '"') +
+      field('Average doc length', 'min="1" data-global="len" value="' + esc(state.len) + '"') +
+      field('Preamble <i>q</i><sub>pre</sub>', 'min="0" data-global="qpre" value="' + esc(state.qpre) + '"') +
       '</div>' +
       '<div class="pg-label-row"><span class="pg-h">Your chain</span></div>' +
       '<div class="pg-cols" aria-hidden="true"><span></span><span>Predicate</span><span>Selectivity <i>s</i></span><span><i>q</i><sub>tail</sub></span><span>Docs</span><span></span></div>' +
@@ -312,7 +310,7 @@
     const num = (str) => (String(str).trim() === '' ? NaN : Number(str));
     const cfg = { N: num(state.N), len: num(state.len), qpre: num(state.qpre) };
     if (!(Number.isInteger(cfg.N) && cfg.N >= 1 && cfg.N <= 1e8)) errors['g:N'] = 'Documents must be a whole number of at least 1.';
-    if (!(cfg.len >= 1 && cfg.len <= 1e6)) errors['g:len'] = 'Document length must be at least 1 token.';
+    if (!(cfg.len >= 1 && cfg.len <= 1e6)) errors['g:len'] = 'Average document length must be at least 1 token.';
     if (!(Number.isInteger(cfg.qpre) && cfg.qpre >= 0 && cfg.qpre <= 1e5)) errors['g:qpre'] = 'q_pre must be a whole number of tokens, 0 or more.';
     const filters = state.filters.map((f, i) => {
       const s = num(f.s);
@@ -392,12 +390,14 @@
     const best = dots.slice().sort((p, q) => p.a.total - q.a.total)[0];
     let svg = '<svg class="pg-plot-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Latency of every ordering of the chain">';
     svg += '<line x1="' + padL + '" y1="' + axisY + '" x2="' + (W - padR) + '" y2="' + axisY + '" class="pg-axis"/>';
+    const orderAttr = (order) => order.map((f) => f.id).join(',');
+    const dotTitle = (d) => esc(d.a.order.map((f) => f.name).join(' → ')) + ': ' + fmtTime(d.a.total) + ' (click to apply)';
     dots.forEach((d) => {
-      svg += '<circle cx="' + d.cx.toFixed(1) + '" cy="' + d.cy + '" r="3.4" class="pg-dot"><title>' + esc(d.a.order.map((f) => f.name).join(' → ')) + ': ' + fmtTime(d.a.total) + '</title></circle>';
+      svg += '<circle cx="' + d.cx.toFixed(1) + '" cy="' + d.cy + '" r="3.4" class="pg-dot" tabindex="0" role="button" data-order="' + orderAttr(d.a.order) + '"><title>' + dotTitle(d) + '</title></circle>';
     });
-    if (yours) svg += '<circle cx="' + yours.cx.toFixed(1) + '" cy="' + yours.cy + '" r="6.5" class="pg-dot-yours"/>';
-    if (rule) svg += '<circle cx="' + rule.cx.toFixed(1) + '" cy="' + rule.cy + '" r="4.6" class="pg-dot-rule"/>';
-    if (best && best !== rule) svg += '<circle cx="' + best.cx.toFixed(1) + '" cy="' + best.cy + '" r="4.6" class="pg-dot-best"/>';
+    if (yours) svg += '<circle cx="' + yours.cx.toFixed(1) + '" cy="' + yours.cy + '" r="6.5" class="pg-dot-yours" tabindex="0" role="button" data-order="' + orderAttr(yours.a.order) + '"><title>' + dotTitle(yours) + '</title></circle>';
+    if (rule) svg += '<circle cx="' + rule.cx.toFixed(1) + '" cy="' + rule.cy + '" r="4.6" class="pg-dot-rule" tabindex="0" role="button" data-order="' + orderAttr(rule.a.order) + '"><title>' + dotTitle(rule) + '</title></circle>';
+    if (best && best !== rule) svg += '<circle cx="' + best.cx.toFixed(1) + '" cy="' + best.cy + '" r="4.6" class="pg-dot-best" tabindex="0" role="button" data-order="' + orderAttr(best.a.order) + '"><title>' + dotTitle(best) + '</title></circle>';
     svg += '<text x="' + padL + '" y="' + (axisY + 16) + '" class="pg-axis-label">' + fmtTime(lo) + '</text>';
     svg += '<text x="' + (W - padR) + '" y="' + (axisY + 16) + '" text-anchor="end" class="pg-axis-label">' + fmtTime(hi) + '</text>';
     return svg + '</svg>';
@@ -405,12 +405,11 @@
 
   function mount(el) {
     const uid = 'pg-filters-' + ++instances;
-    const state = scenarioState('biodex');
+    const state = defaultState();
     el.innerHTML = skeleton(state);
     const rowsEl = el.querySelector('.pg-rows');
     const presetsEl = el.querySelector('.pg-presets');
     const resultsEl = el.querySelector('.pg-results');
-    const scenarioEl = el.querySelector('[data-scenario]');
     const lastValue = {};
     let lastSol = null;
 
@@ -476,8 +475,11 @@
         })
         .join('');
 
-      const verdict =
-        m === 1 ? 'Single filter' : same ? 'Already optimal' : 'Reordering saves ' + fmtTime(gain) + ' (' + gainPct.toFixed(2) + '%)';
+      const verdict = m === 1 ? 'Single filter'
+        : same ? 'Your order matches the ordering rule'
+        : Math.abs(gain) < 1e-12 ? 'Both orders have the same SoL estimate'
+        : gain > 0 ? 'The rule lowers the SoL estimate by ' + fmtTime(gain) + ' (' + gainPct.toFixed(2) + '%)'
+        : 'Your order has a lower SoL estimate by ' + fmtTime(-gain) + ' (' + (-gainPct).toFixed(2) + '%)';
 
       let plot = '';
       if (m > 1 && m <= MAX_BRUTE_FORCE) {
@@ -518,7 +520,7 @@
           '<div class="pg-h-small pg-mt">Rank filters, ms per document</div>' +
           '<div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>ask</th><th>scan</th><th>ask / (1 &minus; <i>s</i>)</th></tr></thead><tbody>' + rankRows + '</tbody></table></div>' +
           '<div class="pg-h-small pg-mt">Candidate chains, each filter tried first</div>' +
-          '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Chain</th><th>C(&pi;)</th></tr></thead><tbody>' + candRows + '</tbody></table></div>';
+          '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Chain</th><th>S(&pi;)</th></tr></thead><tbody>' + candRows + '</tbody></table></div>';
       }
       const kv = sol.kv;
       const kvNote =
@@ -526,19 +528,19 @@
           ? 'One document’s prefix KV (' + (kv.perDocBytes / 1e9).toFixed(2) + ' GB) does not fit in the free HBM (' + (kv.freeBytes / 1e9).toFixed(2) + ' GB).'
           : 'KV per document ' + (kv.perDocBytes / 1e9).toFixed(3) + ' GB; ' + (kv.freeBytes / 1e9).toFixed(2) + ' GB free, so ' + fmtInt(kv.perBatch) + ' documents per batch (' + fmtInt(kv.batches) + (kv.batches === 1 ? ' batch' : ' batches') + ').';
       math +=
-        '<div class="pg-h-small pg-mt">Stage costs, optimal order</div>' +
+        '<div class="pg-h-small pg-mt">Stage costs, ordering rule</div>' +
         '<div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>Docs in</th><th>Tokens</th><th><i>T</i><sub>proj</sub></th><th><i>T</i><sub>attn</sub></th><th><i>T</i><sub>mlp</sub></th><th>Stage</th></tr></thead><tbody>' +
         opt.stages.map(stageRow).join('') +
-        '<tr class="pg-total"><td></td><td class="pg-left">Chain</td><td></td><td>' + fmtInt(opt.stages.reduce((a, s) => a + s.n, 0)) + '</td><td>' + fmtTime(opt.proj) + '</td><td>' + fmtTime(opt.attn) + '</td><td>' + fmtTime(opt.mlp) + '</td><td><strong>' + fmtTime(opt.total) + '</strong></td></tr>' +
-        '</tbody></table></div><div class="pg-note">' + kvNote + '</div>';
+        '<tr class="pg-total"><td></td><td class="pg-left">Conjunction SoL</td><td></td><td>' + fmtInt(opt.stages.reduce((a, s) => a + s.n, 0)) + '</td><td>' + fmtTime(opt.proj) + '</td><td>' + fmtTime(opt.attn) + '</td><td>' + fmtTime(opt.mlp) + '</td><td><strong>' + fmtTime(opt.total) + '</strong></td></tr>' +
+        '</tbody></table></div><div class="pg-note">The total applies the roofline to combined work, so it can be lower than the sum of stage times.</div><div class="pg-note">' + kvNote + '</div>';
 
       return (
-        '<div class="pg-label-row"><span class="pg-h">Optimal order</span></div>' +
+        '<div class="pg-label-row"><span class="pg-h">Ordering rule</span></div>' +
         '<ol class="pg-chain">' + chips + '</ol>' +
         '<div class="pg-tiles">' +
-        '<div class="pg-tile pg-tile-main"><span class="pg-tile-label">Speed-of-Light, optimal</span><span class="pg-tile-value" data-count="opt"></span></div>' +
+        '<div class="pg-tile pg-tile-main"><span class="pg-tile-label">SoL estimate, ordering rule</span><span class="pg-tile-value" data-count="opt"></span></div>' +
         '<div class="pg-tile"><span class="pg-tile-label">Speed-of-Light, your order</span><span class="pg-tile-value" data-count="ent"></span>' +
-        '<span class="pg-verdict' + (same || m === 1 ? '' : ' is-gain') + '">' + verdict + '</span></div>' +
+        '<span class="pg-verdict' + (!same && gain > 1e-12 ? ' is-gain' : '') + '">' + verdict + '</span></div>' +
         '</div>' +
         plot +
         '<details class="pg-details"><summary>Show the math</summary>' + math + '</details>'
@@ -608,8 +610,8 @@
       return f;
     }
 
-    function loadScenario(id) {
-      Object.assign(state, scenarioState(id));
+    function loadDefault() {
+      Object.assign(state, defaultState());
       ['N', 'len', 'qpre'].forEach((k) => (el.querySelector('[data-global="' + k + '"]').value = state[k]));
       flip(rowsEl, '.pg-row', 'id', renderRows, 380);
       update();
@@ -648,11 +650,12 @@
       }
     });
 
-    el.addEventListener('change', (e) => {
-      if (e.target === scenarioEl) loadScenario(scenarioEl.value);
-    });
-
     el.addEventListener('click', (e) => {
+      const dot = e.target.closest('[data-order]');
+      if (dot) {
+        reorderTo(dot.dataset.order.split(','));
+        return;
+      }
       const btn = e.target.closest('button');
       const row = e.target.closest('.pg-row');
       const preset = e.target.closest('.pg-preset');
@@ -664,7 +667,9 @@
       }
       if (!btn) return;
       const action = btn.dataset.action;
-      if (action === 'apply' && lastSol) {
+      if (action === 'reset') {
+        loadDefault();
+      } else if (action === 'apply' && lastSol) {
         reorderTo(lastSol.best.order.map((f) => String(f.id)));
       } else if (action === 'shuffle' && state.filters.length > 1) {
         const before = state.filters.map((f) => f.id).join();
@@ -700,6 +705,11 @@
       if (preset && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         preset.click();
+      }
+      const dot = e.target.closest && e.target.closest('[data-order]');
+      if (dot && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        reorderTo(dot.dataset.order.split(','));
       }
     });
 
