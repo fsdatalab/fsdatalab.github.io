@@ -86,7 +86,7 @@ The preamble and filter instruction add tokens to each request, so their lengths
 
 ## 2.2 GPU Execution
 
-Our examples assume an NVIDIA H100 SXM GPU. Its Hopper architecture introduced FP8 Tensor Cores as part of a design aimed at accelerating transformer models.<sup><a href="#note-3">3</a></sup>
+Our examples assume an NVIDIA H100 SXM GPU. Its Hopper architecture introduced FP8 Tensor Cores as part of a design aimed at accelerating transformer models.<sup><a href="#note-3">3</a></sup> *FP8* is an eight-bit floating-point number format.
 
 <figure class="figure-full" id="gpu">
   <img src="/assets/blog/ai-filter-cost-estimates/gpu.svg" alt="H100 memory hierarchy diagram showing HBM3, L2 cache, and an SM with registers, shared memory, and tensor cores.">
@@ -97,7 +97,7 @@ Our examples assume an NVIDIA H100 SXM GPU. Its Hopper architecture introduced F
 
 Our cost model tracks two hardware costs: arithmetic and HBM traffic. For arithmetic, it divides the number of *floating-point operations (FLOPs)* by the Tensor Core throughput. For HBM traffic, it divides the number of bytes read from or written to HBM by the HBM bandwidth. The model does not account for each intermediate cache level separately.
 
-[Table 1](#table-1) maps the H100 specifications to the symbols used in our equations. *Arithmetic throughput* is the number of FLOPs that the GPU can perform per second, and *memory bandwidth* is the number of bytes that it can transfer from HBM per second. $$\Pi_{bf16}$$ and $$\Pi_{fp8}$$ are the peak arithmetic throughput rates for BF16 and FP8 operations, while $$\beta$$ is the peak HBM bandwidth. We use the FP8 rate for the projection and MLP matrix multiplications, and the BF16 rate for attention in our FlashAttention<sup><a href="#note-4">4</a></sup> setup.
+[Table 1](#table-1) maps the H100 specifications to the symbols used in our equations. *Arithmetic throughput* is the number of FLOPs that the GPU can perform per second, and *memory bandwidth* is the number of bytes that it can transfer from HBM per second. $$\Pi_{bf16}$$ and $$\Pi_{fp8}$$ are the peak arithmetic throughput rates for *BF16* (a 16-bit floating-point number format) and FP8 operations, while $$\beta$$ is the peak HBM bandwidth. We use the FP8 rate for the projection and MLP matrix multiplications, and the BF16 rate for attention in our FlashAttention<sup><a href="#note-4">4</a></sup> setup.
 
 <div class="table-wrap" id="table-1" markdown="1">
 
@@ -113,24 +113,24 @@ Our cost model tracks two hardware costs: arithmetic and HBM traffic. For arithm
 
 ## 2.3 Transformer Forward Pass
 
-A *forward pass* processes input tokens through the model's layers. Each filter processes its input and predicts one token, true or false. Within each layer, *projections* transform token vectors through matrix multiplication, *attention* combines information from the current and earlier tokens, and a *multilayer perceptron (MLP)* applies further transformations to each token independently. Our cost model counts the arithmetic and memory traffic of each component within every layer. We use Qwen3-4B FP8<sup><a href="#note-5">5</a></sup> in our examples.<sup><a href="#note-6">6</a></sup>
+A *forward pass* processes input tokens through the model's layers. Each filter processes its input and predicts one token, true or false. Within each layer, *projections* transform token vectors through matrix multiplication, *attention* combines information from the current and earlier tokens, and a *multilayer perceptron (MLP)* applies further transformations to each token independently. Our cost model counts the arithmetic and memory traffic of each component within every layer. We use Qwen3-4B FP8<sup><a href="#note-5">5</a></sup> in our examples.<sup><a href="#note-6">6</a></sup> The loaded model occupies about 4.5 GB in HBM.
 
 Before the first layer, the model uses an *embedding table* to map each token ID to a *hidden state*, a vector of 2,560 values in Qwen3-4B. Each layer transforms the hidden state before passing it to the next layer.
 
-[Figure 3](#model) shows the execution order within one Qwen3-4B layer. The model first computes query, key, and value projections, then performs attention and an output projection. The MLP follows.
+[Figure 3](#model) shows the execution order within one Qwen3-4B layer. The model first computes query (Q), key (K), and value (V) projections, then performs attention and an output projection. The MLP follows.
 
 <figure class="figure-full" id="model">
   <img src="/assets/blog/ai-filter-cost-estimates/model.svg" alt="Diagram of a token passing through one Qwen3-4B layer: QKV projection, attention with a KV cache, output projection, and the gate/up/SwiGLU/down MLP block.">
-  <figcaption>Figure 3. A token passes through query, key, and value projections, attention, an output projection, and the MLP. Attention also reads the keys and values of earlier tokens.</figcaption>
+  <figcaption>Figure 3. A token passes through Q, K, and V projections, attention, an output projection, and the MLP. Attention also reads the K and V vectors of earlier tokens.</figcaption>
 </figure>
 
-**Projections.** The query, key, and value matrices transform each token's hidden state into *query*, *key*, and *value vectors* used by attention. After attention, the *output projection* uses another matrix multiplication to produce a vector with the same width as the hidden state. Fortunately, projections can be highly parallelized: each projection applies the same matrix to every token independently, so the GPU can process many tokens at once. Processing more tokens together lets the GPU read the weights from HBM once and use them for many tokens. In [Section 3](#3-cost-model-for-one-filter), we will therefore aim to pack as many tokens as possible into each forward pass.
+**Projections.** The model's Q, K, and V projection matrices transform each token's hidden state into Q, K, and V vectors used by attention. After attention, the *output projection* uses another matrix multiplication to produce a vector with the same width as the hidden state. Fortunately, projections can be highly parallelized: each projection applies the same matrix to every token independently, so the GPU can process many tokens at once. Processing more tokens together amortizes the cost of reading the weights from HBM, since the GPU can reuse the same weights across many tokens.
 
-**Attention.** Attention updates each token's representation using the value vectors of itself and earlier tokens. Comparing the token's query with each key determines how much the corresponding value contributes. The annoying part is that each token must be compared with itself and all previous tokens. Doubling the number of tokens therefore roughly quadruples the attention arithmetic.
+**Attention.** Attention updates each token's representation using the V vectors of itself and earlier tokens. Comparing the token's Q vector with each K vector determines how much the corresponding V vector contributes. The annoying part is that each token must be compared with itself and all previous tokens. Doubling the number of tokens therefore roughly quadruples the attention arithmetic.
 
-The model has multiple *attention heads*. For each token, each head uses a different query vector to compare keys and combine values. The heads compute separate attention results, so the GPU can run them in parallel. Qwen3-4B uses *grouped query attention (GQA)*.<sup><a href="#note-7">7</a></sup> Its 32 query heads share eight sets of key and value vectors, with four query heads per set. Each query head still performs its own comparisons, but sharing keys and values reduces the key and value matrices and KV cache to one quarter the size of *full multi-head attention*, where every query head has its own keys and values.<sup><a href="#note-8">8</a></sup>
+The model has multiple *attention heads*. For each token, each head uses a different Q vector to compare K vectors and combine V vectors. The heads compute separate attention results, so the GPU can run them in parallel. Qwen3-4B uses *grouped query attention (GQA)*.<sup><a href="#note-7">7</a></sup> Its 32 query heads share eight sets of K and V vectors, with four query heads per set. Each query head still performs its own comparisons, but sharing K and V vectors reduces the K and V matrices and KV cache to one quarter the size of *full multi-head attention*, where every query head has its own K and V vectors.<sup><a href="#note-8">8</a></sup>
 
-In [Section 4](#4-cost-model-for-a-conjunction-of-filters), we will consider multiple filters on the same document and explain how they can reuse the document's cached key and value vectors (*KV cache*).
+In [Section 4](#4-cost-model-for-a-conjunction-of-filters), we will consider multiple filters on the same document and explain how they can reuse the document's cached K and V vectors (*KV cache*).
 
 **MLP.** After attention and the output projection, the *multilayer perceptron (MLP)* further transforms each token's hidden state. It first multiplies the hidden state by the *gate* and *up* matrices to produce two wider vectors. The SwiGLU *activation* first transforms the gate vector, then uses it to scale each element of the up vector.<sup><a href="#note-9">9</a></sup> The *down* matrix then returns the result to the original hidden-state width. Like projections, the MLP operates on each token independently, so many tokens can run in parallel and share the weights read from HBM. Its arithmetic grows with the number of tokens, rather than the number of token pairs as in attention.
 
@@ -177,7 +177,7 @@ $$
 
 Here, $$I$$ is the arithmetic performed per byte transferred from HBM. $$I^*$$ is the intensity at which compute time and memory transfer time are equal. Below the ridge point, the operation is memory-bound. Above it, the operation is compute-bound.
 
-The ridge point depends on the arithmetic precision. Our projections and MLP use FP8, while attention uses BF16. For the H100 rates in [Table 1](#table-1):
+The H100 has different arithmetic throughput rates for FP8 and BF16, so each has a different ridge point. Our projections and MLP use FP8, while attention uses BF16. For the H100 rates in [Table 1](#table-1):
 
 $$
 \begin{aligned}
@@ -225,7 +225,7 @@ Here, $$L_1$$ is the total number of document tokens in the batch. $$r_i$$ is th
 
 Given that we estimate costs before executing the query, we can estimate the mean document length from a sample and use the mean in place of each $$\ell_i$$. Using individual document lengths gives a tighter estimate, especially for attention, whose arithmetic depends on squared request lengths.
 
-Then, let $$C$$ be the token budget for one forward pass. We make $$C$$ as large as possible so the GPU can reuse the weights across more tokens and read them from HBM fewer times. Quail sets $$C$$ using the available HBM and the limits of its kernels. For our Qwen3-4B example, the limiting constraint is the kernels' 32-bit indexing. The token budget and the number of forward passes, $$K$$, are
+Then, let $$C$$ be the token budget for one forward pass. We make $$C$$ as large as possible so the GPU can reuse the weights across more tokens and read them from HBM fewer times. Quail sets $$C$$ using the available HBM and the limits of its GPU programs, called *kernels*. For our Qwen3-4B example, the limiting constraint is the kernels' 32-bit indexing. The token budget and the number of forward passes, $$K$$, are
 
 $$
 \begin{aligned}
@@ -238,7 +238,7 @@ Here, $$d_{\text{mlp}}$$ is the MLP intermediate width from [Table 2](#table-2).
 
 ## 3.2 Projection Cost
 
-Here we derive the FLOPs for Q, K, V and output projections, their HBM traffic across forward passes, and the projection roofline cost.
+Here we derive the FLOPs for Q, K, V, and output projections, their HBM traffic across forward passes, and the projection roofline cost.
 
 Q, K, V, and output projections are matrix multiplications over each token. Each matrix maps a vector of one width to another, so its parameter count is the product of its input and output widths. Per layer we have the following for each projection:
 
@@ -251,7 +251,7 @@ p_O &= n_{\text{heads}}\,d_{\text{head}}\,d_{\text{model}}.
 \end{aligned}
 $$
 
-Here, $$p_Q$$, $$p_K$$, $$p_V$$, and $$p_O$$ are the parameter counts of the query, key, value, and output projection matrices in one layer.
+Here, $$p_Q$$, $$p_K$$, $$p_V$$, and $$p_O$$ are the parameter counts of the Q, K, V, and output projection matrices in one layer.
 
 Thus, in every layer they hold $$2\,d_{\text{model}}\,d_{\text{head}}(n_{\text{heads}}+n_{kv})$$ parameters. The totals for parameters, FLOPs, and memory transfer are given below along with the total projection cost.
 
@@ -278,7 +278,7 @@ $$
 
 Here, $$A$$ is the total number of attention comparisons across the batch. $$n_{\text{tok}} = \sum_i r_i$$ is the total number of request tokens, and $$L_2 = \sum_i r_i^2$$ is the sum of the squared request lengths defined in [Section 3.1](#31-workload-and-notation).
 
-One comparison, for one head in one layer, costs $$2\,d_{\text{head}}$$ FLOPs for the query--key dot product ($$QK^\top$$), because we do a multiply and addition per number, and another $$2\,d_{\text{head}}$$ for the weighted sum over value vectors. Repeating across all $$n_{\text{heads}}$$ and all layers gives,
+One comparison, for one head in one layer, costs $$2\,d_{\text{head}}$$ FLOPs for the dot product of Q and K vectors, because we do a multiply and addition per number, and another $$2\,d_{\text{head}}$$ for the weighted sum over V vectors. Repeating across all $$n_{\text{heads}}$$ and all layers gives,
 
 $$
 F_{\text{attn}} = 4\,n_{\text{heads}}\,d_{\text{head}}\,\text{layers}\cdot A.
@@ -286,7 +286,7 @@ $$
 
 Here, $$F_{\text{attn}}$$ is the total number of attention FLOPs across all heads and layers.
 
-Unlike projections, attention has no weights of its own to read. Instead, attention uses the key and value vectors (KV) produced by the projections. For large batches, the KV vectors do not all fit in the GPU's L2 cache, so they are stored in a temporary buffer in HBM.
+Unlike projections, attention has no weights of its own to read. Instead, attention uses the K and V vectors (KV) produced by the projections. For large batches, the KV vectors do not all fit in the GPU's L2 cache, so they are stored in a temporary buffer in HBM.
 
 Let $$B_{\text{kv}}$$ be the bytes needed to store one token's KV vectors across all layers, and $$b_{kv}$$ the bytes per vector element (2 for BF16):
 
@@ -294,7 +294,7 @@ $$
 B_{\text{kv}} = 2\,b_{kv}\,\text{layers}\,n_{kv}\,d_{\text{head}},
 $$
 
-The factor 2 accounts for one key vector and one value vector. Even though Qwen3-4B has 32 query heads, it stores only eight pairs of key and value vectors per token per layer, because every four query heads share a pair.
+The factor 2 accounts for one K vector and one V vector. Even though Qwen3-4B has 32 query heads, it stores only eight pairs of K and V vectors per token per layer, because every four query heads share a pair.
 
 For a single filter, we write KV vectors for all $$n_{\text{tok}}$$ input tokens. Our estimate of attention's memory traffic, $$B_{\text{attn}}$$, is therefore
 
@@ -592,9 +592,9 @@ $$
 
 The first filter computes the prefix's KV vectors. Later filters reuse them and process only their own instruction tokens. Our cost model assumes the saved vectors remain in HBM until the document fails a filter or passes the final filter. We therefore choose a batch whose prefix KV vectors fit in HBM.
 
-**HBM available for KV.** The GPU needs space for model weights, temporary activations, and saved KV vectors. We use a rough estimate of peak activation memory.<sup><a href="#note-16">16</a></sup> Inference engines such as [vLLM](https://docs.vllm.ai/en/v0.18.2/api/vllm/v1/worker/gpu_worker/#vllm.v1.worker.gpu_worker.Worker.determine_available_memory) instead run a forward pass with dummy inputs to profile peak activation memory before determining how much space remains for KV.
+**HBM available for KV.** The GPU needs space for model weights, temporary intermediate vectors called *activations*, and saved KV vectors. We use a rough estimate of peak activation memory.<sup><a href="#note-16">16</a></sup> Inference engines such as [vLLM](https://docs.vllm.ai/en/v0.18.2/api/vllm/v1/worker/gpu_worker/#vllm.v1.worker.gpu_worker.Worker.determine_available_memory) instead run a forward pass with dummy inputs to profile peak activation memory before determining how much space remains for KV.
 
-Quail makes 95% of the H100's 80 GB available to its memory pool. Let $$M_{\text{KV}}$$ be the space left for saved KV vectors after accounting for resident weights, including the embedding table and FP8 scale factors, and temporary buffers:
+Quail makes 95% of the H100's 80 GB available to its memory pool. Let $$M_{\text{KV}}$$ be the space left for saved KV vectors after accounting for resident weights, including the embedding table and any extra storage required by FP8 weights, and temporary buffers:
 
 $$
 M_{\text{KV}}

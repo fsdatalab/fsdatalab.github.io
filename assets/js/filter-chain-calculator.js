@@ -297,8 +297,8 @@
       field('Average doc length', 'min="1" data-global="len" value="' + esc(state.len) + '"') +
       field('Preamble <i>q</i><sub>pre</sub>', 'min="0" data-global="qpre" value="' + esc(state.qpre) + '"') +
       '</div>' +
-      '<div class="pg-label-row"><span class="pg-h">Your chain</span></div>' +
-      '<div class="pg-cols" aria-hidden="true"><span></span><span>Predicate</span><span>Selectivity <i>s</i></span><span><i>q</i><sub>tail</sub></span><span>Docs</span><span></span></div>' +
+      '<div class="pg-label-row"><span class="pg-h">Your filter order</span></div>' +
+      '<div class="pg-cols" aria-hidden="true"><span></span><span>Predicate</span><span>Selectivity <i>s</i></span><span><i>q</i><sub>i</sub></span><span>Docs</span><span></span></div>' +
       '<ol class="pg-rows" aria-label="Filters in the order you entered them"></ol>' +
       '<div class="pg-library"><span class="pg-h-small">Drag in</span><ul class="pg-presets">' + PRESETS.map(presetHTML).join('') + '</ul></div>' +
       '<div class="pg-results" aria-live="polite"></div></div>'
@@ -317,7 +317,7 @@
       const q = num(f.q);
       const name = f.name.trim() || 'Filter ' + (i + 1);
       if (!(s >= 0 && s <= 1)) errors[f.id + ':s'] = 'Selectivity of "' + name + '" must be between 0 and 1.';
-      if (!(Number.isInteger(q) && q >= 1 && q <= 1e5)) errors[f.id + ':q'] = 'q_tail of "' + name + '" must be a whole number of tokens, 1 or more.';
+      if (!(Number.isInteger(q) && q >= 1 && q <= 1e5)) errors[f.id + ':q'] = 'Instruction length for "' + name + '" must be a whole number of tokens, 1 or more.';
       return { id: f.id, name, s, q, color: f.color };
     });
     return { cfg, filters, errors };
@@ -447,7 +447,7 @@
     }
 
     function stageRow(s, j) {
-      const cell = (r) => fmtTime(r.t) + (r.bound === 'memory' && r.t > 0 ? ' <span class="pg-tag">mem</span>' : '');
+      const cell = (r) => fmtTime(r.t) + (r.bound === 'memory' && r.t > 0 ? ' <span class="pg-tag">memory-bound</span>' : '');
       return (
         '<tr><td>' + (j + 1) + '</td><td class="pg-left"><span class="pg-dot-c" style="--c:' + s.filter.color + '"></span>' + esc(s.filter.name) + '</td>' +
         '<td>' + fmtInt(s.docsIn) + '</td><td>' + fmtInt(s.n) + '</td>' +
@@ -519,8 +519,8 @@
         math =
           '<div class="pg-h-small pg-mt">Rank filters, ms per document</div>' +
           '<div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>ask</th><th>scan</th><th>ask / (1 &minus; <i>s</i>)</th></tr></thead><tbody>' + rankRows + '</tbody></table></div>' +
-          '<div class="pg-h-small pg-mt">Candidate chains, each filter tried first</div>' +
-          '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Chain</th><th>S(&pi;)</th></tr></thead><tbody>' + candRows + '</tbody></table></div>';
+          '<div class="pg-h-small pg-mt">Candidate orders, each filter tried first</div>' +
+          '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Order</th><th>S(&pi;)</th></tr></thead><tbody>' + candRows + '</tbody></table></div>';
       }
       const kv = sol.kv;
       const kvNote =
@@ -539,7 +539,7 @@
         '<ol class="pg-chain">' + chips + '</ol>' +
         '<div class="pg-tiles">' +
         '<div class="pg-tile pg-tile-main"><span class="pg-tile-label">SoL estimate, ordering rule</span><span class="pg-tile-value" data-count="opt"></span></div>' +
-        '<div class="pg-tile"><span class="pg-tile-label">Speed-of-Light, your order</span><span class="pg-tile-value" data-count="ent"></span>' +
+        '<div class="pg-tile"><span class="pg-tile-label">SoL estimate, your order</span><span class="pg-tile-value" data-count="ent"></span>' +
         '<span class="pg-verdict' + (!same && gain > 1e-12 ? ' is-gain' : '') + '">' + verdict + '</span></div>' +
         '</div>' +
         plot +
