@@ -6,7 +6,7 @@ author: "Arnav Dhariya, Shreya Shankar"
 permalink: /blog/ai-filter-cost-estimates/
 math: true
 typora-root-url: ..
-description: "A roofline-based cost model for AI-powered SQL filters that estimates FLOPs, HBM traffic, KV-cache storage, and latency, and extends to conjunctions of filters with an optimal ordering rule."
+description: "Costing AI-SQL filters from model and GPU specs, and using the estimates to choose a filter order."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How fast could an AI-SQL query run on a given LLM and GPU? We walk through how to estimate speed-of-light (SoL) latency for individual filters and conjunctions of filters, providing a baseline for evaluating system performance. SoL estimates power <a href="https://github.com/fsdatalab/quail">Quail</a>'s cost models. You can try out our <a href="#6-filter-playground">interactive playground</a> to explore how filter ordering affects estimated latency on Qwen3-4B and an H100.</aside>
@@ -59,11 +59,10 @@ One approach is to profile the system by running representative queries and fitt
 
 In this article, we'll walk through how to derive a SoL estimate for AI-SQL queries that only contain filter operators. Well go through:
 
-- The GPU and transformer concepts behind the cost model.
-- How to derive the work and latency of a single AI filter.
-- How reuse, selectivity, and filter order affect a conjunction of filters.
-- An example of applying our cost model to a query running Qwen3-4B on an NVIDIA H100.
-- An interactive playground for building conjunctions of filters and comparing their estimated latency.
+- The GPU and transformer concepts behind our cost model ([Section 2](#2-background)).
+- How to estimate latency for one AI-powered filter ([Section 3](#3-cost-model-for-one-filter)).
+- How to cost a conjunction of filters and choose a filter order ([Section 4](#4-cost-model-for-a-conjunction-of-filters)).
+- An example using Qwen3-4B-fp8 on an H100, with an interactive playground to explore different filter orders ([Sections 5](#5-example-imdb-query) and [6](#6-filter-playground)).
 
 # 2. Background
 
