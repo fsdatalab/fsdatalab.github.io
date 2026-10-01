@@ -6,7 +6,12 @@ author: "Arnav Dhariya, Shreya Shankar"
 permalink: /blog/ai-filter-cost-estimates/
 math: true
 typora-root-url: ..
-description: "Costing AI-SQL filters from model and GPU specs, and using the estimates to choose a filter order."
+description: "How fast could your AI-powered filters run? We do the math for an H100 and show how filter order changes the answer."
+image:
+  path: /assets/blog/ai-filter-cost-estimates/social-preview.png
+  width: 1200
+  height: 630
+  alt: "How to Cost Your AI-Powered Filters, with an example of AI filters applied to movie reviews."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How fast could an AI-SQL query run on a given LLM and GPU? We walk through how to estimate speed-of-light (SoL) latency for individual filters and conjunctions of filters, providing a baseline for evaluating system performance. SoL estimates power <a href="https://github.com/fsdatalab/quail">Quail</a>'s cost models. You can try out our <a href="#6-filter-playground">interactive playground</a> to explore how filter ordering affects estimated latency on Qwen3-4B and an H100.</aside>

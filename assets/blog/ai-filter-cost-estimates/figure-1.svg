@@ -77,7 +77,7 @@
     <text x="1088" y="637"><tspan class="str">by name.  ANSWER:"</tspan><tspan>), body</tspan></text>
     <text x="1061" y="666">);</text>
   </g>
-  <text class="serif cap mid" x="1407" y="744">AI_IF Conjunction Query</text>
+  <text class="serif cap mid" x="1407" y="744">AI Filter query</text>
 
   <!-- Result -->
   <rect class="box" x="1945" y="187" width="615" height="333" rx="18"/>
