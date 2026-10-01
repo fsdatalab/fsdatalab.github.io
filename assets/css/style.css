@@ -179,6 +179,11 @@ a:hover { opacity: 0.75; }
   border-radius: 5px;
   margin: 0.5rem 0 1rem;
 }
+.prose mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 .prose hr {
   border: none;
   border-top: 1px solid var(--border);
@@ -765,6 +770,11 @@ a:hover { opacity: 0.75; }
 .prose figure.figure-full img {
   width: 100%;
   max-width: 100%;
+}
+.prose figure.figure-full.figure-readable {
+  width: min(48rem, calc(100vw - 3rem));
+  margin: 2rem 50%;
+  transform: translateX(-50%);
 }
 
 /* ── filter-chain playground ─────────────────────── */
