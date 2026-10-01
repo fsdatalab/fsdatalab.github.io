@@ -3,6 +3,7 @@ description: A CS research lab at Carnegie Mellon University led by Shreya Shank
 url: https://fsdatalab.github.io
 baseurl: ""
 image: /assets/og-image.png
+future: true
 
 defaults:
   - scope:
