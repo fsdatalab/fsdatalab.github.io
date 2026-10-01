@@ -22,7 +22,7 @@ title: Home
   </div>
 
   <h2 class="section-heading">Blog</h2>
-  {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" %}
+  {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
   {% if listed_posts.size > 0 %}
   {% for post in listed_posts %}
   <a href="{{ post.url | relative_url }}" class="post-item">

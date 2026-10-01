@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How to Cost Your AI-Powered Filters"
-date: 2026-09-30
+date: 2026-10-01
 author: "Arnav Dhariya, Shreya Shankar"
 permalink: /blog/ai-filter-cost-estimates/
 math: true
