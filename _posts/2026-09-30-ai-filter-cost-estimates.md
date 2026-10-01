@@ -88,7 +88,7 @@ The preamble and filter instruction add tokens to each request, so their lengths
 
 Our examples assume an NVIDIA H100 SXM GPU. Its Hopper architecture introduced FP8 Tensor Cores as part of a design aimed at accelerating transformer models.<sup><a href="#note-3">3</a></sup> *FP8* is an eight-bit floating-point number format.
 
-<figure class="figure-full" id="gpu">
+<figure class="figure-full figure-readable" id="gpu">
   <img src="/assets/blog/ai-filter-cost-estimates/gpu.svg" alt="H100 memory hierarchy diagram showing HBM3, L2 cache, and an SM with registers, shared memory, and tensor cores.">
   <figcaption>Figure 2. H100 memory layout and forward-pass data movement.</figcaption>
 </figure>
@@ -119,18 +119,20 @@ Before the first layer, the model uses an *embedding table* to map each token ID
 
 [Figure 3](#model) shows the execution order within one Qwen3-4B layer. The model first computes query (Q), key (K), and value (V) projections, then performs attention and an output projection. The MLP follows.
 
-<figure class="figure-full" id="model">
+<figure class="figure-full figure-readable" id="model">
   <img src="/assets/blog/ai-filter-cost-estimates/model.svg" alt="Diagram of a token passing through one Qwen3-4B layer: QKV projection, attention with a KV cache, output projection, and the gate/up/SwiGLU/down MLP block.">
   <figcaption>Figure 3. A token passes through Q, K, and V projections, attention, an output projection, and the MLP. Attention also reads the K and V vectors of earlier tokens.</figcaption>
 </figure>
 
 **Projections.** The model's Q, K, and V projection matrices transform each token's hidden state into Q, K, and V vectors used by attention. After attention, the *output projection* uses another matrix multiplication to produce a vector with the same width as the hidden state. Fortunately, projections can be highly parallelized: each projection applies the same matrix to every token independently, so the GPU can process many tokens at once. Processing more tokens together amortizes the cost of reading the weights from HBM, since the GPU can reuse the same weights across many tokens.
 
-**Attention.** Attention updates each token's representation using the V vectors of itself and earlier tokens. Comparing the token's Q vector with each K vector determines how much the corresponding V vector contributes. Unfortunately, each token must be compared with itself and all previous tokens, so doubling the number of tokens roughly quadruples the attention arithmetic.
+**Attention.** Attention combines the V vectors of the current token and earlier tokens. Comparing the current token's Q vector with each token's K vector determines how much each V vector contributes. Unfortunately, each token must be compared with itself and all previous tokens, so doubling the number of tokens roughly quadruples the attention arithmetic.
 
-The model has multiple *attention heads*. For each token, each head uses a different Q vector to compare K vectors and combine V vectors. The heads compute separate attention results, so the GPU can run them in parallel. Qwen3-4B uses *grouped query attention (GQA)*.<sup><a href="#note-7">7</a></sup> Its 32 query heads share eight sets of K and V vectors, with four query heads per set. Each query head still performs its own comparisons, but sharing K and V vectors reduces the K and V matrices and KV cache to one quarter the size of *full multi-head attention*, where every query head has its own K and V vectors.<sup><a href="#note-8">8</a></sup>
+Models have multiple *attention heads*, and the attention calculation above runs separately for each head. Each head uses its own Q vector and computes its result independently, so the GPU can run the heads in parallel.
 
-In [Section 4](#4-cost-model-for-a-conjunction-of-filters), we will consider multiple filters on the same document and explain how they can reuse the document's cached K and V vectors (*KV cache*).
+To reduce the memory needed for K and V, Qwen3-4B uses *grouped query attention (GQA)*.<sup><a href="#note-7">7</a></sup> Its 32 query heads are arranged in eight groups of four, and the heads in each group share the same K and V vectors. Sharing reduces the K and V projection matrices and KV cache to one quarter the size of *full multi-head attention*, where each of the 32 heads has its own K and V vectors.<sup><a href="#note-8">8</a></sup>
+
+In [Section 4](#4-cost-model-for-a-conjunction-of-filters), we will consider queries with multiple filters on the same document and explain how the filters can reuse the document's cached K and V vectors (*KV cache*).
 
 **MLP.** After attention and the output projection, the *multilayer perceptron (MLP)* further transforms each token's hidden state. It first multiplies the hidden state by the *gate* and *up* matrices to produce two wider vectors. The SwiGLU *activation* first transforms the gate vector, then uses it to scale each element of the up vector.<sup><a href="#note-9">9</a></sup> The *down* matrix then returns the result to the original hidden-state width. Like projections, the MLP operates on each token independently, so many tokens can run in parallel and share the weights read from HBM. Its arithmetic grows with the number of tokens, rather than the number of token pairs as in attention.
 
@@ -194,7 +196,7 @@ Here, $$I^*$$ is the FP8 ridge point used for projections and the MLP, and $$I^*
 
 [Figure 4](#figure-4) shows how operational intensity limits arithmetic throughput. In the sloped region, HBM bandwidth is the limit: performing more arithmetic for each byte transferred allows higher throughput. Once an operation reaches the ridge point, arithmetic throughput is the limit, so the plot becomes horizontal.
 
-<figure class="figure-full" id="figure-4">
+<figure class="figure-full figure-readable" id="figure-4">
   <img src="/assets/blog/ai-filter-cost-estimates/roofline.svg" alt="Log-log roofline plot for an NVIDIA H100 SXM showing the memory-bound and compute-bound regions, the FP8 and BF16 ridge points, and the operating points of the example single filter and conjunction.">
   <figcaption>Figure 4. Roofline for an NVIDIA H100 SXM. The BF16 roof applies only to attention; &times; marks the single filter of Section 3, diamond marks the conjunction of Section 5.</figcaption>
 </figure>
@@ -944,16 +946,16 @@ We now calculate $$T_{\text{query}}$$ for the same order, $$\pi=(F_2,F_1,F_3)$$,
 
 The capacity calculation in [Section 4.1](#41-kv-reuse-and-hbm-capacity) shows that only $$1{,}204$$ document prefixes fit in HBM at once, so the $$5{,}000$$ documents run as five batches.
 
-[Table 7](#table-7) applies the first-filter and later-filter formulas from [Section 4.2](#42-cost-of-a-fixed-filter-order), rounding the expected document counts to 5,000, 1,137, and 552. Its total row gives the inputs $$n$$, $$A$$, $$W$$, and $$R$$ for $$T_{\text{query}}$$.
+[Table 7](#table-7) applies the first-filter and later-filter formulas from [Section 4.2](#42-cost-of-a-fixed-filter-order), using the expected document counts 5,000, 1,136.5, and 551.8844 without rounding. We also keep the resulting token, attention, and KV counts unrounded in the calculations. The table rounds those work counts only for display.
 
 <div class="table-wrap" id="table-7" markdown="1">
 
 | Stage | $$n_j$$ | $$A_j$$ | $$W_j$$ | $$R_j$$ |
 |-------|-------|-------|-------|-------|
 | 1 ($$F_2$$) | 1,729,233 | $$2.999\times10^{8}$$ | 1,729,233 | 0 |
-| 2 ($$F_1$$) | 57,987 | $$1.895\times10^{7}$$ | 57,987 | 342,063 |
-| 3 ($$F_3$$) | 27,048 | $$8.813\times10^{6}$$ | 27,048 | 166,067 |
-| **Conjunction** | **1,814,268** | $$3.277\times10^{8}$$ | **1,814,268** | **508,130** |
+| 2 ($$F_1$$) | 57,962 | $$1.894\times10^{7}$$ | 57,962 | 341,912 |
+| 3 ($$F_3$$) | 27,042 | $$8.812\times10^{6}$$ | 27,042 | 166,033 |
+| **Conjunction** | **1,814,237** | $$3.276\times10^{8}$$ | **1,814,237** | **507,945** |
 
 <p class="table-caption">Table 7. Per-stage work of the ordered IMDB conjunction, and its totals.</p>
 </div>
@@ -962,25 +964,25 @@ The model's forward-pass count assumes tokens can be packed across filters:
 
 $$
 K=\left\lceil\frac{n}{C}\right\rceil
- =\left\lceil\frac{1{,}814{,}268}{110{,}376}\right\rceil
+ =\left\lceil\frac{1{,}814{,}236.8356}{110{,}376}\right\rceil
  =17.
 $$
 
-Attention's HBM traffic is $$B_{\text{attn}}=B_{\text{kv}}(W+R)$$, with $$W+R=2{,}322{,}398$$ tokens. Table 8 lists the resulting arithmetic and memory times for each component.
+Attention's HBM traffic is $$B_{\text{attn}}=B_{\text{kv}}(W+R)$$, with $$W+R\approx2{,}322{,}182$$ tokens. Table 8 lists the resulting arithmetic and memory times for each component.
 
 Attention explains the difference between the ordering score and the query-wide estimate. It is compute-bound for the first filter but memory-bound for the later filters. Adding the separate attention estimates gives
 
 $$
-178.76+17.61+8.50=204.87~\text{ms}.
+178.76+17.60+8.50\approx204.86~\text{ms}.
 $$
 
 The query-wide estimate instead uses the total arithmetic and memory times:
 
 $$
-\max(195.31,\;102.22)=195.31~\text{ms}.
+\max(195.30,\;102.22)=195.30~\text{ms}.
 $$
 
-The 9.56 ms difference assumes memory transfers can overlap with arithmetic across filters, as discussed in Section 4.3. Projections and the MLP are compute-bound in every stage, so their latency estimates agree under both calculations.
+The approximately 9.55 ms difference assumes memory transfers can overlap with arithmetic across filters, as discussed in Section 4.3. Projections and the MLP are compute-bound in every stage, so their latency estimates agree under both calculations.
 
 <div class="table-wrap" id="table-8" markdown="1">
 
@@ -988,7 +990,7 @@ The 9.56 ms difference assumes memory transfers can overlap with arithmetic acro
 |-----------|-------|-------|-----------------------|----------------------|
 | Projections | $$3.42\times10^{15}$$ | $$1.60\times10^{10}$$ | 1.7303 s | 0.0048 s |
 | Attention | $$1.93\times10^{14}$$ | $$3.42\times10^{11}$$ | 0.1953 s | 0.1022 s |
-| MLP | $$9.76\times10^{15}$$ | $$4.57\times10^{10}$$ | 4.9314 s | 0.0136 s |
+| MLP | $$9.76\times10^{15}$$ | $$4.57\times10^{10}$$ | 4.9313 s | 0.0136 s |
 | **Total** | $$1.34\times10^{16}$$ | $$4.04\times10^{11}$$ | **6.857 s** | 0.12 s |
 
 <p class="table-caption">Table 8. Query-wide roofline estimate for the ordered IMDB conjunction. For each component's total work, arithmetic takes longer than memory transfers.</p>
@@ -1001,14 +1003,14 @@ $$
 T_{\text{query}}
     &= \max(1.7303,\;0.0048) \\
     &\quad + \max(0.1953,\;0.1022) \\
-    &\quad + \max(4.9314,\;0.0136) \\
-    &= 1.7303 + 0.1953 + 4.9314 \\
+    &\quad + \max(4.9313,\;0.0136) \\
+    &= 1.7303 + 0.1953 + 4.9313 \\
     &= 6.857~\text{seconds} \\
     &\approx \boxed{6.86~\text{seconds}} .
 \end{aligned}
 $$
 
-For $$\pi=(F_2,F_1,F_3)$$, we used $$S(\pi)=6.8665$$ s to choose the order and obtained $$T_{\text{query}}\approx6.857$$ s as its SoL estimate. The roughly 9.4 ms difference comes mainly from estimating attention for each filter separately in $$S(\pi)$$ rather than assuming overlap across filters in $$T_{\text{query}}$$.
+For $$\pi=(F_2,F_1,F_3)$$, we used $$S(\pi)=6.8665$$ s to choose the order and obtained $$T_{\text{query}}\approx6.857$$ s as its SoL estimate. The roughly 9.6 ms difference comes from estimating attention for each filter separately in $$S(\pi)$$ rather than assuming overlap across filters in $$T_{\text{query}}$$.
 
 Phew! We made it! The SoL estimate is about 6.86 seconds for all 5,000 reviews. Of course, actual runtime may be much longer. Sustaining NVIDIA's peak arithmetic throughput and memory bandwidth, with enough overlap across filters, may not be achievable for this query. But the estimate gives us a lower bound to compare against as we improve execution.
 
@@ -1016,7 +1018,7 @@ Phew! We made it! The SoL estimate is about 6.86 seconds for all 5,000 reviews. 
 
 To help illustrate how filter ordering affects query cost, we've built an interactive playground! You can change the filter order, selectivities, and instruction lengths to see how they affect the query's SoL estimate. The playground uses Qwen3-4B-fp8 on an H100, starting with the IMDB example from [Section 5](#5-example-imdb-query). Drag filters to reorder them, or apply the ordering rule from [Section 4.3](#43-choosing-the-filter-order). For up to six filters, you can compare the rule's order with every possible order.
 
-The estimates assume peak hardware rates and reuse of each document's cached prefix across filters. We use the average document length for every document and round the expected number of surviving documents to whole numbers.
+The estimates assume peak hardware rates and reuse of each document's cached prefix across filters. We use the average document length for every document.
 
 <div class="pg" id="filter-chain-playground" data-filter-chain-calculator>
   <noscript>The playground needs JavaScript. The worked example in Section 5 gives the same numbers for the IMDB query.</noscript>
