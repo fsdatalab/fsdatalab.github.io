@@ -295,10 +295,11 @@ a:hover { opacity: 0.75; }
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 0.875rem 1rem;
-  margin: 1.5rem 0;
+  margin: 0 0 1.5rem;
   font-size: 1rem;
   line-height: 1.65;
 }
+.prose .subscribe { margin: 2.5rem 0 0; }
 .subscribe-copy { margin-bottom: 0.625rem; }
 .subscribe-fields { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .subscribe input[type="email"] {
