@@ -1,0 +1,12 @@
+{% if site.kit_form_id and site.kit_form_id != "" %}
+<form class="subscribe" action="https://app.kit.com/forms/{{ site.kit_form_id }}/subscriptions" method="post">
+  <div class="subscribe-copy">
+    <strong>Get new posts by email.</strong> Occasional updates on our research. No spam, and you can unsubscribe anytime.
+  </div>
+  <div class="subscribe-fields">
+    <label class="visually-hidden" for="subscribe-email">Email address</label>
+    <input id="subscribe-email" type="email" name="email_address" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Subscribe</button>
+  </div>
+</form>
+{% endif %}

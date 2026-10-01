@@ -21,6 +21,8 @@ title: Home
     <strong>Want to use our systems?</strong> We love to work directly with users. If any of the projects above are interesting to you as a <em>user</em>, please reach out.
   </div>
 
+  {% include subscribe.html %}
+
   <h2 class="section-heading">Blog</h2>
   {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
   {% if listed_posts.size > 0 %}

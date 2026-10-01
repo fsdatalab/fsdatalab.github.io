@@ -290,6 +290,47 @@ a:hover { opacity: 0.75; }
   color: var(--red);
 }
 
+/* ── newsletter signup ────────────────────────────── */
+.subscribe {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  margin: 1.5rem 0;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.subscribe-copy { margin-bottom: 0.625rem; }
+.subscribe-fields { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.subscribe input[type="email"] {
+  flex: 1 1 14rem;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.subscribe input[type="email"]:focus { outline: 2px solid rgba(196, 18, 48, 0.3); border-color: var(--red); }
+.subscribe button {
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+}
+.subscribe button:hover { opacity: 0.85; }
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ── footer ───────────────────────────────────────── */
 .footer {
   padding: 1.75rem 1.5rem;

@@ -4,6 +4,7 @@ title: Blog
 ---
 <div class="content">
   <h2 class="section-heading">Blog</h2>
+  {% include subscribe.html %}
   {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
   {% if listed_posts.size > 0 %}
   {% for post in listed_posts %}

@@ -25,3 +25,7 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - README.md
+
+# Kit (ConvertKit) newsletter. Set to your form's numeric ID to show the
+# signup box; leave empty to hide it.
+kit_form_id: ""
