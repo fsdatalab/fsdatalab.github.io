@@ -18,6 +18,32 @@ image:
 
 <aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! We discuss several ways to classify in Quail, and how Quail picks the cheapest one for a given LLM.</aside>
 
+<nav class="post-toc" aria-label="Table of contents">
+<strong>Contents</strong>
+<ol>
+  <li><a href="#1-introduction">Introduction.</a></li>
+  <li><a href="#2-aiclassify-in-quail"><code>AI.CLASSIFY</code> in Quail.</a></li>
+  <li><a href="#3-how-quail-executes-aiclassify">How Quail Executes <code>AI.CLASSIFY</code>.</a>
+    <ol>
+      <li><a href="#31-trie_decode-greedily-generate-the-label"><code>trie_decode</code>: Greedily Generate the Label.</a></li>
+      <li><a href="#32-trie_tree-score-all-labels-at-once"><code>trie_tree</code>: Score All Labels at Once.</a></li>
+      <li><a href="#33-letters-score-one-token-per-label"><code>letters</code>: Score One Token per Label.</a></li>
+      <li><a href="#34-keeping-the-document-kv-for-later-operators">Keeping the Document KV for Later Operators.</a></li>
+    </ol>
+  </li>
+  <li><a href="#4-pricing-and-picking-a-method">Pricing and Picking a Method.</a>
+    <ol>
+      <li><a href="#41-workload-and-notation">Workload and Notation.</a></li>
+      <li><a href="#42-cost-of-trie_tree-and-letters">Cost of <code>trie_tree</code> and <code>letters</code>.</a></li>
+      <li><a href="#43-cost-of-trie_decode">Cost of <code>trie_decode</code>.</a></li>
+      <li><a href="#44-picking-a-method">Picking a Method.</a></li>
+    </ol>
+  </li>
+  <li><a href="#5-aside-decision-models">Aside: Decision Models.</a></li>
+  <li><a href="#6-conclusion">Conclusion.</a></li>
+</ol>
+</nav>
+
 # 1. Introduction
 
 We recently released [Quail](/blog/introducing-quail/), an execution engine for AI-SQL. One of the most common AI-SQL operations is classification: given a document and a list of labels, pick the label that fits best. E.g., a support team might want to sort every incoming message into "billing", "refund request", "shipping delay", and so on.
