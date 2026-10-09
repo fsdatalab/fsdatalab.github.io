@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "To Classify, Try a Trie"
-date: 2026-10-07
+date: 2026-10-09
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-classification/
 unlisted: true
