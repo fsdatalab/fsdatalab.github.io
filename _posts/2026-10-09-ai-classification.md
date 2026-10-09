@@ -16,7 +16,7 @@ image:
   alt: "To Classify, Try a Trie, with an AI.CLASSIFY query and the trie of its labels."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! We discuss several ways to classify in Quail, and how Quail picks the cheapest one for a given LLM.</aside>
+<aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! On 12 new classification queries in <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a>, Quail is <strong>1.8x faster</strong> than a vLLM baseline.</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -37,6 +37,7 @@ image:
       <li><a href="#42-cost-of-trie_tree-and-letters">Cost of <code>trie_tree</code> and <code>letters</code>.</a></li>
       <li><a href="#43-cost-of-trie_decode">Cost of <code>trie_decode</code>.</a></li>
       <li><a href="#44-picking-a-method">Picking a Method.</a></li>
+      <li><a href="#45-experiments-on-quail-b">Experiments on QUAIL-B.</a></li>
     </ol>
   </li>
   <li><a href="#5-aside-decision-models">Aside: Decision Models.</a></li>
@@ -63,7 +64,7 @@ We'll go through:
 
 `AI.CLASSIFY` takes a document and a list of labels. It returns one of the labels.
 
-Here is the query that we use throughout the post, with Qwen3-4B (in FP8) as the LLM. It sorts support messages into 10 topics:
+Here is the query that we use throughout the post, with Qwen3-4B-fp8 as the LLM. It sorts support messages into 10 topics:
 
 ```sql
 SELECT m.id,
@@ -338,6 +339,19 @@ Putting it all together, the optimizer computes $$T_{\text{classify}}$$ for ever
 In our running example, `trie_decode` wins, because it runs the LLM on the fewest extra tokens per document: 1.5, compared with 4 for `trie_tree` and 24 for `letters`. `letters` only wins when there are a few labels that share a long start, e.g., 2 labels that differ only in their last word, since both trie methods have to run the LLM on every shared token. And `trie_tree` mostly wins when the query asks for probabilities, since `trie_decode` can't run then.
 
 Note that the differences are small, between 2% and 11% for 1,000 documents of 100 tokens, because all three methods have to prefill the preamble, the document, and the instruction, and the prefill is most of $$T_{\text{classify}}$$.
+
+## 4.5 Experiments on QUAIL-B
+
+To see how all of this plays out end to end, we added 12 classification queries to [QUAIL-B](https://github.com/fsdatalab/quail-bench), our benchmark for AI-SQL. The queries span five datasets (movie reviews, adverse drug event reports, fact-checking claims, legal citations, and agent traces), with 4 to 27 labels for each `AI.CLASSIFY` operator. Some queries have only one operator (`AI.CLASSIFY`); other queries also have filters, joins, or multiple different `AI.CLASSIFY` operators.
+
+We ran each query with Qwen3-4B-fp8 on one H100, at scale factor 0.5, on both Quail and a vLLM baseline (v0.26.0, with prefix caching). In the vLLM baseline, the LLM generates the label, and then we parse it. [Figure 6](#figure-6) shows the results.
+
+<figure id="figure-6" style="width: min(42rem, calc(100vw - 3rem));">
+  <img src="{{ '/assets/blog/ai-classification/quailb-results.svg' | relative_url }}" alt="Input tokens per second, KV regret, and cost per query for Quail and a vLLM baseline on the 12 QUAIL-B classification queries.">
+  <figcaption>Figure 6. QUAIL-B classification queries with Qwen3-4B-fp8 on one H100, at scale factor 0.5. KV regret is the share of computed tokens that are recomputed.</figcaption>
+</figure>
+
+**Quail is faster on all 12 queries: 2.1x faster in total, and 1.8x faster per query (geometric mean).** The biggest wins come from queries that read the same documents more than once. E.g., AGENT-5 has three different `AI.CLASSIFY` operators on the same agent traces. vLLM's prefix cache evicts the least recently used KV, so by the time the next operator reads a trace, its KV is usually gone and vLLM has to recompute it (64% KV regret). Quail instead keeps the KV of the trace around for the later operators ([Section 3.4](#34-keeping-the-document-kv-for-later-operators)). Quail also runs within 1.8x to 2.8x of its SoL estimate on every query.
 
 # 5. Aside: Decision Models
 
