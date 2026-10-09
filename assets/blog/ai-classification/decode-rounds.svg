@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="29 104 1471 557" role="img" aria-labelledby="title6 desc6">
+<title id="title6">Steps of trie_decode</title>
+<desc id="desc6">Ten documents, each of which gets a different label. Step 0 selects the first label token at the ANSWER token. Only the documents that selected refund or shipping need step 1. Every other document has its label after step 0.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<style>
+  .frame { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .doc { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+  .pos { fill: #dcebd3; stroke: #667085; stroke-width: 2; }
+  .leaf { fill: #ffffff; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 5; }
+  .end { fill: #ffffff; stroke: #101828; stroke-width: 3; }
+  .edge { fill: none; stroke: #667085; stroke-width: 2; }
+  .heading { fill: #101828; font: 600 25px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .colhead { fill: #101828; font: 600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .label { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .left { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .note { fill: #3b6ea8; font: 600 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+</style>
+</defs>
+<text class="colhead" x="377.0" y="130">Prompt of each document</text>
+<text class="colhead" x="837.0" y="130">Step 0</text>
+<text class="colhead" x="1027.0" y="130">Step 1</text>
+<text class="colhead" x="1172" y="130" style="text-anchor:start">Label</text>
+<rect class="doc" x="40" y="160" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="181.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="160" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="181.0">Document 1</text>
+<rect class="doc" x="356" y="160" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="181.0">Question and labels</text>
+<rect class="doc" x="584" y="160" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="181.0">ANSWER:</text>
+<rect class="leaf" x="752" y="160" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="181.0">billing</text>
+<text class="left" x="1172" y="181.0">billing</text>
+<rect class="doc" x="40" y="210" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="231.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="210" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="231.0">Document 2</text>
+<rect class="doc" x="356" y="210" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="231.0">Question and labels</text>
+<rect class="doc" x="584" y="210" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="231.0">ANSWER:</text>
+<rect class="pos" x="752" y="210" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="231.0">refund</text>
+<rect class="leaf" x="942" y="210" width="170" height="40" rx="8"/>
+<text class="label" x="1027.0" y="231.0">request</text>
+<text class="left" x="1172" y="231.0">refund request</text>
+<rect class="doc" x="40" y="260" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="281.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="260" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="281.0">Document 3</text>
+<rect class="doc" x="356" y="260" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="281.0">Question and labels</text>
+<rect class="doc" x="584" y="260" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="281.0">ANSWER:</text>
+<rect class="pos" x="752" y="260" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="281.0">refund</text>
+<rect class="leaf" x="942" y="260" width="170" height="40" rx="8"/>
+<text class="label" x="1027.0" y="281.0">status</text>
+<text class="left" x="1172" y="281.0">refund status</text>
+<rect class="doc" x="40" y="310" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="331.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="310" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="331.0">Document 4</text>
+<rect class="doc" x="356" y="310" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="331.0">Question and labels</text>
+<rect class="doc" x="584" y="310" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="331.0">ANSWER:</text>
+<rect class="pos" x="752" y="310" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="331.0">shipping</text>
+<rect class="leaf" x="942" y="310" width="170" height="40" rx="8"/>
+<text class="label" x="1027.0" y="331.0">delay</text>
+<text class="left" x="1172" y="331.0">shipping delay</text>
+<rect class="doc" x="40" y="360" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="381.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="360" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="381.0">Document 5</text>
+<rect class="doc" x="356" y="360" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="381.0">Question and labels</text>
+<rect class="doc" x="584" y="360" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="381.0">ANSWER:</text>
+<rect class="pos" x="752" y="360" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="381.0">shipping</text>
+<rect class="leaf" x="942" y="360" width="170" height="40" rx="8"/>
+<text class="label" x="1027.0" y="381.0">damage</text>
+<text class="left" x="1172" y="381.0">shipping damage</text>
+<rect class="doc" x="40" y="410" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="431.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="410" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="431.0">Document 6</text>
+<rect class="doc" x="356" y="410" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="431.0">Question and labels</text>
+<rect class="doc" x="584" y="410" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="431.0">ANSWER:</text>
+<rect class="pos" x="752" y="410" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="431.0">shipping</text>
+<rect class="leaf" x="942" y="410" width="170" height="40" rx="8"/>
+<text class="label" x="1027.0" y="431.0">address</text>
+<text class="left" x="1172" y="431.0">shipping address change</text>
+<rect class="doc" x="40" y="460" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="481.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="460" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="481.0">Document 7</text>
+<rect class="doc" x="356" y="460" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="481.0">Question and labels</text>
+<rect class="doc" x="584" y="460" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="481.0">ANSWER:</text>
+<rect class="leaf" x="752" y="460" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="481.0">product</text>
+<text class="left" x="1172" y="481.0">product defect</text>
+<rect class="doc" x="40" y="510" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="531.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="510" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="531.0">Document 8</text>
+<rect class="doc" x="356" y="510" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="531.0">Question and labels</text>
+<rect class="doc" x="584" y="510" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="531.0">ANSWER:</text>
+<rect class="leaf" x="752" y="510" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="531.0">two</text>
+<text class="left" x="1172" y="531.0">two-factor authentication issue</text>
+<rect class="doc" x="40" y="560" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="581.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="560" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="581.0">Document 9</text>
+<rect class="doc" x="356" y="560" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="581.0">Question and labels</text>
+<rect class="doc" x="584" y="560" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="581.0">ANSWER:</text>
+<rect class="leaf" x="752" y="560" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="581.0">praise</text>
+<text class="left" x="1172" y="581.0">praise</text>
+<rect class="doc" x="40" y="610" width="150" height="40" rx="8"/>
+<text class="label" x="115.0" y="631.0">DOCUMENT:</text>
+<rect class="doc" x="198" y="610" width="150" height="40" rx="8"/>
+<text class="label" x="273.0" y="631.0">Document 10</text>
+<rect class="doc" x="356" y="610" width="220" height="40" rx="8"/>
+<text class="label" x="466.0" y="631.0">Question and labels</text>
+<rect class="doc" x="584" y="610" width="130" height="40" rx="8"/>
+<text class="label" x="649.0" y="631.0">ANSWER:</text>
+<rect class="leaf" x="752" y="610" width="170" height="40" rx="8"/>
+<text class="label" x="837.0" y="631.0">other</text>
+<text class="left" x="1172" y="631.0">other</text>
+</svg>
