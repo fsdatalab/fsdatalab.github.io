@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 532" role="img" aria-labelledby="title0 desc0">
+<title id="title0">The running example in DocWriter</title>
+<desc id="desc0">(a) When the agent reads, the document has three lines: two sentences and a note to the agent. (b) About a minute later, the user has changed "most tools" to "chat interfaces" on line 2 and started a fourth line.</desc>
+<defs><style>
+  .ptitle { fill: #101828; font: 600 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .tab { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; }
+  .tabtext { fill: #101828; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .page { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; }
+  .num { fill: #98a2b3; font: 400 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-anchor: end; }
+  .mono { fill: #101828; font: 400 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note { fill: #6941c6; }
+  .hlbg { fill: #fde68a; }
+  .newbg { fill: #fef3c7; }
+</style></defs>
+<rect x="0" y="0" width="1190" height="532" fill="#f2f4f7" rx="10"/>
+<g transform="translate(0,10)">
+<text class="ptitle" x="20" y="24">(a) When the agent reads the document</text>
+<path class="tab" d="M 90 76 L 90 48 Q 90 42 96 42 L 236 42 Q 242 42 242 48 L 242 76 Z"/>
+<text class="tabtext" x="112" y="65">paper.md</text>
+<rect class="page" x="90" y="76" width="1080" height="150"/>
+<text class="num" x="70" y="116">1</text>
+<text class="mono" x="114" y="116" xml:space="preserve">People increasingly write documents together with AI agents.</text>
+<text class="num" x="70" y="154">2</text>
+<text class="mono" x="114" y="154" xml:space="preserve">But most tools make the person wait while the agent works on its edits.</text>
+<text class="num" x="70" y="192">3</text>
+<text class="mono note" x="114" y="192" xml:space="preserve">[[say what is missing]]</text>
+<text class="ptitle" x="20" y="270">(b) About a minute later: while the agent thinks, the user edits line 2 and starts line 4 (highlighted)</text>
+<path class="tab" d="M 90 322 L 90 294 Q 90 288 96 288 L 236 288 Q 242 288 242 294 L 242 322 Z"/>
+<text class="tabtext" x="112" y="311">paper.md</text>
+<rect class="page" x="90" y="322" width="1080" height="188"/>
+<text class="num" x="70" y="362">1</text>
+<text class="mono" x="114" y="362" xml:space="preserve">People increasingly write documents together with AI agents.</text>
+<text class="num" x="70" y="400">2</text>
+<text class="mono" x="114" y="400" xml:space="preserve">But </text>
+<rect class="hlbg" x="157.8" y="379" width="175.6" height="28" rx="3"/>
+<text class="mono" x="159.8" y="400" xml:space="preserve">chat interfaces</text>
+<text class="mono" x="331.3" y="400" xml:space="preserve"> make the person wait while the agent works on its edits.</text>
+<text class="num" x="70" y="438">3</text>
+<text class="mono note" x="114" y="438" xml:space="preserve">[[say what is missing]]</text>
+<text class="num" x="70" y="476">4</text>
+<rect class="newbg" x="112" y="455" width="404.3" height="28" rx="3"/>
+<text class="mono" x="114" y="476" xml:space="preserve">We built DocWriter, an editor where</text>
+<rect x="516.3" y="457" width="2.5" height="24" fill="#101828"/>
+<rect x="516.3" y="428" width="46" height="24" rx="4" fill="#7a5af8"/>
+<text x="539.3" y="445" style="fill:#ffffff; font: 600 14px 'Inter', -apple-system, sans-serif; text-anchor: middle;">You</text>
+</g>
+</svg>

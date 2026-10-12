@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1008" role="img" aria-labelledby="t d">
+<title id="t">The agent's tool calls</title>
+<desc id="d">DocWriter sends the agent a diff of lines 1 to 3 and asks it to propose edits. About a minute later, the agent calls edit_doc for line 2 with old text that says "most tools", and DocWriter replies with an "old_string not found" error, because the user changed that text. The agent calls read_doc, then calls edit_doc again with "chat interfaces", and DocWriter proposes the edit. Last, the agent calls edit_doc to replace the note on line 3, and DocWriter proposes the edit.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b42318"/></marker>
+<style>
+  .head { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .headt { fill: #101828; font: 600 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .life { stroke: #98a2b3; stroke-width: 2; }
+  .mono { fill: #101828; font: 400 22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .f { fill: #6f42c1; }
+  .k { fill: #c4501a; }
+  .s { fill: #0a3069; }
+  .stalebg { fill: none; stroke: #b42318; stroke-width: 2; }
+  .userbg { fill: #fde68a; }
+  .call { stroke: #667085; stroke-width: 2; fill: none; }
+  .retl { stroke: #667085; stroke-width: 2; fill: none; stroke-dasharray: 7 5; }
+  .badl { stroke: #b42318; }
+  .ret { font: 400 22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-anchor: end; fill: #344054; }
+  .bad { fill: #b42318; }
+  .num { fill: #101828; }
+  .add { fill: #067647; }
+  .gap { fill: #475467; font: italic 400 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .okc { fill: #067647; }
+  .badc { fill: #b42318; }
+  .glyph { fill: none; stroke: #ffffff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .leg { fill: #344054; font: 500 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .band { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.5; }
+  .numt { fill: #ffffff; font: 600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+</style></defs>
+<rect width="1120" height="1008" fill="#f2f4f7" rx="10"/>
+<rect class="band" x="60" y="94" width="1010" height="204" rx="8"/>
+<rect class="band" x="60" y="360" width="1010" height="142" rx="8"/>
+<rect class="band" x="60" y="516" width="1010" height="110" rx="8"/>
+<rect class="band" x="60" y="640" width="1010" height="142" rx="8"/>
+<rect class="band" x="60" y="796" width="1010" height="142" rx="8"/>
+<line class="life" x1="150" x2="150" y1="74" y2="936"/><line class="life" x1="1010" x2="1010" y1="74" y2="936"/>
+<rect class="head" x="70" y="26" width="160" height="48" rx="6"/><text class="headt" x="150" y="58">Agent</text>
+<rect class="head" x="930" y="26" width="160" height="48" rx="6"/><text class="headt" x="1010" y="58">DocWriter</text>
+<text class="mono" x="180" y="136" xml:space="preserve">Diff of paper.md since your last turn:</text>
+<text class="mono" x="180" y="168" xml:space="preserve"><tspan class="add">+ People increasingly write documents…</tspan></text>
+<text class="mono" x="180" y="200" xml:space="preserve"><tspan class="add">+ But most tools make the person wait…</tspan></text>
+<text class="mono" x="180" y="232" xml:space="preserve"><tspan class="add">+ [[say what is missing]]</tspan></text>
+<text class="mono" x="180" y="264" xml:space="preserve">Read the document and propose edits.</text>
+<circle class="num" cx="90" cy="127" r="17"/><text class="numt" x="90" y="134">1</text>
+<path class="call" d="M 1010 278 L 152 278" marker-end="url(#ah)"/>
+<text class="gap" x="580.0" y="338">About a minute later, the user changes "most tools" to "chat interfaces".</text>
+<rect class="stalebg" x="416.4" y="382" width="136.4" height="28" rx="3"/>
+<text class="mono" x="180" y="402" xml:space="preserve"><tspan class="f">edit_doc</tspan>(<tspan class="k">old</tspan>=<tspan class="s">"But </tspan><tspan class="s">most tools</tspan><tspan class="s"> … works on its edits."</tspan>,</text>
+<text class="mono" x="180" y="434" xml:space="preserve">         <tspan class="k">new</tspan>=<tspan class="s">"But most tools … finishes."</tspan>)</text>
+<circle class="num" cx="90" cy="393" r="17"/><text class="numt" x="90" y="400">2</text>
+<path class="call" d="M 150 448 L 1008 448" marker-end="url(#ah)"/>
+<circle class="badc" cx="1042" cy="465" r="13"/><path class="glyph" d="M 1037 460 l 10 10 M 1047 460 l -10 10"/>
+<text class="ret bad" x="980" y="477">Error: "old_string not found … read_doc and retry."</text>
+<path class="retl badl" d="M 1010 486 L 152 486" marker-end="url(#ahr)"/>
+<text class="mono" x="180" y="558" xml:space="preserve"><tspan class="f">read_doc</tspan>()</text>
+<circle class="num" cx="90" cy="549" r="17"/><text class="numt" x="90" y="556">3</text>
+<path class="call" d="M 150 572 L 1008 572" marker-end="url(#ah)"/>
+<text class="ret plain" x="980" y="601">"…But chat interfaces make the person wait…"</text>
+<path class="retl plainl" d="M 1010 610 L 152 610" marker-end="url(#ah)"/>
+<rect class="userbg" x="416.4" y="662" width="202.7" height="28" rx="3"/>
+<text class="mono" x="180" y="682" xml:space="preserve"><tspan class="f">edit_doc</tspan>(<tspan class="k">old</tspan>=<tspan class="s">"But </tspan><tspan class="s">chat interfaces</tspan><tspan class="s"> … works on its edits."</tspan>,</text>
+<text class="mono" x="180" y="714" xml:space="preserve">         <tspan class="k">new</tspan>=<tspan class="s">"But chat interfaces … finishes."</tspan>)</text>
+<circle class="num" cx="90" cy="673" r="17"/><text class="numt" x="90" y="680">4</text>
+<path class="call" d="M 150 728 L 1008 728" marker-end="url(#ah)"/>
+<circle class="okc" cx="1042" cy="745" r="13"/><path class="glyph" d="M 1036 745 l 4 5 l 8 -10"/>
+<text class="ret ok" x="980" y="757">"Proposed the edit."</text>
+<path class="retl okl" d="M 1010 766 L 152 766" marker-end="url(#ah)"/>
+<text class="mono" x="180" y="838" xml:space="preserve"><tspan class="f">edit_doc</tspan>(<tspan class="k">old</tspan>=<tspan class="s">"[[say what is missing]]"</tspan>,</text>
+<text class="mono" x="180" y="870" xml:space="preserve">         <tspan class="k">new</tspan>=<tspan class="s">"No tool lets both write at the same time."</tspan>)</text>
+<circle class="num" cx="90" cy="829" r="17"/><text class="numt" x="90" y="836">5</text>
+<path class="call" d="M 150 884 L 1008 884" marker-end="url(#ah)"/>
+<circle class="okc" cx="1042" cy="901" r="13"/><path class="glyph" d="M 1036 901 l 4 5 l 8 -10"/>
+<text class="ret ok" x="980" y="913">"Proposed the edit."</text>
+<path class="retl okl" d="M 1010 922 L 152 922" marker-end="url(#ah)"/>
+<circle class="okc" cx="90" cy="974" r="13"/><path class="glyph" d="M 84 974 l 4 5 l 8 -10"/><text class="leg" x="112" y="980">dependency check passes</text>
+<circle class="badc" cx="470" cy="974" r="13"/><path class="glyph" d="M 465 969 l 10 10 M 475 969 l -10 10"/><text class="leg" x="492" y="980">dependency check fails</text>
+</svg>

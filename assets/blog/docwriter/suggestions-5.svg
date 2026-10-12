@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1468 640" role="img">
+<defs><style>
+  .tab { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.2; }
+  .tabtext { fill: #101828; font: 500 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .dot { fill: #7a5af8; }
+  .page { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.2; }
+  .mono { fill: #101828; font: 400 17px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note { fill: #101828; }
+  .del { fill: #d92d20; text-decoration: line-through; opacity: 0.8; }
+  .ins { fill: #079455; }
+  .insbg { fill: #dcfae6; }
+  .caret { fill: #101828; }
+  .card { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.2; filter: drop-shadow(0 2px 4px rgba(16,24,40,0.08)); }
+  .av { fill: #ebe9fe; }
+  .avf { fill: none; stroke: #7a5af8; stroke-width: 2; stroke-linecap: round; }
+  .who { fill: #101828; font: 600 17px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .time { fill: #667085; font: 400 14px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .msg { fill: #101828; font: 400 17px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .prev { fill: #667085; font: 400 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .hint { fill: #344054; font: 400 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .div { stroke: #e4e7ec; stroke-width: 1.2; }
+  .pc { fill: #4f46e5; font: 600 14px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0.06em; }
+  .cdel { fill: #d92d20; text-decoration: line-through; }
+  .rem { fill: #667085; font-style: italic; }
+  .cins { fill: #079455; font: 400 17px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .rej { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.2; }
+  .rejt { fill: #344054; font: 500 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .acc { fill: #4f46e5; }
+  .acct { fill: #ffffff; font: 600 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .reply { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.2; }
+  .ph { fill: #98a2b3; font: 400 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .dismiss { fill: #475467; font: 400 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .kbd { fill: #667085; font: 400 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .send { fill: #a5b4fc; }
+  .sendt { fill: #ffffff; font: 600 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .cap { fill: #101828; font: 400 17px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .capk { font-weight: 600; }
+  .badge { fill: #f79009; }
+  .badget { fill: #ffffff; font: 600 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .capnt { fill: #ffffff; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .flag { fill: #7a5af8; }
+  .flagt { fill: #ffffff; font: 600 13px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .ptr { fill: #101828; stroke: #ffffff; stroke-width: 1.5; }
+</style></defs>
+<rect width="1468" height="640" fill="#f0f1f3" rx="10"/>
+<path class="tab" d="M 30 56 L 30 26 Q 30 20 36 20 L 176 20 Q 182 20 182 26 L 182 56 Z"/>
+<text class="tabtext" x="48" y="43">paper.md</text>
+<circle class="dot" cx="160" cy="38" r="4"/>
+<rect class="page" x="30" y="56" width="930" height="564"/>
+<text class="mono" x="62" y="202" xml:space="preserve">We built DocWriter, an editor where the person keeps </text><rect class="caret" x="604.7" y="186" width="2" height="21"/><rect class="flag" x="604.7" y="162" width="44" height="22" rx="4"/><text class="flagt" x="626.7" y="178">You</text>
+<text class="mono" x="62" y="172" xml:space="preserve"><tspan class="del">[[say what is missing]]</tspan></text>
+<text class="mono" x="62" y="142" xml:space="preserve">But chat interfaces make the person wait while the agent finishes.</text>
+<rect class="insbg" x="265.8" y="95" width="94.2" height="23" rx="2"/>
+<text class="mono" x="62" y="112" xml:space="preserve">People <tspan class="del">increasingly</tspan> <tspan class="ins">now often</tspan> write documents together with AI agents.</text>
+<rect class="card" x="990" y="70" width="452" height="364" rx="10"/>
+<rect class="card" x="990" y="446" width="452" height="72" rx="10"/>
+<circle class="av" cx="1020" cy="102" r="15"/>
+<path class="avf" d="M 1013 100 q 7 7 14 0" />
+<text class="who" x="1044" y="99">Agent</text>
+<text class="time" x="1044" y="116">06:13 PM</text>
+<circle class="badge" cx="1414" cy="100" r="12"/><text class="badget" x="1414" y="105">1</text>
+<text class="msg" x="1010" y="150">I changed "increasingly" to "now often," which</text>
+<text class="msg" x="1010" y="174">is more direct.</text>
+<line class="div" x1="1010" x2="1422" y1="194" y2="194"/>
+<text class="pc" x="1010" y="220">PROPOSED CHANGES</text>
+<text class="msg" x="1010" y="248"><tspan class="cdel">increasingly</tspan> <tspan class="rem">removed</tspan></text>
+<text class="cins" x="1010" y="274">now often</text>
+<rect class="rej" x="1238" y="288" width="94" height="32" rx="6"/>
+<text class="rejt" x="1285" y="309">✕ Reject</text>
+<rect class="acc" x="1340" y="288" width="82" height="32" rx="6"/>
+<text class="acct" x="1381" y="309">✓ Accept</text>
+<rect class="reply" x="1010" y="332" width="412" height="44" rx="6"/>
+<text class="dismiss" x="1014" y="408">Dismiss</text>
+<text class="kbd" x="1242" y="408">⌘↵ to send</text>
+<rect class="send" x="1358" y="389" width="64" height="28" rx="6"/>
+<text class="sendt" x="1390" y="408">Send</text>
+<circle class="av" cx="1020" cy="478" r="15"/>
+<path class="avf" d="M 1013 476 q 7 7 14 0" />
+<text class="who" x="1044" y="475">Agent</text>
+<text class="time" x="1044" y="492">06:13 PM</text>
+<circle class="badge" cx="1414" cy="476" r="12"/><text class="badget" x="1414" y="481">3</text>
+<text class="msg" x="1010" y="510" opacity="0">.</text>
+<text class="prev" x="1120" y="484">I filled in your note with o…</text>
+<text class="msg" x="1022" y="359">Just "now" is enough.</text>
+<circle class="badge" cx="46" cy="106" r="12"/><text class="badget" x="46" y="111">1</text>
+<circle class="badge" cx="46" cy="166" r="12"/><text class="badget" x="46" y="171">3</text>
+<path class="ptr" d="M 1392 400 l 0 22 l 6 -6 l 5 11 l 4 -2 l -5 -11 l 8 0 z"/>
+</svg>

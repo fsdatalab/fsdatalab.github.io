@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 380" role="img" aria-labelledby="title3 desc3">
+<title id="title3">Bayou example with tentative and committed writes</title>
+<desc id="desc3">Bob's laptop is the primary, so Bob's write commits immediately. Alice's write is tentative. At the first sync, both laptops replay the same log, Bob's write then Alice's write, and Alice's check fails, so her meeting moves to 3:00 pm. Bob's laptop, the primary, then commits Alice's write. At the second sync, Alice's laptop learns about the commit, and her 3:00 pm meeting becomes final.</desc>
+<defs>
+<marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<style>
+  .lane { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; }
+  .log { fill: #f2f4f7; stroke: #98a2b3; stroke-width: 1.5; }
+  .bob { fill: #aecbee; stroke: #101828; stroke-width: 2.5; }
+  .alice { fill: #f5d7a8; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 4; }
+  .fail { fill: #f5d7a8; stroke: #b42318; stroke-width: 2.5; stroke-dasharray: 6 4; }
+  .commit { fill: #ffffff; stroke: #101828; stroke-width: 2.5; }
+  .alicec { fill: #f5d7a8; stroke: #101828; stroke-width: 2.5; }
+  .sync { stroke: #667085; stroke-width: 2; stroke-dasharray: 3 5; }
+  .axis { fill: none; stroke: #667085; stroke-width: 2; }
+  .lanehead { fill: #101828; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .sub { fill: #475467; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .label { fill: #101828; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .loglabel { fill: #475467; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; }
+  .small { fill: #475467; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+</style>
+</defs>
+
+<rect class="lane" x="4" y="15" width="1292" height="130" rx="10"/>
+<rect class="lane" x="4" y="165" width="1292" height="130" rx="10"/>
+<text class="lanehead" x="16" y="70">Bob</text>
+<text class="sub" x="16" y="100">(primary)</text>
+<text class="lanehead" x="16" y="230">Alice</text>
+
+<rect class="bob" x="122" y="58" width="180" height="50" rx="8"/>
+<text class="label" x="212" y="84">Books 1:30 pm</text>
+<rect class="alice" x="188" y="208" width="180" height="50" rx="8"/>
+<text class="label" x="278" y="234">Books 1:30 pm</text>
+
+<line class="sync" x1="380" y1="8" x2="380" y2="302"/>
+<text class="small" x="380" y="325">sync</text>
+
+<rect class="fail" x="398" y="58" width="444" height="50" rx="8"/>
+<text class="label" x="620" y="84">Runs Alice's write: fails, 3:00 pm</text>
+
+<rect class="log" x="386" y="180" width="468" height="98" rx="10"/>
+<text class="loglabel" x="398" y="200">replay the log</text>
+<rect class="bob" x="398" y="212" width="150" height="50" rx="8"/>
+<text class="label" x="473" y="238">Bob's write</text>
+<rect class="fail" x="560" y="212" width="282" height="50" rx="8"/>
+<text class="label" x="701" y="238">Alice's: fails, 3:00 pm</text>
+
+<rect class="commit" x="864" y="58" width="250" height="50" rx="8"/>
+<text class="label" x="989" y="84">Commits Alice's write</text>
+
+<line class="sync" x1="1124" y1="8" x2="1124" y2="302"/>
+<text class="small" x="1124" y="325">sync</text>
+
+<rect class="alicec" x="1134" y="212" width="160" height="50" rx="8"/>
+<text class="label" x="1214" y="238">Alice, 3:00 pm</text>
+
+<rect class="alice" x="115" y="342" width="28" height="24" rx="4"/>
+<text class="sub" x="152" y="354">tentative</text>
+<rect class="commit" x="270" y="342" width="28" height="24" rx="4"/>
+<text class="sub" x="307" y="354">committed</text>
+<line class="axis" x1="460" y1="354" x2="1285" y2="354" marker-end="url(#arrow3)"/>
+<text class="small" x="1285" y="376" style="text-anchor:end">time</text>
+</svg>
