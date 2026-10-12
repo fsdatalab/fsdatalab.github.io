@@ -1,202 +1,137 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 430" role="img" aria-labelledby="title2 desc2">
 <title id="title2">Human transactions compared with agent transactions</title>
-<desc id="desc2">Top: two human writers make many small transactions over time. Bottom: a user makes many small transactions, while an agent makes one long transaction that reads at the start and writes at the end.</desc>
+<desc id="desc2">Top: two human writers make many small transactions over time, each a short read followed by a short write. Bottom: a user makes many small transactions, while an agent makes one long transaction that reads at the start, thinks, and writes at the end.</desc>
 <defs>
 <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
 <style>
-  .lane { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; }
-  .tx { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
-  .read { fill: #b9dca8; stroke: #667085; stroke-width: 2; }
-  .think { fill: #ffffff; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 5; }
-  .write { fill: #aecbee; stroke: #667085; stroke-width: 2; }
+  .lane { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.5; }
   .rd { fill: #b9dca8; }
   .wr { fill: #aecbee; }
-  .outline { fill: none; stroke: #667085; stroke-width: 1.5; }
-  .axis { fill: none; stroke: #667085; stroke-width: 2; }
+  .think { fill: #ffffff; stroke: #98a2b3; stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .axis { fill: none; stroke: #98a2b3; stroke-width: 1.5; }
   .panel { fill: #101828; font: 600 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; }
   .lanehead { fill: #101828; font: 600 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
   .label { fill: #101828; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
   .small { fill: #475467; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: end; }
 </style>
 </defs>
-<text class="panel" x="4" y="26">(a) Two human writers</text>
+<text class="panel" x="4" y="26">(a) Two concurrent human writers</text>
 <rect class="lane" x="4" y="40" width="1182" height="56" rx="10"/>
-<rect class="lane" x="4" y="104" width="1182" height="56" rx="10"/>
 <text class="lanehead" x="18" y="68">Writer A</text>
+<rect class="lane" x="4" y="104" width="1182" height="56" rx="10"/>
+<rect class="rd" x="154" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="174" y="55" width="54" height="26" rx="3"/>
+<rect class="rd" x="230" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="250" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="290" y="55" width="14" height="26" rx="3"/>
+<rect class="wr" x="306" y="55" width="54" height="26" rx="3"/>
+<rect class="rd" x="362" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="386" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="426" y="55" width="14" height="26" rx="3"/>
+<rect class="wr" x="442" y="55" width="54" height="26" rx="3"/>
+<rect class="rd" x="498" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="518" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="558" y="55" width="14" height="26" rx="3"/>
+<rect class="wr" x="574" y="55" width="30" height="26" rx="3"/>
+<rect class="rd" x="606" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="630" y="55" width="54" height="26" rx="3"/>
+<rect class="rd" x="686" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="706" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="746" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="770" y="55" width="30" height="26" rx="3"/>
+<rect class="rd" x="802" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="826" y="55" width="30" height="26" rx="3"/>
+<rect class="rd" x="858" y="55" width="14" height="26" rx="3"/>
+<rect class="wr" x="874" y="55" width="30" height="26" rx="3"/>
+<rect class="rd" x="906" y="55" width="14" height="26" rx="3"/>
+<rect class="wr" x="922" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="962" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="986" y="55" width="30" height="26" rx="3"/>
+<rect class="rd" x="1018" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="1038" y="55" width="46" height="26" rx="3"/>
+<rect class="rd" x="1086" y="55" width="18" height="26" rx="3"/>
+<rect class="wr" x="1106" y="55" width="38" height="26" rx="3"/>
+<rect class="rd" x="1146" y="55" width="22" height="26" rx="3"/>
+<rect class="wr" x="1170" y="55" width="6" height="26" rx="3"/>
 <text class="lanehead" x="18" y="132">Writer B</text>
-<rect class="read" x="150" y="51" width="10" height="34" rx="3"/>
-<rect class="write" x="160" y="51" width="34" height="34" rx="3"/>
-<rect class="read" x="194" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="214" y="51" width="16" height="34" rx="3"/>
-<rect class="read" x="230" y="51" width="12" height="34" rx="3"/>
-<rect class="write" x="242" y="51" width="34" height="34" rx="3"/>
-<rect class="read" x="276" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="292" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="336" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="356" y="51" width="12" height="34" rx="3"/>
-<rect class="read" x="368" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="388" y="51" width="12" height="34" rx="3"/>
-<rect class="read" x="400" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="416" y="51" width="20" height="34" rx="3"/>
-<rect class="read" x="436" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="456" y="51" width="16" height="34" rx="3"/>
-<rect class="read" x="472" y="51" width="10" height="34" rx="3"/>
-<rect class="write" x="482" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="526" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="542" y="51" width="34" height="34" rx="3"/>
-<rect class="read" x="576" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="596" y="51" width="26" height="34" rx="3"/>
-<rect class="read" x="622" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="638" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="682" y="51" width="10" height="34" rx="3"/>
-<rect class="write" x="692" y="51" width="16" height="34" rx="3"/>
-<rect class="read" x="708" y="51" width="10" height="34" rx="3"/>
-<rect class="write" x="718" y="51" width="34" height="34" rx="3"/>
-<rect class="read" x="752" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="768" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="812" y="51" width="8" height="34" rx="3"/>
-<rect class="write" x="820" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="864" y="51" width="8" height="34" rx="3"/>
-<rect class="write" x="872" y="51" width="16" height="34" rx="3"/>
-<rect class="read" x="888" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="908" y="51" width="12" height="34" rx="3"/>
-<rect class="read" x="920" y="51" width="12" height="34" rx="3"/>
-<rect class="write" x="932" y="51" width="12" height="34" rx="3"/>
-<rect class="read" x="944" y="51" width="12" height="34" rx="3"/>
-<rect class="write" x="956" y="51" width="26" height="34" rx="3"/>
-<rect class="read" x="982" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="1002" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="1046" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="1062" y="51" width="44" height="34" rx="3"/>
-<rect class="read" x="1106" y="51" width="16" height="34" rx="3"/>
-<rect class="write" x="1122" y="51" width="26" height="34" rx="3"/>
-<rect class="read" x="1148" y="51" width="20" height="34" rx="3"/>
-<rect class="write" x="1168" y="51" width="10" height="34" rx="3"/>
-<rect class="read" x="150" y="115" width="16" height="34" rx="3"/>
-<rect class="write" x="166" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="200" y="115" width="16" height="34" rx="3"/>
-<rect class="write" x="216" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="242" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="262" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="296" y="115" width="10" height="34" rx="3"/>
-<rect class="write" x="306" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="322" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="342" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="368" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="388" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="404" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="412" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="438" y="115" width="12" height="34" rx="3"/>
-<rect class="write" x="450" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="466" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="474" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="508" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="516" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="550" y="115" width="16" height="34" rx="3"/>
-<rect class="write" x="566" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="592" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="612" y="115" width="44" height="34" rx="3"/>
-<rect class="read" x="656" y="115" width="10" height="34" rx="3"/>
-<rect class="write" x="666" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="700" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="708" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="742" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="750" y="115" width="12" height="34" rx="3"/>
-<rect class="read" x="762" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="770" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="786" y="115" width="10" height="34" rx="3"/>
-<rect class="write" x="796" y="115" width="34" height="34" rx="3"/>
-<rect class="read" x="830" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="838" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="864" y="115" width="12" height="34" rx="3"/>
-<rect class="write" x="876" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="902" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="922" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="938" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="958" y="115" width="16" height="34" rx="3"/>
-<rect class="read" x="974" y="115" width="12" height="34" rx="3"/>
-<rect class="write" x="986" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="1012" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="1020" y="115" width="44" height="34" rx="3"/>
-<rect class="read" x="1064" y="115" width="8" height="34" rx="3"/>
-<rect class="write" x="1072" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="1098" y="115" width="12" height="34" rx="3"/>
-<rect class="write" x="1110" y="115" width="26" height="34" rx="3"/>
-<rect class="read" x="1136" y="115" width="20" height="34" rx="3"/>
-<rect class="write" x="1156" y="115" width="12" height="34" rx="3"/>
-<rect class="read" x="1168" y="115" width="10" height="34" rx="3"/>
+<rect class="rd" x="154" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="178" y="119" width="46" height="26" rx="3"/>
+<rect class="rd" x="226" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="246" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="278" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="302" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="334" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="354" y="119" width="46" height="26" rx="3"/>
+<rect class="rd" x="402" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="422" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="454" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="478" y="119" width="46" height="26" rx="3"/>
+<rect class="rd" x="526" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="546" y="119" width="38" height="26" rx="3"/>
+<rect class="rd" x="586" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="610" y="119" width="46" height="26" rx="3"/>
+<rect class="rd" x="658" y="119" width="14" height="26" rx="3"/>
+<rect class="wr" x="674" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="706" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="730" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="762" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="782" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="814" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="834" y="119" width="54" height="26" rx="3"/>
+<rect class="rd" x="890" y="119" width="14" height="26" rx="3"/>
+<rect class="wr" x="906" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="938" y="119" width="22" height="26" rx="3"/>
+<rect class="wr" x="962" y="119" width="30" height="26" rx="3"/>
+<rect class="rd" x="994" y="119" width="14" height="26" rx="3"/>
+<rect class="wr" x="1010" y="119" width="38" height="26" rx="3"/>
+<rect class="rd" x="1050" y="119" width="14" height="26" rx="3"/>
+<rect class="wr" x="1066" y="119" width="54" height="26" rx="3"/>
+<rect class="rd" x="1122" y="119" width="18" height="26" rx="3"/>
+<rect class="wr" x="1142" y="119" width="34" height="26" rx="3"/>
 <text class="panel" x="4" y="210">(b) A human and an agent</text>
 <rect class="lane" x="4" y="224" width="1182" height="56" rx="10"/>
-<rect class="lane" x="4" y="288" width="1182" height="56" rx="10"/>
 <text class="lanehead" x="18" y="252">User</text>
+<rect class="lane" x="4" y="288" width="1182" height="56" rx="10"/>
 <text class="lanehead" x="18" y="316">Agent</text>
-<rect class="read" x="150" y="235" width="12" height="34" rx="3"/>
-<rect class="write" x="162" y="235" width="16" height="34" rx="3"/>
-<rect class="read" x="178" y="235" width="16" height="34" rx="3"/>
-<rect class="write" x="194" y="235" width="44" height="34" rx="3"/>
-<rect class="read" x="238" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="246" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="258" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="278" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="290" y="235" width="12" height="34" rx="3"/>
-<rect class="write" x="302" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="336" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="344" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="378" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="388" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="400" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="408" y="235" width="26" height="34" rx="3"/>
-<rect class="read" x="434" y="235" width="16" height="34" rx="3"/>
-<rect class="write" x="450" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="462" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="472" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="484" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="504" y="235" width="26" height="34" rx="3"/>
-<rect class="read" x="530" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="538" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="572" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="580" y="235" width="16" height="34" rx="3"/>
-<rect class="read" x="596" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="616" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="628" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="648" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="682" y="235" width="16" height="34" rx="3"/>
-<rect class="write" x="698" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="710" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="720" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="732" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="752" y="235" width="16" height="34" rx="3"/>
-<rect class="read" x="768" y="235" width="12" height="34" rx="3"/>
-<rect class="write" x="780" y="235" width="26" height="34" rx="3"/>
-<rect class="read" x="806" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="816" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="850" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="858" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="892" y="235" width="12" height="34" rx="3"/>
-<rect class="write" x="904" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="938" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="948" y="235" width="12" height="34" rx="3"/>
-<rect class="read" x="960" y="235" width="20" height="34" rx="3"/>
-<rect class="write" x="980" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="1014" y="235" width="10" height="34" rx="3"/>
-<rect class="write" x="1024" y="235" width="20" height="34" rx="3"/>
-<rect class="read" x="1044" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="1052" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="1086" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="1094" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="1128" y="235" width="8" height="34" rx="3"/>
-<rect class="write" x="1136" y="235" width="34" height="34" rx="3"/>
-<rect class="read" x="1170" y="235" width="8" height="34" rx="3"/>
-<rect class="read" x="150" y="297" width="100" height="38" rx="6"/>
-<text class="label" x="200" y="317">Reads</text>
-<rect class="think" x="250" y="297" width="760" height="38" rx="6"/>
-<text class="label" x="630" y="317">Thinks</text>
-<rect class="write" x="1010" y="297" width="168" height="38" rx="6"/>
-<text class="label" x="1094" y="317">Writes</text>
+<rect class="rd" x="154" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="174" y="239" width="30" height="26" rx="3"/>
+<rect class="rd" x="206" y="239" width="22" height="26" rx="3"/>
+<rect class="wr" x="230" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="270" y="239" width="22" height="26" rx="3"/>
+<rect class="wr" x="294" y="239" width="46" height="26" rx="3"/>
+<rect class="rd" x="342" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="362" y="239" width="30" height="26" rx="3"/>
+<rect class="rd" x="394" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="414" y="239" width="46" height="26" rx="3"/>
+<rect class="rd" x="462" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="478" y="239" width="54" height="26" rx="3"/>
+<rect class="rd" x="534" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="550" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="590" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="606" y="239" width="30" height="26" rx="3"/>
+<rect class="rd" x="638" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="654" y="239" width="30" height="26" rx="3"/>
+<rect class="rd" x="686" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="706" y="239" width="54" height="26" rx="3"/>
+<rect class="rd" x="762" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="778" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="818" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="838" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="878" y="239" width="22" height="26" rx="3"/>
+<rect class="wr" x="902" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="942" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="962" y="239" width="54" height="26" rx="3"/>
+<rect class="rd" x="1018" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="1034" y="239" width="54" height="26" rx="3"/>
+<rect class="rd" x="1090" y="239" width="18" height="26" rx="3"/>
+<rect class="wr" x="1110" y="239" width="38" height="26" rx="3"/>
+<rect class="rd" x="1150" y="239" width="14" height="26" rx="3"/>
+<rect class="wr" x="1166" y="239" width="10" height="26" rx="3"/>
+<rect class="rd" x="154" y="299" width="96" height="34" rx="6"/><text class="label" x="202" y="317">Reads</text>
+<rect class="think" x="258" y="299" width="770" height="34" rx="6"/><text class="label" x="643" y="317">Thinks</text>
+<rect class="wr" x="1036" y="299" width="136" height="34" rx="6"/><text class="label" x="1104" y="317">Writes</text>
 <line class="axis" x1="150" y1="372" x2="1180" y2="372" marker-end="url(#arrow2)"/>
 <text class="small" x="1180" y="398">time</text>
-<rect class="read" x="150" y="398" width="24" height="24" rx="4"/>
-<text class="small" x="182" y="417" style="text-anchor:start">read</text>
-<rect class="write" x="250" y="398" width="24" height="24" rx="4"/>
-<text class="small" x="282" y="417" style="text-anchor:start">write</text>
+<rect class="rd" x="150" y="402" width="22" height="20" rx="3"/><text class="small" x="180" y="417" style="text-anchor:start">read</text>
+<rect class="wr" x="250" y="402" width="22" height="20" rx="3"/><text class="small" x="280" y="417" style="text-anchor:start">write</text>
 </svg>

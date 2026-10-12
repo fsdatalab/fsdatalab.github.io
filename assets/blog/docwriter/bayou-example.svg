@@ -13,11 +13,11 @@
   .alicec { fill: #f5d7a8; stroke: #101828; stroke-width: 2.5; }
   .sync { stroke: #667085; stroke-width: 2; stroke-dasharray: 3 5; }
   .axis { fill: none; stroke: #667085; stroke-width: 2; }
-  .lanehead { fill: #101828; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
-  .sub { fill: #475467; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
-  .label { fill: #101828; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
-  .loglabel { fill: #475467; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; }
-  .small { fill: #475467; font: 500 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .lanehead { fill: #101828; font: 600 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .sub { fill: #475467; font: 500 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .label { fill: #101828; font: 500 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .loglabel { fill: #475467; font: 600 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; }
+  .small { fill: #475467; font: 500 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
 </style>
 </defs>
 

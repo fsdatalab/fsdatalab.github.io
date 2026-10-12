@@ -14,7 +14,7 @@ image:
   alt: "Introducing DocWriter: write a document concurrently with your agent, without waiting. A DocWriter snippet shows an agent suggestion with Accept and Reject buttons."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> We built <a href="https://github.com/docwriter-org/docwriter">DocWriter</a>, an open-source text editor where you and your agent can write a document <em>concurrently</em>. Think of DocWriter as "Cursor for writing," except that DocWriter is not chat-based: you and your agent edit the same document at the same time, and you decide which of the agent's edits to keep. DocWriter works with your existing Claude Code or Codex subscription. <a href="https://github.com/docwriter-org/docwriter">Star us on GitHub</a>, try DocWriter, and <a href="TODO">sign up for our upcoming user study</a> (TODO create link)!</aside>
+<aside class="tldr"><strong>TL;DR:</strong> We built <a href="https://github.com/docwriter-org/docwriter">DocWriter</a>, an open-source text editor where you and your agent can write a document <em>concurrently</em>. Think of DocWriter as "Cursor for writing," except that DocWriter is not chat-based: the agent runs ambiently in the background, "watching" you write and suggesting edits as you go, and you decide which of the agent's edits to keep. DocWriter works with your existing Claude Code or Codex subscription. <a href="https://github.com/docwriter-org/docwriter">Star us on GitHub</a>, try DocWriter, and <a href="TODO">sign up for our upcoming user study</a> (TODO create link)!</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -47,7 +47,7 @@ Writing is different. Usually, it is not a good idea to ask an agent to write a 
 
 Today, almost all human-agent collaboration happens through chat: the user sends a message, and the agent replies or edits the document. A strawman argument against chat is that a chat box is not where people usually write documents. But people can learn to work in a chat box if truly necessary (in fact, a growing share of scientific papers is now written with AI).<sup><a href="#note-1">1</a></sup> The real problem is that chat interfaces are _inefficient_ for effective writing, where there is (ideally) a high frequency of human-agent interaction. Chat is synchronous: users have to wait for the agent to respond. Therefore, the onus is on the user to be efficient: they have to synchronize their "think time" with the agent's "think time," which is impossible. So, even generously assuming that people want to stay involved in their writing, it is not surprising that many people run out of patience and let the agent write nearly the whole thing!
 
-The honest story behind DocWriter is a little embarrassing. Shreya wanted to write her PhD dissertation as quickly as possible, but could not figure out how to use any frontier LLM effectively in the process, without ending up with a dissertation full of slop. Therefore, we built DocWriter, an editor where a person and their agent write concurrently. Think of DocWriter as a custom harness (i.e., system prompt and tools) for a frontier agent, coupled with an IDE- or text-editor-like UI where the user can write normally.
+The honest story behind DocWriter is a little embarrassing. Shreya wanted to write her PhD dissertation as quickly as possible, but could not figure out how to use any frontier LLM effectively in the process, without ending up with a dissertation full of slop. Therefore, we built DocWriter, an editor where a person and their agent write concurrently. Think of DocWriter as a custom harness (i.e., system prompt and tools) for a frontier agent that runs ambiently in the background, coupled with an IDE- or text-editor-like UI where the user can write normally.
 
 In the rest of this article, we dive into the concurrency challenges we faced in designing DocWriter. We discuss:
 
@@ -93,7 +93,7 @@ Human writers usually avoid conflicts by coordinating socially, in addition to r
 
 <figure id="figure-3" style="width: min(52rem, calc(100vw - 3rem));">
   <img src="{{ '/assets/blog/docwriter/transaction-shapes.svg' | relative_url }}" alt="Two human writers make many short transactions over time. A user also makes many short transactions, while an agent makes one long transaction that reads at the start and writes at the end.">
-  <figcaption>Figure 3. Reads are green, and writes are blue. (a) Two human writers read and write small parts of the document all the time. (b) The agent makes one long transaction: it reads, thinks, and then writes.</figcaption>
+  <figcaption>Figure 3. Reads are green, and writes are blue. (a) Two concurrent human writers read and write small parts of the document all the time. (b) The agent makes one long transaction: it reads, thinks, and then writes.</figcaption>
 </figure>
 
 **Agent edits have lower priority than user edits.** In human collaboration, writers generally have equal authority over the document, or they socially agree on a lead author. Real-time editors reflect this: OT and CRDTs treat every writer's edits the same way. In DocWriter, the relationship is asymmetric: the user owns the document, and the agent assists. At the same time, the agent needs autonomy to be useful. For example, when asked to write an abstract, the agent should be able to read the paper and draft the abstract without asking for permission at every step. So the concurrency control must treat the two writers differently. The agent should be free to make edits, even many edits, but those edits must never overwrite newer user changes or stop the user from typing, and the user should have the final say over what enters the document --- without feeling overwhelmed.
@@ -148,7 +148,7 @@ Bayou_Write(
 
 Suppose Bob and then Alice each book the room for 1:30 pm, on their own laptops, while offline ([Figure 4](#figure-4)). Both checks pass, because neither laptop has the other's meeting yet. Later, the laptops sync, and both laptops order the writes by timestamp, with Bob's write first. On Bob's laptop, Alice's check now finds Bob's meeting and fails, so her merge procedure moves her to 3:00 pm. Alice's laptop undoes her write, applies Bob's write, and runs hers again, with the same result. Both calendars end up the same.
 
-<figure id="figure-4" style="width: min(60rem, calc(100vw - 3rem));">
+<figure id="figure-4" style="width: min(52rem, calc(100vw - 3rem));">
   <img src="{{ '/assets/blog/docwriter/bayou-example.svg' | relative_url }}" alt="A timeline with one lane for Bob's laptop and one for Alice's. Both book 1:30 pm offline. After the laptops sync, Alice's check fails on both laptops, and her meeting moves to 3:00 pm.">
   <figcaption>Figure 4. Bob's laptop is the primary. Bob and Alice both book the room for 1:30 pm while offline. At the first sync, Bob's laptop runs Alice's write after Bob's write, and Alice's laptop replays its log with Bob's write first. On both laptops, Alice's check fails, so her meeting moves to 3:00 pm. Bob's laptop then commits Alice's write. At the next sync, Alice's laptop learns about the commit, and her 3:00 pm meeting becomes final.</figcaption>
 </figure>
