@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 360" role="img" aria-labelledby="title1 desc1">
+<title id="title1">Timeline of the running example</title>
+<desc id="desc1">The user writes lines 1 to 3 and pauses. The agent reads the document and thinks for about a minute. While the agent thinks, the user changes line 2 and writes line 4. Then the agent edits lines 1 to 3, based on its old read, so its edit to line 2 conflicts with the user's change.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b42318"/></marker>
+<style>
+  .lane { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; }
+  .user { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+  .read { fill: #b9dca8; stroke: #667085; stroke-width: 2; }
+  .think { fill: #ffffff; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 5; }
+  .write { fill: #aecbee; stroke: #667085; stroke-width: 2; }
+  .axis { fill: none; stroke: #667085; stroke-width: 2; }
+  .tick { stroke: #667085; stroke-width: 2; }
+  .conflict { fill: none; stroke: #b42318; stroke-width: 2.5; stroke-dasharray: 7 5; }
+  .lanehead { fill: #101828; font: 600 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .label { fill: #101828; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .think-label { fill: #101828; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .small { fill: #475467; font: 500 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .note { fill: #b42318; font: 600 19px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: end; }
+</style>
+</defs>
+
+<rect class="lane" x="4" y="30" width="1182" height="105" rx="10"/>
+<rect class="lane" x="4" y="165" width="1182" height="95" rx="10"/>
+<text class="lanehead" x="18" y="97">User</text>
+<text class="lanehead" x="18" y="213">Agent</text>
+
+<rect class="user" x="110" y="72" width="250" height="50" rx="8"/>
+<text class="label" x="235" y="98">Writes lines 1 to 3</text>
+<text class="small" x="430" y="104">pauses</text>
+<rect class="user" x="500" y="72" width="200" height="50" rx="8"/>
+<text class="label" x="600" y="98">Changes line 2</text>
+<rect class="user" x="715" y="72" width="200" height="50" rx="8"/>
+<text class="label" x="815" y="98">Writes line 4</text>
+
+<rect class="read" x="380" y="187" width="100" height="50" rx="8"/>
+<text class="label" x="430" y="213">Reads</text>
+<rect class="think" x="480" y="187" width="440" height="50" rx="8"/>
+<text class="think-label" x="700" y="213">Thinks (cannot see the user's changes)</text>
+<rect class="write" x="920" y="187" width="250" height="50" rx="8"/>
+<text class="label" x="1045" y="213">Edits lines 1 to 3</text>
+
+<path class="conflict" d="M 600 122 L 600 150 L 1045 150 L 1045 182" marker-end="url(#arrow-red)"/>
+<text class="note" x="1180" y="290">Its edit to line 2 conflicts with the user's change</text>
+
+<line class="axis" x1="110" y1="315" x2="1180" y2="315" marker-end="url(#arrow)"/>
+<line class="tick" x1="380" y1="307" x2="380" y2="323"/>
+<line class="tick" x1="560" y1="307" x2="560" y2="323"/>
+<line class="tick" x1="740" y1="307" x2="740" y2="323"/>
+<line class="tick" x1="920" y1="307" x2="920" y2="323"/>
+<text class="small" x="380" y="349">0 s</text>
+<text class="small" x="560" y="349">20 s</text>
+<text class="small" x="740" y="349">40 s</text>
+<text class="small" x="920" y="349">60 s</text>
+</svg>
