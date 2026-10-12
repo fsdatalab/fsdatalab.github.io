@@ -379,7 +379,7 @@ The first term is a dot product, like an attention score, and the second is a ti
 
 Like `trie_tree`, Decision 2.0 Kai gives probabilities in one request. But `trie_tree` has to score every token in the vocabulary at each answer position, while Decision 2.0 Kai only scores the $$M$$ labels.
 
-One might notice that the option blocks add a lot of tokens: about 16 tokens per label, or about 190 tokens per document in our running example, compared with 24 for `letters`. But the extra tokens buy a lot of accuracy. We ran Decision 2.0 Kai and the base Qwen3-0.6B on the 12 classification queries in [QUAIL-B](https://github.com/fsdatalab/quail-bench), on one H100. Decision 2.0 Kai agrees with the reference labels on 63.1% of documents on average, compared with just 39.0% for Qwen3-0.6B! We are really excited about these decision models and believe we can fine-tune our own decision models for AI-SQL tasks (potentially even-smaller models).
+One might notice that the option blocks add a lot of tokens: about 16 tokens per label, or about 190 tokens per document in our running example, compared with 24 for `letters`. But the extra tokens (more specifically, the trained decision head) buy a lot of accuracy. We ran Decision 2.0 Kai and the base Qwen3-0.6B on the 12 classification queries in [QUAIL-B](https://github.com/fsdatalab/quail-bench), on one H100. Decision 2.0 Kai agrees with the reference labels on 63.1% of documents on average, compared with just 39.0% for Qwen3-0.6B! We are really excited about these decision models and believe we can fine-tune our own decision models for AI-SQL tasks (potentially even-smaller models).
 
 # 6. Conclusion
 
