@@ -1,11 +1,9 @@
 ---
 layout: post
 title: "To Classify, Try a Trie Tree"
-date: 2026-10-09
+date: 2026-10-12
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-classification/
-unlisted: true
-sitemap: false
 math: true
 typora-root-url: ..
 description: "How should an AI-SQL engine classify documents with LLMs at scale? We walk through the ways Quail can do it, and how it picks the cheapest one for a given LLM."
@@ -13,7 +11,7 @@ image:
   path: /assets/blog/ai-classification/social-preview.png
   width: 1200
   height: 630
-  alt: "To Classify, Try a Trie Tree, with an AI.CLASSIFY query and the trie of its labels."
+  alt: "To Classify, Try a Trie Tree: AI-powered classification in Quail, 1.8x faster than a vLLM baseline, with the trie of the labels."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! On 12 new classification queries in <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a>, Quail is <strong>1.8x faster</strong> than a vLLM baseline.</aside>
