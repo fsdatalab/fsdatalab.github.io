@@ -1,11 +1,9 @@
 ---
 layout: post
-title: "To Classify, Try a Trie"
-date: 2026-10-09
+title: "To Classify, Try a Trie Tree"
+date: 2026-10-12
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-classification/
-unlisted: true
-sitemap: false
 math: true
 typora-root-url: ..
 description: "How should an AI-SQL engine classify documents with LLMs at scale? We walk through the ways Quail can do it, and how it picks the cheapest one for a given LLM."
@@ -13,7 +11,7 @@ image:
   path: /assets/blog/ai-classification/social-preview.png
   width: 1200
   height: 630
-  alt: "To Classify, Try a Trie, with an AI.CLASSIFY query and the trie of its labels."
+  alt: "To Classify, Try a Trie Tree: AI-powered classification in Quail, 1.8x faster than a vLLM baseline, with the trie of the labels."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! On 12 new classification queries in <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a>, Quail is <strong>1.8x faster</strong> than a vLLM baseline.</aside>
@@ -114,7 +112,7 @@ The implementations also select the label in different ways. `trie_decode` gener
 
 ## 3.1 trie_decode: Greedily Generate the Label
 
-`trie_decode` is the implementation that is closest to what prior systems do. It generates the label one token at a time, as an LLM generates text.<sup><a href="#note-1">1</a></sup> At each step, the LLM picks the most likely token that continues a label.
+`trie_decode` is the implementation that is closest to what prior systems do. It generates the label one token at a time, as an LLM generates text.<sup><a href="#note-1">1</a></sup> At each decode step, the LLM picks the most likely token that continues a label.
 
 At a high level, we can assemble the set of labels into a *trie* ([Figure 2](#figure-2)). A trie, also called a prefix tree, stores each label as a path of tokens from the root. Labels that start with the same tokens share the start of their paths, e.g., both refund labels pass through `refund`. The root of the trie is the `ANSWER:` token. For the rest of the article, we write labels in quotes and tokens in code, e.g., the label "refund request" has the tokens `refund` and `request`.
 
@@ -123,17 +121,17 @@ At a high level, we can assemble the set of labels into a *trie* ([Figure 2](#fi
   <figcaption>Figure 2. The trie of the 10 labels in the running example. The <code>ANSWER:</code> token is the root. The labels branch at three nodes: <code>ANSWER:</code>, <code>refund</code>, and <code>shipping</code>. Each label ends at a node with a dark outline. E.g., <code>refund</code> is not a label, but <code>refund</code> followed by <code>request</code> is.</figcaption>
 </figure>
 
-The simple way to generate a label is one token per step. At each step, the LLM reads the tokens so far and picks the most likely child of the current node in the trie. E.g., to generate "shipping address change", the LLM could take 3 steps. It would pick `shipping` at `ANSWER:`, then `address`, and then `change`.
+The simple way to generate a label is one token per decode step. At each decode step, the LLM reads the tokens so far and picks the most likely child of the current node in the trie. E.g., to generate "shipping address change", the LLM could take 3 decode steps. It would pick `shipping` at `ANSWER:`, then `address`, and then `change`.
 
-Now, you might realize --- if the answer really was "shipping address change", by the time we are at the second step (`address`), we actually need not decode the `change` token, because there is no other valid token!
+Now, you might realize --- if the answer really was "shipping address change", by the time we are at the second decode step (`address`), we actually need not decode the `change` token, because there is no other valid token!
 
 More generally, the LLM only needs to make a choice where the labels branch apart in the trie, i.e., at a node with more than one child. In our running example, there are only 3 such nodes: `ANSWER:` (which first word?), `refund` (request or status?), and `shipping` (delay, damage, or address?). Everywhere else, the next token is already determined. So Quail only runs the LLM at the 3 branching nodes, and it stops as soon as there's just one label left. For instance, if the LLM picks `product` at `ANSWER:`, the answer must be "product defect", so one step and we're done!
 
-What does this look like when we classify many documents at once? [Figure 3](#figure-3) shows the steps for a batch of 10 documents. Quail computes each step for all documents in the batch together, in one forward pass. Step 0 happens in the same request as the prompt: the LLM reads the document and picks the first token at `ANSWER:`. Then, each later step sends one more request, but only for the documents whose labels aren't decided yet. In our running example, only the 5 documents that picked `refund` or `shipping` need a step 1, and the other 5 documents are already done.
+What does this look like when we classify many documents at once? [Figure 3](#figure-3) shows the decode steps for a batch of 10 documents. Quail computes each step for all documents in the batch together, in one forward pass. Step 0 happens in the same request as the prompt: the LLM reads the document and picks the first token at `ANSWER:`. Then, each later decode step sends one more request, but only for the documents whose labels aren't decided yet. In our running example, only the 5 documents that picked `refund` or `shipping` need a step 1, and the other 5 documents are already done.
 
 <figure id="figure-3" style="width: min(69.9rem, calc(100vw - 3rem));">
-  <img src="{{ '/assets/blog/ai-classification/decode-rounds.svg' | relative_url }}" alt="The steps of trie_decode for 10 documents.">
-  <figcaption>Figure 3. The steps of <code>trie_decode</code> for a batch of 10 documents, with one forward pass per step. Each document gets a different label. Step 0 is part of the same request as the prompt, and it selects the first label token at the <code>ANSWER:</code> token. Only the 5 documents that selected <code>refund</code> or <code>shipping</code> need step 1. A green box is a token that the next step sends back to the LLM. A dashed box is the token that decides the label.</figcaption>
+  <img src="{{ '/assets/blog/ai-classification/decode-rounds.svg' | relative_url }}" alt="The decode steps of trie_decode for 10 documents.">
+  <figcaption>Figure 3. The steps of <code>trie_decode</code> for a batch of 10 documents, with one forward pass per decode step. Each document gets a different label. Step 0 is part of the same request as the prompt, and it selects the first label token at the <code>ANSWER:</code> token. Only the 5 documents that selected <code>refund</code> or <code>shipping</code> need step 1. A green box is a token that the next step sends back to the LLM. A dashed box is the token that decides the label.</figcaption>
 </figure>
 
 So `trie_decode` is pretty cheap: if every label is equally likely, a document in our running example needs just 1.5 requests on average. But there is a catch --- since it is greedy, `trie_decode` only looks at the tokens on its own path. It never scores the other labels, so it can't return label probabilities. So, if the user asks for probabilities, Quail must use one of the other methods.<sup><a href="#note-2">2</a></sup>
@@ -221,8 +219,8 @@ Like all cost models in Quail, our cost models for classification are based on *
 
 ## 4.1 Workload and Notation
 
-<details class="collapsible-section" markdown="1">
-<summary id="table-1">Table 1. Symbols in the classification cost model.<span class="collapsible-note">The table is collapsible.</span></summary>
+<details class="collapsible-section proof-card" markdown="1">
+<summary id="table-1">Table 1. Symbols in the classification cost model.</summary>
 
 <div class="table-wrap" markdown="1">
 
@@ -269,9 +267,9 @@ The three methods only differ in $$q_{\text{tail}}$$ and $$a$$. [Table 2](#table
 <p class="table-caption">Table 2. Instruction length and expected answer positions per document in the running example.</p>
 </div>
 
-For projections, attention, and the MLP, we can reuse the formulas from [our blog post on AI-powered filters](/blog/ai-filter-cost-estimates/), plugging in the new $$n_{\text{tok}}$$ and $$r_i$$. But classification adds two costs that our filter cost model leaves out: loading the cached KV of the prompt, and computing scores for the whole vocabulary at the answer positions (a filter only needs the scores of TRUE and FALSE).
+For projections, attention, and the MLP, we can reuse the formulas from [our blog post on AI-powered filters](/blog/ai-filter-cost-estimates/), plugging in the new $$n_{\text{tok}}$$ and $$r_i$$. However, classification differs from filters in two ways: (1) each method has a different number of KV reads, i.e., loads a different number of cached KV tokens, and (2) classification needs the whole output head, i.e., scores for the whole vocabulary, not just TRUE and FALSE.
 
-**KV reads.** Each answer position attends to the prompt, so the GPU has to load the KV of the prompt from HBM. `letters` and `trie_tree` load it once per document, since all of their answer positions are in one request. `trie_decode` loads it once per extra step. Step 0 shares the request of the prompt, but every later step is a new request. So if $$b$$ is the expected number of requests of `trie_decode` per document (including step 0), the number of KV tokens loaded is
+**KV reads.** Each answer position attends to the prompt, so the GPU has to load the KV of the prompt from HBM. `letters` and `trie_tree` load it once per document, since all of their answer positions are in one request. `trie_decode` loads it once per extra decode step. Step 0 shares the request of the prompt, but every later decode step is a new request. So if $$b$$ is the expected number of requests of `trie_decode` per document (including step 0), the number of KV tokens loaded is
 
 $$
 \begin{aligned}
@@ -314,7 +312,7 @@ For `letters`, the extra tokens are in the prompt instead. The letters add $$2M 
 
 ## 4.3 Cost of trie_decode
 
-Unlike the other two methods, the cost of `trie_decode` depends on which label the LLM picks, because some labels need more steps than others. Quail doesn't know the labels before it runs the query, so the cost model assumes that every label is equally likely.<sup><a href="#note-8">8</a></sup>
+Unlike the other two methods, the cost of `trie_decode` depends on which label the LLM picks, because some labels need more decode steps than others. Quail doesn't know the labels before it runs the query, so the cost model assumes that every label is equally likely.<sup><a href="#note-8">8</a></sup>
 
 Each branching node on the path of a label costs one request. So if $$c_m$$ is the number of branching nodes on the path of label $$m$$, up to and including the one that decides the label, the expected number of requests per document is
 
@@ -328,9 +326,9 @@ $$
 b = \frac{5 \cdot 1 + 5 \cdot 2}{10} = 1.5.
 $$
 
-In our running example, each step adds a single token after the prompt: `ANSWER:` in step 0, and `refund` or `shipping` in step 1. So `trie_decode` runs the LLM on 1.5 tokens per document on average, beyond the prompt. Like for `trie_tree`, each token costs about 8 billion FLOPs (7.2 billion in the projections and the MLP, plus 0.78 billion for the full output head). So `trie_decode` adds only about 12 billion FLOPs per document, compared with about 32 billion for `trie_tree`.
+In our running example, each decode step adds a single token after the prompt: `ANSWER:` in step 0, and `refund` or `shipping` in step 1. So `trie_decode` runs the LLM on 1.5 tokens per document on average, beyond the prompt. Like for `trie_tree`, each token costs about 8 billion FLOPs (7.2 billion in the projections and the MLP, plus 0.78 billion for the full output head). So `trie_decode` adds only about 12 billion FLOPs per document, compared with about 32 billion for `trie_tree`.
 
-Note that the estimate assumes optimal packing, i.e., that Quail packs many documents together so that each forward pass saturates the GPU.<sup><a href="#note-9">9</a></sup> With only a few documents, a later step can run in a nearly empty forward pass, and `trie_decode` costs more than the estimate.
+Note that the estimate assumes optimal packing, i.e., that Quail packs many documents together so that each forward pass saturates the GPU.<sup><a href="#note-9">9</a></sup> With only a few documents, a later decode step can run in a nearly empty forward pass, and `trie_decode` costs more than the estimate.
 
 ## 4.4 Picking a Method
 
@@ -348,10 +346,10 @@ We ran each query with Qwen3-4B-fp8 on one H100, at scale factor 0.5, on both Qu
 
 <figure id="figure-6" style="width: min(42rem, calc(100vw - 3rem));">
   <img src="{{ '/assets/blog/ai-classification/quailb-results.svg' | relative_url }}" alt="Input tokens per second, KV regret, and cost per query for Quail and a vLLM baseline on the 12 QUAIL-B classification queries.">
-  <figcaption>Figure 6. QUAIL-B classification queries with Qwen3-4B-fp8 on one H100, at scale factor 0.5. KV regret is the share of computed tokens that are recomputed.</figcaption>
+  <figcaption>Figure 6. QUAIL-B classification queries with Qwen3-4B-fp8 on one H100, at scale factor 0.5. KV regret is the percentage of the tokens an engine computes that it already computed once before, e.g., because it evicted their KV.</figcaption>
 </figure>
 
-**Quail is faster on all 12 queries: 2.1x faster in total, and 1.8x faster per query (geometric mean).** The biggest wins come from queries that read the same documents more than once. E.g., AGENT-5 has three different `AI.CLASSIFY` operators on the same agent traces. vLLM's prefix cache evicts the least recently used KV, so by the time the next operator reads a trace, its KV is usually gone and vLLM has to recompute it (64% KV regret). Quail instead keeps the KV of the trace around for the later operators ([Section 3.4](#34-keeping-the-document-kv-for-later-operators)). Quail also runs within 1.8x to 2.8x of its SoL estimate on every query.
+**Quail is faster on all 12 queries: 2.1x faster in total, and 1.8x faster per query (geometric mean).** The biggest wins come from queries that read the same documents more than once. E.g., AGENT-5 has three different `AI.CLASSIFY` operators on the same agent traces. vLLM's prefix cache evicts the least recently used KV, so by the time the next operator reads a trace, its KV is usually gone and vLLM has to recompute it. On AGENT-5, 64% of the tokens that vLLM computes are recomputations. Quail instead keeps the KV of the trace around for the later operators ([Section 3.4](#34-keeping-the-document-kv-for-later-operators)). Quail also runs within 1.8x to 2.8x of its SoL estimate on every query.
 
 # 5. Aside: Decision Models
 
@@ -379,7 +377,7 @@ The first term is a dot product, like an attention score, and the second is a ti
 
 Like `trie_tree`, Decision 2.0 Kai gives probabilities in one request. But `trie_tree` has to score every token in the vocabulary at each answer position, while Decision 2.0 Kai only scores the $$M$$ labels.
 
-One might notice that the option blocks add a lot of tokens: about 16 tokens per label, or about 190 tokens per document in our running example, compared with 24 for `letters`. But the extra tokens buy a lot of accuracy. We ran Decision 2.0 Kai and the base Qwen3-0.6B on the 12 classification queries in [QUAIL-B](https://github.com/fsdatalab/quail-bench), on one H100. Decision 2.0 Kai agrees with the reference labels on 63.1% of documents on average, compared with just 39.0% for Qwen3-0.6B! We are really excited about these decision models and believe we can fine-tune our own decision models for AI-SQL tasks (potentially even-smaller models).
+One might notice that the option blocks add a lot of tokens: about 16 tokens per label, or about 190 tokens per document in our running example, compared with 24 for `letters`. But the extra tokens (more specifically, the trained decision head) buy a lot of accuracy. We ran Decision 2.0 Kai and the base Qwen3-0.6B on the 12 classification queries in [QUAIL-B](https://github.com/fsdatalab/quail-bench), on one H100. Decision 2.0 Kai agrees with the reference labels on 63.1% of documents on average, compared with just 39.0% for Qwen3-0.6B! We are really excited about these decision models and believe we can fine-tune our own decision models for AI-SQL tasks (potentially even-smaller models).
 
 # 6. Conclusion
 
@@ -421,7 +419,7 @@ this research.
 
 ```bibtex
 @misc{shankar2026aiclassify,
-  title = {To Classify, Try a Trie},
+  title = {To Classify, Try a Trie Tree},
   author = {Shankar, Shreya and Frye, Charles},
   year = {2026},
   month = oct,
