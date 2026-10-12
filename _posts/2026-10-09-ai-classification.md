@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "To Classify, Try a Trie"
+title: "To Classify, Try a Trie Tree"
 date: 2026-10-09
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-classification/
@@ -13,7 +13,7 @@ image:
   path: /assets/blog/ai-classification/social-preview.png
   width: 1200
   height: 630
-  alt: "To Classify, Try a Trie, with an AI.CLASSIFY query and the trie of its labels."
+  alt: "To Classify, Try a Trie Tree, with an AI.CLASSIFY query and the trie of its labels."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How should an AI-SQL engine classify documents with LLMs at scale? Most systems let the LLM generate an answer and then parse it into a label. But since <a href="https://github.com/fsdatalab/quail">Quail</a> runs the LLM inside its own inference engine, we can do <em>much</em> better &mdash; we can restrict the LLM to the labels and minimize the number of tokens it decodes! On 12 new classification queries in <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a>, Quail is <strong>1.8x faster</strong> than a vLLM baseline.</aside>
@@ -421,7 +421,7 @@ this research.
 
 ```bibtex
 @misc{shankar2026aiclassify,
-  title = {To Classify, Try a Trie},
+  title = {To Classify, Try a Trie Tree},
   author = {Shankar, Shreya and Frye, Charles},
   year = {2026},
   month = oct,
