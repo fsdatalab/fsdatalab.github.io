@@ -221,7 +221,7 @@ Like all cost models in Quail, our cost models for classification are based on *
 
 ## 4.1 Workload and Notation
 
-<details class="collapsible-section" markdown="1">
+<details class="collapsible-section proof-card" markdown="1">
 <summary id="table-1">Table 1. Symbols in the classification cost model.</summary>
 
 <div class="table-wrap" markdown="1">
