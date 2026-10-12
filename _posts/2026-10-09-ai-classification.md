@@ -348,7 +348,7 @@ We ran each query with Qwen3-4B-fp8 on one H100, at scale factor 0.5, on both Qu
 
 <figure id="figure-6" style="width: min(42rem, calc(100vw - 3rem));">
   <img src="{{ '/assets/blog/ai-classification/quailb-results.svg' | relative_url }}" alt="Input tokens per second, KV regret, and cost per query for Quail and a vLLM baseline on the 12 QUAIL-B classification queries.">
-  <figcaption>Figure 6. QUAIL-B classification queries with Qwen3-4B-fp8 on one H100, at scale factor 0.5. KV regret is the share of computed tokens that are recomputed.</figcaption>
+  <figcaption>Figure 6. QUAIL-B classification queries with Qwen3-4B-fp8 on one H100, at scale factor 0.5. KV regret is the percentage of the tokens an engine computes that it already computed once before, e.g., because it evicted their KV.</figcaption>
 </figure>
 
 **Quail is faster on all 12 queries: 2.1x faster in total, and 1.8x faster per query (geometric mean).** The biggest wins come from queries that read the same documents more than once. E.g., AGENT-5 has three different `AI.CLASSIFY` operators on the same agent traces. vLLM's prefix cache evicts the least recently used KV, so by the time the next operator reads a trace, its KV is usually gone and vLLM has to recompute it. On AGENT-5, 64% of the tokens that vLLM computes are recomputations. Quail instead keeps the KV of the trace around for the later operators ([Section 3.4](#34-keeping-the-document-kv-for-later-operators)). Quail also runs within 1.8x to 2.8x of its SoL estimate on every query.
