@@ -269,7 +269,7 @@ The three methods only differ in $$q_{\text{tail}}$$ and $$a$$. [Table 2](#table
 <p class="table-caption">Table 2. Instruction length and expected answer positions per document in the running example.</p>
 </div>
 
-For projections, attention, and the MLP, we can reuse the formulas from [our blog post on AI-powered filters](/blog/ai-filter-cost-estimates/), plugging in the new $$n_{\text{tok}}$$ and $$r_i$$. However, classification differs from filters in two ways: (1) *KV reads*: each method loads a different number of cached KV tokens, and (2) *output head*: classification needs scores for the whole vocabulary, not just TRUE and FALSE.
+For projections, attention, and the MLP, we can reuse the formulas from [our blog post on AI-powered filters](/blog/ai-filter-cost-estimates/), plugging in the new $$n_{\text{tok}}$$ and $$r_i$$. However, classification differs from filters in two ways: (1) each method has a different number of KV reads, i.e., loads a different number of cached KV tokens, and (2) classification needs the whole output head, i.e., scores for the whole vocabulary, not just TRUE and FALSE.
 
 **KV reads.** Each answer position attends to the prompt, so the GPU has to load the KV of the prompt from HBM. `letters` and `trie_tree` load it once per document, since all of their answer positions are in one request. `trie_decode` loads it once per extra decode step. Step 0 shares the request of the prompt, but every later decode step is a new request. So if $$b$$ is the expected number of requests of `trie_decode` per document (including step 0), the number of KV tokens loaded is
 
