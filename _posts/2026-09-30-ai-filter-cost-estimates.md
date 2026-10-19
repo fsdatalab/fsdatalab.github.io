@@ -1014,7 +1014,7 @@ Phew! We made it! The SoL estimate is about 6.86 seconds for all 5,000 reviews. 
 
 # 6. Filter Playground
 
-To help illustrate how filter ordering affects query cost, we've built an interactive playground! You can change the filter order, selectivities, and instruction lengths to see how they affect the query's SoL estimate. The playground uses Qwen3-4B-fp8 on an H100, starting with the IMDB example from [Section 5](#5-example-imdb-query). Drag filters to reorder them, or apply the ordering rule from [Section 4.3](#43-choosing-the-filter-order). For up to six filters, you can compare the rule's order with every possible order.
+To help illustrate how filter ordering affects query cost, we've built an interactive playground! You can change the filter order, selectivities, and instruction lengths to see how they affect the query's SoL estimate. The playground uses Qwen3-4B-fp8 on an H100, starting with the IMDB example from [Section 5](#5-example-imdb-query). Drag filters to reorder them, or apply the ordering rule from [Section 4.3](#43-choosing-the-filter-order). For up to six filters, you can compare the rule's order with every possible order. You can also switch to a hybrid model, Qwen3.5-4B-fp8 or Qwen3.5-27B-fp8, where three of every four layers use Gated DeltaNet linear attention and keep a fixed-size state per document instead of KV; the playground prices them as Quail does.
 
 The estimates assume peak hardware rates and reuse of each document's cached prefix across filters. We use the average document length for every document and round the expected number of surviving documents to whole numbers.
 
