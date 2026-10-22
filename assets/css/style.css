@@ -625,6 +625,9 @@ a:hover { opacity: 0.75; }
 .prose .proof-card > p:last-child {
   margin-bottom: 0;
 }
+.prose .proof-card .table-wrap {
+  margin: 0.75rem 0 0;
+}
 .prose .algorithm-pseudocode {
   margin: 1rem 0;
   padding: 1rem 1.125rem;
