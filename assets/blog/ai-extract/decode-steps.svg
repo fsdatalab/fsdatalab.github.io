@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 216" role="img" aria-labelledby="t2 d2">
+<title id="t2">The steps of one answer</title>
+<desc id="d2">Three steps of the answer cat /tests/* with a draft of 2 tokens. Step 1 picks cat from the whole document. Step 2 drafts / and tests, accepts both, and the target model writes /*. Step 3 drafts [ and OUTPUT, rejects [, and the target model ends the answer.</desc>
+<defs>
+<style>
+  .pre { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .acc { fill: #dcebd3; stroke: #3b7d3b; stroke-width: 2; }
+  .rej { fill: #f8dcdc; stroke: #b54747; stroke-width: 2; }
+  .own { fill: #dbe7f5; stroke: #3b6ea8; stroke-width: 2; }
+  .strike { stroke: #b54747; stroke-width: 2; }
+  .tok { fill: #101828; font: 500 17.5px "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace; }
+  .step { fill: #101828; font: 600 17.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .note { fill: #475467; font: italic 500 17.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .legend { fill: #101828; font: 500 17.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+</style>
+</defs>
+<text class="step" x="20" y="43">Step 1</text>
+<rect class="own" x="130" y="20" width="49.5" height="34" rx="6"/>
+<text class="tok" x="139" y="43">cat</text>
+<text class="note" x="197.5" y="43">the first token, from any place in the document</text>
+<text class="step" x="20" y="95">Step 2</text>
+<rect class="pre" x="130" y="72" width="49.5" height="34" rx="6"/>
+<text class="tok" x="139" y="95">cat</text>
+<rect class="acc" x="187.5" y="72" width="28.5" height="34" rx="6"/>
+<text class="tok" x="196.5" y="95">/</text>
+<rect class="acc" x="224.0" y="72" width="70.5" height="34" rx="6"/>
+<text class="tok" x="233.0" y="95">tests</text>
+<rect class="own" x="302.5" y="72" width="39.0" height="34" rx="6"/>
+<text class="tok" x="311.5" y="95">/*</text>
+<text class="note" x="359.5" y="95">the draft copies the 2 tokens after cat</text>
+<text class="step" x="20" y="147">Step 3</text>
+<rect class="pre" x="130" y="124" width="49.5" height="34" rx="6"/>
+<text class="tok" x="139" y="147">cat</text>
+<rect class="pre" x="187.5" y="124" width="28.5" height="34" rx="6"/>
+<text class="tok" x="196.5" y="147">/</text>
+<rect class="pre" x="224.0" y="124" width="70.5" height="34" rx="6"/>
+<text class="tok" x="233.0" y="147">tests</text>
+<rect class="pre" x="302.5" y="124" width="39.0" height="34" rx="6"/>
+<text class="tok" x="311.5" y="147">/*</text>
+<rect class="rej" x="349.5" y="124" width="28.5" height="34" rx="6"/>
+<text class="tok" x="358.5" y="147">[</text>
+<line class="strike" x1="354.5" y1="141" x2="373.0" y2="141"/>
+<rect class="rej" x="386.0" y="124" width="81.0" height="34" rx="6"/>
+<text class="tok" x="395.0" y="147">OUTPUT</text>
+<line class="strike" x1="391.0" y1="141" x2="462.0" y2="141"/>
+<rect class="own" x="475.0" y="124" width="70.5" height="34" rx="6"/>
+<text class="tok" x="484.0" y="147">⟨end⟩</text>
+<text class="note" x="563.5" y="147">the answer ends inside the draft</text>
+<rect class="pre" x="20" y="182" width="22" height="22" rx="4"/>
+<text class="legend" x="50" y="198">answer so far</text>
+<rect class="acc" x="187.7" y="182" width="22" height="22" rx="4"/>
+<text class="legend" x="217.7" y="198">accepted draft token</text>
+<rect class="rej" x="417.7" y="182" width="22" height="22" rx="4"/>
+<text class="legend" x="447.7" y="198">rejected draft token</text>
+<rect class="own" x="647.7" y="182" width="22" height="22" rx="4"/>
+<text class="legend" x="677.7" y="198">target model’s own token</text>
+</svg>
