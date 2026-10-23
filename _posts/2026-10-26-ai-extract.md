@@ -101,11 +101,12 @@ In this section, we discuss our key idea --- that Quail should pick a different 
 | --- | --- |
 | $$\gamma$$, $$\gamma^*$$ | Draft length, and the draft length that minimizes the time per output token |
 | $$E(\gamma)$$ | Expected number of tokens that a step outputs |
-| $$\alpha$$, $$\alpha(m)$$ | Acceptance rate of the classic cost model, and acceptance rate given $$m$$ matches: the probability that the first match is correct |
+| $$\alpha$$ | Acceptance rate, assuming the target model accepts each draft token independently (the classic cost model) |
 | $$\rho$$ | Time of the KV read of the document in one step, divided by the time to compute one token |
 | $$N$$ | Number of tokens in the answer |
 | $$S(j)$$ | Probability that the answer has more than $$j$$ tokens left |
 | $$m$$ | Number of matches of the answer so far in the document |
+| $$\alpha(m)$$ | Acceptance rate, assuming Quail copies the draft from the first of $$m$$ matches: the probability that the first match is correct |
 
 </div>
 </details>
