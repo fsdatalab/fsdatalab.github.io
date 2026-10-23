@@ -8,15 +8,15 @@ unlisted: true
 sitemap: false
 math: true
 typora-root-url: ..
-description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 2.2x speedups over vLLM."
+description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 2.8x speedups over vLLM."
 image:
   path: /assets/blog/ai-extract/social-preview.png
   width: 1200
   height: 630
-  alt: "Optimizing LLM Inference for Data Extraction: query time of vLLM and Quail on legal contracts, movie reviews, and agent traces; Quail is 1.3x, 1.3x, and 2.2x faster than vLLM."
+  alt: "Optimizing LLM Inference for Data Extraction: query time of vLLM and Quail on agent traces, SEC filings, filtered SEC filings, and legal contracts; Quail is 1.2x, 1.4x, 2.8x, and 1.5x faster than vLLM."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> How do you run LLM-powered extraction at scale, as fast as possible? Our implementation of <code>AI.EXTRACT</code> in <a href="https://github.com/fsdatalab/quail">Quail</a> is <strong>1.3x faster on average (up to 2.2x)</strong> than well-tuned vLLM baselines. Read this post to find out how!</aside>
+<aside class="tldr"><strong>TL;DR:</strong> How do you run LLM-powered extraction at scale, as fast as possible? Our implementation of <code>AI.EXTRACT</code> in <a href="https://github.com/fsdatalab/quail">Quail</a> is <strong>1.6x faster on average (up to 2.8x)</strong> than a well-tuned vLLM baseline. Read this post to find out how!</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -24,11 +24,11 @@ image:
   <li><a href="#1-introduction">Introduction.</a></li>
   <li><a href="#2-aiextract-in-quail"><code>AI.EXTRACT</code> in Quail.</a></li>
   <li><a href="#3-extracting-with-an-off-the-shelf-llm">Extracting with an Off-the-Shelf LLM.</a></li>
-  <li><a href="#4-key-idea-adaptive-draft-lengths">Key Idea: Adaptive Draft Lengths.</a>
+  <li><a href="#4-key-idea-adaptive-and-per-request-draft-lengths">Key Idea: Adaptive and Per-Request Draft Lengths.</a>
     <ol>
       <li><a href="#41-the-cost-of-a-draft">The Cost of a Draft.</a></li>
-      <li><a href="#42-learning-the-length-during-execution">Learning the Length During Execution.</a></li>
-      <li><a href="#43-parallels-with-prior-work">Parallels with Prior Work.</a></li>
+      <li><a href="#42-learning-the-length-gamma-during-execution">Learning the Length <em>γ</em> During Execution.</a></li>
+      <li><a href="#43-reflecting-on-prior-work">Reflecting on Prior Work.</a></li>
     </ol>
   </li>
   <li><a href="#5-experiments-on-quail-b">Experiments on QUAIL-B.</a></li>
@@ -46,7 +46,7 @@ We'll go through:
 
 - [What `AI.EXTRACT` is in Quail](#2-aiextract-in-quail).
 - [How to extract with an off-the-shelf LLM](#3-extracting-with-an-off-the-shelf-llm), and how the document can speed up the LLM.
-- [How Quail adapts to each query and each document](#4-key-idea-adaptive-draft-lengths), while the query runs.
+- [How Quail adapts to each query and each document](#4-key-idea-adaptive-and-per-request-draft-lengths), while the query runs.
 - [Experiments on QUAIL-B](#5-experiments-on-quail-b), against vLLM.
 
 # 2. AI.EXTRACT in Quail
@@ -77,9 +77,9 @@ Suppose that we want to run `AI.EXTRACT` with an off-the-shelf LLM (i.e., any au
 
 The answer must be either empty or a substring of the document. However, an LLM can write any text. So, Quail constrains decoding: the LLM can write a token only if the answer stays a substring of the document.
 
-Typically, an LLM generates the answer token by token, with one forward pass for each token, in a phase called *decoding*. Each forward pass of decoding is memory bound: the forward pass reads the weights and the KV of the whole document, but computes only one token. One of the most popular ways to accelerate decoding is *speculative decoding*, proposed at the same time by Leviathan et al.<sup><a href="#note-1">1</a></sup> and Chen et al.<sup><a href="#note-2">2</a></sup>. In speculative decoding, a step has two parts. First, a small, fast draft model proposes the next few tokens, called draft tokens, with one forward pass for each token. Then the LLM, called the target model, checks all of the draft tokens in one forward pass.
+Typically, an LLM generates the answer token by token, with one forward pass for each token, in a phase called *decoding*. Each forward pass of decoding is memory bound: the forward pass reads the weights and the KV of the whole document, but computes only one token. One of the most popular ways to accelerate decoding is *speculative decoding*, proposed at the same time by Leviathan et al.<sup><a href="#note-1">1</a></sup> and Chen et al.<sup><a href="#note-2">2</a></sup>. In speculative decoding, a step has two parts. First, a small, fast draft model proposes the next few tokens, called draft tokens, with one forward pass for each token. Then the LLM, called the target model, checks all of the draft tokens in one forward pass. The target model accepts draft tokens until it disagrees with one, and then outputs one token of its own.
 
-For `AI.EXTRACT`, the document itself can act as a "natural" draft model: the answer is a substring of the document, so the tokens that follow the answer so far in the document are a good guess for the next answer tokens. So, Quail can simply copy the document tokens that follow the answer so far as the draft.<sup><a href="#note-3">3</a></sup> Let the draft length $$\gamma$$ be the number of tokens that Quail copies. For example, Figure 2 shows the steps of the answer in Figure 1 with $$\gamma = 2$$.
+For `AI.EXTRACT`, the document itself can act as a "natural" draft model. Quail finds the answer so far in the document, which we call a *match*, and copies the next few tokens as the draft.<sup><a href="#note-3">3</a></sup> Let the draft length $$\gamma$$ be the number of tokens that Quail copies. For example, Figure 2 shows the steps of the answer in Figure 1 with $$\gamma = 2$$.
 
 <figure id="figure-2" style="width: min(45rem, calc(100vw - 3rem));">
 <img src="{{ '/assets/blog/ai-extract/decode-steps.svg' | relative_url }}?v=2" alt="Three steps of the answer cat /tests/* with a draft length of 2.">
@@ -88,9 +88,9 @@ For `AI.EXTRACT`, the document itself can act as a "natural" draft model: the an
 
 So, how should Quail set $$\gamma$$?
 
-# 4. Key Idea: Adaptive Draft Lengths
+# 4. Key Idea: Adaptive and Per-Request Draft Lengths
 
-In this section, we discuss our key idea --- that Quail should pick a different draft length for each request, as the query runs. First, we describe how to cost a draft of length $$\gamma$$. Then, we show how Quail adaptively picks $$\gamma$$ for each request. Finally, we discuss relevant prior work. Table 1 lists the symbols that we use.
+In this section, we discuss our key idea --- that Quail should pick a different draft length for each request, and learn the optimal draft lengths, as the query runs. First, we describe how to cost a draft of length $$\gamma$$. Then, we show how Quail adaptively picks $$\gamma$$ for each request. Finally, we discuss relevant prior work. Table 1 lists the symbols that we use.
 
 <details class="collapsible-section proof-card" markdown="1">
 <summary id="table-1">Table 1. Symbols in the cost model of the draft length.</summary>
@@ -101,14 +101,11 @@ In this section, we discuss our key idea --- that Quail should pick a different 
 | --- | --- |
 | $$\gamma$$, $$\gamma^*$$ | Draft length, and the draft length that minimizes the time per output token |
 | $$E(\gamma)$$ | Expected number of tokens that a step outputs |
-| $$c$$, $$\alpha$$ | Cost coefficient and acceptance rate of the classic cost model |
-| $$\rho$$ | Time of the KV read of the document in one step, in units of the time to compute one token |
-| $$N$$, $$k$$ | Number of tokens in the answer, and number of answer tokens so far |
+| $$\alpha$$ | Acceptance rate of the classic cost model |
+| $$\rho$$ | Time of the KV read of the document in one step, divided by the time to compute one token |
+| $$N$$ | Number of tokens in the answer |
 | $$S(j)$$ | Probability that the answer has more than $$j$$ tokens left |
-| $$m$$, $$p(m)$$ | Number of places where the answer so far appears in the document, and probability that the draft copies the right place |
-| $$\kappa$$, $$L$$ | Number of made-up requests and drafts, and mean answer length of the made-up requests |
-| $$n$$, $$n_{>i}$$ | Number of finished requests, and number of them whose answers have more than $$i$$ tokens |
-| $$t$$, $$a$$ | Number of drafts in a bucket of $$m$$, and number of them whose first token the target model accepts |
+| $$m$$, $$p(m)$$ | Number of matches of the answer so far in the document, and probability that the first match is correct |
 
 </div>
 </details>
@@ -121,120 +118,96 @@ $$
 \gamma^* = \arg\min_{\gamma} \frac{\text{time of one step}}{E(\gamma)}.
 $$
 
-Leviathan et al. give a classic cost model for both parts of the fraction. We first explain their model, and then we show how Quail is a bit different.
+We look at each part of the fraction in turn.
 
-**The classic model.** The cost model of Leviathan et al. has two parts.
+**Time of one step.** In `AI.EXTRACT`, the draft comes from the document, so the draft is free to make. However, each draft token adds time to the check. Quail fills each forward pass with tokens from many documents, so the forward pass is compute bound. A step also reads the KV of the document. Let $$\rho$$ be the time of the KV read, divided by the time to compute one token.<sup><a href="#note-4">4</a></sup> Then a step takes as long as computing $$1 + \gamma + \rho$$ tokens.
 
-- *Time of one step.* Let the cost coefficient $$c$$ be the time of one forward pass of the draft model, divided by the time of one forward pass of the target model. The draft model takes $$\gamma$$ forward passes, which take as long as $$\gamma c$$ forward passes of the target model. The target model checks the whole draft in one forward pass. The cost model assumes that the forward pass of the check takes as long as a forward pass with only one token. So, a step takes $$\gamma c + 1$$ forward passes of the target model.
-- *Expected tokens per step.* Let the acceptance rate $$\alpha$$ be the probability that the target model accepts a draft token. The cost model assumes that the acceptances are independent and identically distributed (i.i.d.): the target model accepts each draft token independently, with the same probability $$\alpha$$. So, $$E(\gamma) = 1 + \alpha + \alpha^2 + \dots + \alpha^\gamma$$.<sup><a href="#note-4">4</a></sup>
+**Expected tokens per step.** Leviathan et al. give a classic model of $$E(\gamma)$$. Let the acceptance rate $$\alpha$$ be the probability that the target model accepts a draft token. The classic model assumes that the target model accepts each draft token independently, with the same probability $$\alpha$$. So, $$E(\gamma) = 1 + \alpha + \alpha^2 + \dots + \alpha^\gamma$$.<sup><a href="#note-5">5</a></sup>
 
-So the classic model picks
+However, this assumption does not hold for `AI.EXTRACT`. If the target model accepts the first draft token, the target model likely accepts the rest of the draft too, until the answer ends, because the answer is a substring of the document. In fact, the target model rejects a draft token for only one of two reasons. First, the answer so far can have more than one match, and Quail copies the draft from the *first* match, which can be incorrect. Second, the draft can copy past the end of the answer.
 
-$$
-\gamma^* = \arg\min_{\gamma} \frac{\gamma c + 1}{1 + \alpha + \alpha^2 + \dots + \alpha^\gamma}.
-$$
-
-**AI.EXTRACT.** In `AI.EXTRACT`, the draft comes from the document, not from a draft model. So $$c = 0$$. Now, there are two assumptions made by Leviathan et al. that don't quite hold for `AI.EXTRACT`. We explain each one below.
-
-- *Assumption 1: draft tokens add no time.* The classic cost model makes Assumption 1 because the forward pass of the target model is memory bound, i.e., limited by reading the weights. However, Quail fills each forward pass with tokens from many documents, so its matrix multiplications are compute bound, and each token adds time. So a step has two costs: the step computes $$1 + \gamma$$ tokens, and the step reads the KV of the document from memory. To add the two costs, we measure both in the time to compute one token.<sup><a href="#note-5">5</a></sup> Then the tokens take $$1 + \gamma$$, and we let $$\rho$$ be the time of the KV read. So, a step takes $$1 + \gamma + \rho$$.
-- *Assumption 2: the target model accepts draft tokens i.i.d.* Assumption 2 is clearly not true for `AI.EXTRACT`. If the target model accepts the first draft token, the target model is much more likely to accept the next draft token, because the answer is a substring of the document. So, how can we model the probability that the target model accepts a draft token?
-
-  If we think about it, the target model rejects a draft token for only one of two reasons. First, if the answer so far appears at more than one place in the document, Quail copies the draft from the *first* place, which can be the wrong one. Second, the draft can copy past the end of the answer.
-
-  So, to model the probability that the target model accepts a draft token, let $$m$$ be the number of places where the answer so far appears in the document, and let $$p(m)$$ be the probability that the draft copies the right place, i.e., the place that the answer continues. If $$m = 1$$, then $$p(m) = 1$$. Also, let $$S(j)$$ be the probability that the answer has more than $$j$$ tokens left. Let $$N$$ be the number of tokens in the answer, and let $$k$$ be the number of answer tokens so far. Then
-
-  $$
-  S(j) = P(N > k + j \mid N \ge k).
-  $$
-
-  For $$j \ge 1$$, the step outputs more than $$j$$ tokens only if the draft copies the right place and the answer has more than $$j$$ tokens left, so with probability $$p(m) \cdot S(j)$$. The step outputs at least one token, the own token of the target model, only if the answer does not end, so with probability $$S(0)$$. So, $$E(\gamma) = S(0) + p(m) \, \bigl(S(1) + S(2) + \dots + S(\gamma)\bigr)$$, instead of $$1 + \alpha + \alpha^2 + \dots + \alpha^\gamma$$.
-
-So Quail picks
+So, we model the two reasons separately. Let $$m$$ be the number of matches, and let $$p(m)$$ be the probability that the first match is correct, i.e., that the answer continues from the first match. If $$m = 1$$, then $$p(m) = 1$$. Let $$S(j)$$ be the probability that the answer has more than $$j$$ tokens left. The step outputs at least one token, the own token of the target model, only if the answer does not end, i.e., with probability $$S(0)$$. For $$j \ge 1$$, the step outputs more than $$j$$ tokens only if the first match is correct and the answer has more than $$j$$ tokens left, i.e., with probability $$p(m) \cdot S(j)$$. $$E(\gamma)$$ is the sum of these probabilities, so Quail picks
 
 $$
 \gamma^* = \arg\min_{\gamma} \frac{1 + \gamma + \rho}{S(0) + p(m) \, \bigl(S(1) + S(2) + \dots + S(\gamma)\bigr)}.
 $$
 
-Quail computes $$\gamma^*$$ for each document and step.<sup><a href="#note-6">6</a></sup> However, $$S$$ and $$p$$ depend on the answers, so we do not know them before the query runs.
+Quail computes $$\gamma^*$$ for each document and step.<sup><a href="#note-6">6</a></sup> However, $$S$$ and $$p(m)$$ are different for each query, and Quail does not know them when the query starts.
 
-## 4.2 Learning the Length During Execution
+## 4.2 Learning the Length $$\gamma$$ During Execution
 
-Fortunately, queries run over many documents, so we can actually hope to learn $$S$$ and $$p(m)$$ from the answers that finish first. To estimate $$S$$, Quail keeps a histogram of the lengths of the finished answers for each field.<sup><a href="#note-7">7</a></sup> Then, to estimate $$p(m)$$, Quail simply tracks, for each bucket of $$m$$, the fraction of drafts whose first token the target model accepts.<sup><a href="#note-8">8</a></sup>
+Fortunately, queries run over many documents, so Quail can learn $$S$$ and $$p(m)$$ from the requests that finish first. For each field, Quail maintains two histograms:
 
-When the query starts, the histogram and the fractions are empty. So, we populate the histogram with $$\kappa$$ made-up requests, whose answers have $$L$$ tokens on average.<sup><a href="#note-9">9</a></sup> We also populate each bucket of $$m$$ with $$\kappa$$ made-up drafts, of which a fraction $$1/m$$ have their first token accepted (as if each place were equally likely to be the right one). As requests run, Quail adds the real answers and drafts, so the made-up ones matter less and less.
+- *A histogram of answer lengths.* When a request finishes, Quail adds the length of its answer to the histogram.<sup><a href="#note-7">7</a></sup> From the histogram, Quail estimates $$P(N > i)$$, the probability that an answer has more than $$i$$ tokens, where $$N$$ is the number of tokens in the answer.
+- *A histogram of match counts.* After each step with a draft, Quail records whether the target model accepted the first draft token, i.e., whether the first match was correct.<sup><a href="#note-8">8</a></sup> Quail counts the drafts and the accepted ones in a separate bin for each value of $$m$$. Then $$p(m)$$ is the fraction of drafts with $$m$$ matches whose first draft token was accepted.
 
-Concretely, let $$n$$ be the number of finished requests, and let $$n_{>i}$$ be the number of them whose answers have more than $$i$$ tokens. The answer lengths of the made-up requests follow a geometric distribution with a mean of $$L$$ tokens, i.e., the answer ends after each token with probability $$1/L$$. So, an answer has more than $$i$$ tokens with probability $$(1 - 1/L)^i$$. Quail estimates
+When the query starts, the counts are empty. So, Quail starts the histogram as if 8 answers had finished, with a mean length of 16 tokens. For each value of $$m$$, Quail starts the count as if 8 drafts with $$m$$ matches had run, and the target model accepted the first draft token of $$8/m$$ of these drafts. So, $$p(m)$$ starts at $$1/m$$, i.e., each match has the same probability to be correct. As the query runs, Quail adds each finished answer and each draft to the counts, so the 8 initial answers and drafts matter less and less.<sup><a href="#note-9">9</a></sup>
 
-$$
-P(N > i) = \frac{\kappa \, (1 - 1/L)^i + n_{>i}}{\kappa + n},
-$$
-
-and then computes $$S(j) = P(N > k + j \mid N \ge k)$$ from these estimates. For the bucket of $$m$$, let $$t$$ be the number of drafts, and let $$a$$ be the number of drafts whose first token the target model accepts. Quail estimates
-
-$$
-p(m) = \frac{\kappa / m + a}{\kappa + t}.
-$$
-
-Each time Quail schedules a forward pass, Quail computes $$\gamma^*$$ for each request from the current $$S$$ and $$p(m)$$, the number $$k$$ of answer tokens so far, and the number $$m$$ of places where the answer so far appears in the document. Figure 3 shows the draft lengths that Quail picks in two queries (that we will discuss in [Section 5](#5-experiments-on-quail-b)).
+At each step, Quail uses the current estimates of $$S$$ and $$p(m)$$ in the formula of Section 4.1 to compute $$\gamma^*$$ for each request --- given its document, its answer so far, and its matches. Figure 3 shows how the draft length changes as answers finish, in two queries over legal contracts that we discuss in [Section 5](#5-experiments-on-quail-b).
 
 <figure id="figure-3" style="width: min(46rem, calc(100vw - 3rem));">
 <img src="{{ '/assets/blog/ai-extract/draft-length-over-query.svg' | relative_url }}?v=4" alt="The draft length at each step of CUAD-1 and CUAD-3. CUAD-1 falls to about 10, and CUAD-3 rises to about 45.">
-<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each one. Each dot is one step for one contract.</figcaption>
+<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each query. In many steps, <em>γ</em> = 0, which means Quail decided not to draft any tokens at all—likely because the answer so far has too many matches in the document, leading to a low <em>p</em>(<em>m</em>).</figcaption>
 </figure>
 
 Figure 4 shows why $$\gamma$$ changes: as answers finish, the estimate of $$P(N > i)$$ moves toward the true curve.
 
 <figure id="figure-4" style="width: min(52rem, calc(100vw - 3rem));">
 <img src="{{ '/assets/blog/ai-extract/answer-length-curve.svg' | relative_url }}?v=2" alt="The estimate of P(N > i) during CUAD-1 and CUAD-3, before any answer finishes and after 8, 32, and 128 answers, against the true curve.">
-<figcaption>Figure 4. The estimate of <em>P</em>(<em>N</em> &gt; <em>i</em>) that Quail learns during CUAD-1 and CUAD-3. Before any answer finishes, the estimate is the made-up geometric curve with a mean of <em>L</em> = 16 tokens. As answers finish, the estimate moves toward the true curve.</figcaption>
+<figcaption>Figure 4. The estimate of <em>P</em>(<em>N</em> &gt; <em>i</em>) that Quail learns during CUAD-1 and CUAD-3. As answers finish, the estimate moves toward the true curve.</figcaption>
 </figure>
 
-## 4.3 Parallels with Prior Work
+## 4.3 Reflecting on Prior Work
 
-We are not the first to adapt the draft length during decoding. In classic speculative decoding, the draft model proposes one token at a time. So, one can come up with a method to decide, after each draft token, whether to stop the draft. For example, Huang et al.<sup><a href="#note-10">10</a></sup> and Mamou et al.<sup><a href="#note-11">11</a></sup> train a small model that predicts whether the target model will accept the next draft token. Liu et al.<sup><a href="#note-12">12</a></sup> instead pick one draft length for all requests in a batch, from an average of the acceptance rate over recent batches. Quail is simpler: Quail only keeps histograms, which the many requests of a query fill quickly, and Quail picks a draft length for each request.
+It would be remiss not to at least acknowledge the vast prior work on adapting the draft length during decoding. For example, Huang et al.<sup><a href="#note-10">10</a></sup> and Mamou et al.<sup><a href="#note-11">11</a></sup> train a small model that predicts whether the target model will accept the next draft token. Liu et al.<sup><a href="#note-12">12</a></sup> instead pick one draft length for all requests in a batch, from an average of the acceptance rate over recent batches, and adapt it as the acceptance rate changes. Quail operates more simply than its predecessors: Quail only keeps histograms, which the many requests of a query fill quickly, and Quail picks a draft length for each request.
 
 Copying the draft from the input is not new either. For example, Sun et al.<sup><a href="#note-13">13</a></sup> copy the input sentence as the draft to correct grammar, and n-gram decoding<sup><a href="#note-14">14</a></sup> copies n-grams of the prompt as the draft.
 
-Perhaps the closest work is SuffixDecoding, by Oliaro et al. from Snowflake AI Research and CMU.<sup><a href="#note-15">15</a></sup> Like Quail, SuffixDecoding copies the draft and adapts the draft length. However, there are a few key differences. First, SuffixDecoding copies from the prompt and from previous outputs, so the end of the output can match *many* places, and SuffixDecoding drafts a *tree* of the continuations that occur most often. In `AI.EXTRACT`, the answer usually continues at only *one* place in the document, so Quail drafts *one* sequence. Second, SuffixDecoding limits the draft length in proportion to the length of the match, while Quail picks the draft length that minimizes the time per output token. Overall, Quail solves a simpler problem, with a simpler method.
+Perhaps the closest work is SuffixDecoding, by Oliaro et al. from Snowflake AI Research and CMU.<sup><a href="#note-15">15</a></sup> Like Quail, SuffixDecoding copies the draft and adapts the draft length. However, there are a few key differences. First, SuffixDecoding copies from the prompt and from previous outputs, so the end of the output can have *many* matches, and SuffixDecoding drafts a *tree* of the continuations that occur most often. Quail drafts *one* sequence, from the first match. Second, SuffixDecoding limits the draft length in proportion to the length of the match, while Quail picks the draft length that minimizes the expected time per output token under its cost model.
+
+Quail could also draft a tree. When the partially decoded answer has many matches, i.e., $$p(m)$$ is quite low, Quail does not draft any tokens (and therefore decodes token by token). Like SuffixDecoding, Quail could draft a token tree with one branch for each match, and the target model could verify all of the branches in one forward pass. Sequoia, by Chen et al.,<sup><a href="#note-16">16</a></sup> shows how to choose such a tree: Sequoia uses dynamic programming to find the optimal tree structure for a speculation budget, and a hardware-aware optimizer to select the size and depth of the tree for a given GPU. A similar optimizer could use $$p(m)$$ to choose the branches. We leave this to future work.
 
 # 5. Experiments on QUAIL-B
 
-**Setup.** We compare three implementations of `AI.EXTRACT`: our implementation in Quail, and two well-tuned vLLM baselines. All three run Qwen3-4B (FP8) on one H100, with the same prompts. *Quail* runs with adaptive $$\gamma$$, and with each fixed $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. *Stock vLLM* is a well-tuned vLLM baseline, which decodes the answer token by token (without any draft model). *vLLM with n-gram speculation* adds the n-gram speculative decoding of vLLM: vLLM finds the last few tokens of the answer in the prompt, and drafts the 5 tokens that follow them.<sup><a href="#note-16">16</a></sup> For the queries, we use three datasets from QUAIL-B, and we pick questions with short and long answers:
+**Setup.** We compare three implementations of `AI.EXTRACT`: our implementation in Quail, and two well-tuned vLLM baselines. All three run Qwen3-4B (FP8) on one H100, with the same prompts. *Quail* runs with adaptive $$\gamma$$, and with each fixed $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. *Stock vLLM* is a well-tuned vLLM baseline, which decodes the answer token by token (without any draft model). *vLLM with n-gram speculation* adds the n-gram speculative decoding of vLLM: vLLM finds the last few tokens of the answer in the prompt, and drafts the 5 tokens that follow them.<sup><a href="#note-17">17</a></sup> We use two sets of queries from QUAIL-B.
 
-- 449 legal contracts from CUAD,<sup><a href="#note-17">17</a></sup> about 7,500 tokens each. We extract the governing law (CUAD-1, short answers) and the liability cap clause (CUAD-3, long answers).
-- 5,000 movie reviews from IMDB,<sup><a href="#note-18">18</a></sup> about 300 tokens each. We ask "Which actor does the reviewer name?" (IMDB-ACTOR, short answers) and "What does the reviewer say about the acting?" (IMDB-ACTING, long answers).
-- 3,454 messages of coding agents from Terminal Wrench,<sup><a href="#note-19">19</a></sup> about 1,200 tokens each. Each message is one turn of an agent that does a programming task in a terminal: its thoughts, its commands, and their output, as in Figure 1. We run the query in Section 2, which we call WRENCH-CHEAT.
+*Simple queries* extract one field from each document. They vary the document length and the answer length, to show how the draft length affects extraction. Figure 5 uses them.
 
-We run each setting in 3 trials, in round-robin order on the same GPU, and each trial in a fresh process. We drop the first trial as warmup, and report the mean of the other two. Query time excludes model startup. Query time includes planning only on CUAD-1 and CUAD-3, where the QUAIL-B harness measures the time from submission to answer.
+- CUAD-1 and CUAD-3 read 449 legal contracts from CUAD,<sup><a href="#note-18">18</a></sup> about 7,500 tokens each. They extract the governing law (short answers) and the liability cap clause (long answers).
+- IMDB-ACTOR and IMDB-ACTING read 5,000 movie reviews from IMDB,<sup><a href="#note-19">19</a></sup> about 300 tokens each. They ask "Which actor does the reviewer name?" (short answers) and "What does the reviewer say about the acting?" (long answers).
 
-**The best draft length depends on the query.** Figure 5 shows the query time with each fixed $$\gamma$$, relative to adaptive $$\gamma$$. The best fixed $$\gamma$$ is 16 for CUAD-1, 63 for CUAD-3, 2 for IMDB-ACTOR, 4 for IMDB-ACTING, and 8 for WRENCH-CHEAT. A wrong fixed $$\gamma$$ costs up to 21%. In contrast, adaptive $$\gamma$$ is never more than 1% slower than the best fixed $$\gamma$$, and adaptive $$\gamma$$ is faster than every fixed $$\gamma$$ on IMDB-ACTING (by 5%) and on WRENCH-CHEAT (by 1.4%).
+*More realistic queries* ask several questions of each document. Figures 6 and 7 use them, and Figure 5 also uses WRENCH-8.
+
+- WRENCH-8 is the query in Section 2. It reads 3,454 messages of coding agents from Terminal Wrench,<sup><a href="#note-20">20</a></sup> about 1,200 tokens each. Each message is one turn of an agent that does a programming task in a terminal: its thoughts, its commands, and their output, as in Figure 1.
+- SEC-9 and SEC-10 read 1,056 long 8-K filings from [SEC EDGAR](https://huggingface.co/datasets/TeraflopAI/SEC-EDGAR), filed in 2023 or later, with 2,400 to 22,000 tokens each. A company files an 8-K to report an important event. SEC-9 extracts four facts about the event: who is involved, the amount, the sentence that states the event, and what changes. SEC-10 keeps the filings that report a material agreement with a dollar amount (two filters), classifies the kind of agreement, and extracts the other party and the amount.
+- CUAD-16 extracts all 41 clause types of CUAD from the contracts of CUAD-1.
+
+**The best draft length depends on the query.** Figure 5 shows the query time with each fixed $$\gamma$$, relative to adaptive $$\gamma$$. The best fixed $$\gamma$$ is 16 for CUAD-1, 63 for CUAD-3, 2 for IMDB-ACTOR, 4 for IMDB-ACTING, and 8 for WRENCH-8. A wrong fixed $$\gamma$$ costs up to 21%. In contrast, adaptive $$\gamma$$ is never more than 1% slower than the best fixed $$\gamma$$, and adaptive $$\gamma$$ is faster than every fixed $$\gamma$$ on IMDB-ACTING (by 5%) and on WRENCH-8 (by 1.4%).
 
 <figure id="figure-5" style="width: min(60rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/fixed-vs-adaptive.svg' | relative_url }}?v=12" alt="Query time with each fixed draft length relative to adaptive, for contracts and movie reviews with short and long answers.">
+<img src="{{ '/assets/blog/ai-extract/fixed-vs-adaptive.svg' | relative_url }}?v=13" alt="Query time with each fixed draft length relative to adaptive, for contracts and movie reviews with short and long answers.">
 <figcaption>Figure 5. Query time with each fixed draft length, relative to adaptive, on three QUAIL-B datasets: legal contracts from CUAD, movie reviews from IMDB, and messages of coding agents from Terminal Wrench. Adaptive is never more than 1% slower than the best fixed length. The wrong fixed length costs the most when the documents are short or the answers are long: up to 21%.</figcaption>
 </figure>
 
-**The wrong draft length costs the most on short documents and long answers.** On a contract, the KV read takes about as long as computing 90 tokens ($$\rho \approx 90$$), so even 63 draft tokens add little time. In contrast, on a review, $$\rho \approx 5$$, so 63 draft tokens make a step about 11 times as long as a step without a draft. On long answers, a short draft costs the most: with $$\gamma = 0$$, CUAD-3 is 14% slower and IMDB-ACTING 21% slower, against 2% for CUAD-1 and 6% for IMDB-ACTOR. Adaptive $$\gamma$$ accounts for the document length through $$\rho$$, and for the answer length through $$S$$.
-
-**Quail is faster than vLLM.** Figure 6 shows the query time of the three systems. Across the five queries, Quail is 1.4× faster than stock vLLM on average (1.1–2.2×), and 1.3× faster than vLLM with n-gram speculation (1.05–2.0×). On the four queries with one field, all three systems compute the same input tokens,<sup><a href="#note-20">20</a></sup> so the difference comes from decoding. Among these queries, the gain over stock vLLM is largest for long answers (1.33× on CUAD-3 and 1.27× on IMDB-ACTING), because long answers need the most steps. N-gram speculation removes part of the gap, but the draft length of vLLM is fixed. On WRENCH-CHEAT, Quail is 2.2× faster than stock vLLM, partly because Quail computes fewer input tokens: the *KV regret*, i.e., the input tokens that a system computes beyond the minimum, is 3% for Quail and 86% for stock vLLM.
+**Quail is faster than vLLM.** Figure 6 shows the query time of the three systems. Quail is 1.2–2.8x faster than stock vLLM, and 1.1–2.8x faster than vLLM with n-gram speculation. On the queries with only extractions, the more fields a query extracts, the larger the gain: 1.2x on WRENCH-8 (2 fields), 1.4x on SEC-9 (4 fields), and 1.5x on CUAD-16 (41 fields), against stock vLLM. Each field needs its own answer, so a query with more fields spends more of its time on decoding. N-gram speculation removes part of the gap, but the draft length of vLLM is fixed. The gain is largest on SEC-10 (2.8x), because vLLM runs one operator at a time: vLLM computes each filing again for the filters, the classification, and the extractions. Quail computes each filing once for all of them.<sup><a href="#note-21">21</a></sup>
 
 <figure id="figure-6" style="width: min(52rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/quail-vs-vllm.svg' | relative_url }}?v=7" alt="Query time of stock vLLM, vLLM with n-gram speculation, and Quail on five queries.">
-<figcaption>Figure 6. Query time of stock vLLM, vLLM with n-gram speculation, and Quail on the five queries of Figure 5. Quail is the fastest on every query. WRENCH-CHEAT is the only query that extracts more than one field.</figcaption>
+<img src="{{ '/assets/blog/ai-extract/quail-vs-vllm.svg' | relative_url }}?v=12" alt="Query time of stock vLLM, vLLM with n-gram speculation, and Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16.">
+<figcaption>Figure 6. Query time of stock vLLM, vLLM with n-gram speculation, and Quail on four queries that ask several questions of each document. Quail is the fastest on every query.</figcaption>
 </figure>
 
-**Quail runs at 35–50% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}), the *speed-of-light* (SoL) time of a query is a lower bound from the limits of the GPU: we count the FLOPs and the memory traffic of the query, and divide by the peak FLOPs and the memory bandwidth of one H100. For `AI.EXTRACT`, we assume that each document is computed once, and that each answer takes one step, i.e., the draft is the whole answer and the target model accepts every draft token. The answers have the lengths that Quail measured.<sup><a href="#note-21">21</a></sup> Figure 7 compares the throughput of each system, in input tokens per second, with the SoL throughput. The SoL throughput is lower on the long contracts, because attention takes half of the SoL time there. Quail reaches 35–50% of the SoL throughput, and vLLM 18–46%.
+**Quail runs at 32–46% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}), the *speed-of-light* (SoL) time of a query is a lower bound from the peak FLOPs and the memory bandwidth of one H100. To extract a field from a document, the SoL time counts two forward passes. The first pass prefills the document and the question, and picks the first token of the answer. The second pass checks the whole answer, as if we knew the answer.<sup><a href="#note-22">22</a></sup> If there are several fields, we count the prefill of the document only once. Figure 7 compares the throughput of each system, in tokens per second, with the SoL throughput. Quail reaches 32–46% of the SoL throughput, and vLLM 16–39%.
 
 <figure id="figure-7" style="width: min(52rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/throughput-vs-sol.svg' | relative_url }}?v=6" alt="Input tokens per second of stock vLLM, vLLM with n-gram speculation, and Quail, against the speed of light, on five queries.">
-<figcaption>Figure 7. Input tokens per second of each system on the five queries, with each document counted once, against the speed of light. The percentages are the shares of the speed-of-light throughput.</figcaption>
+<img src="{{ '/assets/blog/ai-extract/throughput-vs-sol.svg' | relative_url }}?v=11" alt="Tokens per second of stock vLLM, vLLM with n-gram speculation, and Quail, against the speed of light, on WRENCH-8, SEC-9, SEC-10, and CUAD-16.">
+<figcaption>Figure 7. Tokens per second of each system on the queries of Figure 6, against the speed of light. Each system gets the tokens of the speed-of-light run: each document once, and each question and answer. The percentages are the shares of the speed-of-light throughput.</figcaption>
 </figure>
 
-**Quail keeps the GPU busy 93–99% of the time.** We also measure the *GPU busy time*, i.e., the share of the query time in which the GPU runs a forward pass. The GPU is most idle on IMDB-ACTING (busy 93% of the time), and least idle on CUAD-1 and CUAD-3 (busy 99% of the time). Between two steps, the host must check the drafts and build the next drafts, and the GPU waits. On short documents, each step has little GPU work, so the host work is a larger share of the query time. Surely we can squeeze out more performance, but we'll leave that to future work.
+**The GPU is rarely idle.** With `torch.profiler`, we find that the GPU is busy 96% of the time on IMDB-ACTING, the query with the most idle time. The GPU waits mostly at the end of the query, when only a few long answers are left. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
 
 # 6. Conclusion and Future Work
 
-In this article, we walked through how Quail executes `AI.EXTRACT`, a SQL function that extracts the answers to questions from documents. We use speculative decoding to accelerate `AI.EXTRACT`, with drafts copied from the document, and a draft length that adapts to the document and to the answer lengths that Quail learns while the query runs. On extraction tasks over legal contracts, movie reviews, and agent traces, Quail achieves up to 2.2× speedups over well-tuned vLLM baselines.
+In this article, we walked through how Quail executes `AI.EXTRACT`, a SQL function that extracts the answers to questions from documents. We use speculative decoding to accelerate `AI.EXTRACT`, with drafts copied from the document, and a draft length that adapts to the document and to the answer lengths that Quail learns while the query runs. On extraction tasks over agent traces, SEC filings, and legal contracts, Quail achieves up to 2.8x speedups over well-tuned vLLM baselines.
 
 Looking forward, it would be great if we didn't have to decode answers token by token at all. Perhaps one can train a "System One"-like model, in the spirit of [Cloudflare's Clairic](https://blog.cloudflare.com/clairic-extraction-model), that points to the start and the end of each answer in the document in one forward pass. If this kind of research is interesting to you, reach out! In the meantime, try out [Quail](https://github.com/fsdatalab/quail), and if you like what we're building, give it a star on GitHub!
 
@@ -249,19 +222,19 @@ this research.
 
 <span id="note-2"><strong>2.</strong></span> Charlie Chen, Sebastian Borgeaud, Geoffrey Irving, Jean-Baptiste Lespiau, Laurent Sifre, and John Jumper. [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/abs/2302.01318). arXiv:2302.01318, 2023.
 
-<span id="note-3"><strong>3.</strong></span> [N-gram decoding](https://github.com/apoorvumang/prompt-lookup-decoding) also drafts by copying from the input. The draft is the input tokens that follow the last few output tokens. N-gram decoding works for tasks where the output sometimes copies the input, such as summarization and code editing. In `AI.EXTRACT`, the answer always copies the document.
+<span id="note-3"><strong>3.</strong></span> [N-gram decoding](https://github.com/apoorvumang/prompt-lookup-decoding) also drafts by copying from the input. N-gram decoding finds a match of the last few output tokens in the input, and drafts the input tokens after the match. N-gram decoding works for tasks where the output sometimes copies the input, such as summarization and code editing. In `AI.EXTRACT`, the answer always copies the document.
 
-<span id="note-4"><strong>4.</strong></span> Here is the intuition for the sum. Term $$j$$ is the probability that the step outputs more than $$j$$ tokens. The target model always outputs one token of its own. If the target model rejects a draft token, the target model outputs its own token in that position. If the target model accepts the whole draft, the target model outputs one more token after the draft. So, the step always outputs at least one token, and term 0 is 1. The step outputs more than $$j$$ tokens only if the target model accepts the first $$j$$ draft tokens, which has probability $$\alpha^j$$. Leviathan et al. write the sum in closed form, as $$(1 - \alpha^{\gamma+1}) / (1 - \alpha)$$. We use the sum because Quail changes its terms.
+<span id="note-4"><strong>4.</strong></span> The unit of time does not change $$\gamma^*$$, because the unit scales the numerator of the fraction for every $$\gamma$$ by the same amount.
 
-<span id="note-5"><strong>5.</strong></span> The unit of time does not change $$\gamma^*$$, because the unit scales the numerator of the fraction for every $$\gamma$$ by the same amount.
+<span id="note-5"><strong>5.</strong></span> Here is the intuition. Term $$j$$ is the probability that the step outputs more than $$j$$ tokens. The step always outputs the own token of the target model, so term 0 is 1. The step outputs more than $$j$$ tokens only if the target model accepts the first $$j$$ draft tokens, which has probability $$\alpha^j$$. Leviathan et al. write the sum in closed form, as $$(1 - \alpha^{\gamma+1}) / (1 - \alpha)$$.
 
-<span id="note-6"><strong>6.</strong></span> Quail applies $$p(m)$$ to the whole draft. That is, Quail treats a draft as copied either entirely from the right place or entirely from a wrong one. It also assumes that whether the draft copies the right place does not depend on how long the answer is.
+<span id="note-6"><strong>6.</strong></span> Quail applies $$p(m)$$ to the whole draft. That is, Quail treats a draft as copied either entirely from the correct match or entirely from an incorrect match. Quail also assumes that whether the first match is correct does not depend on how long the answer is.
 
 <span id="note-7"><strong>7.</strong></span> The histogram has 65 bins, one for each answer length from 0 to 64 tokens, because Quail limits answers to 64 tokens.
 
-<span id="note-8"><strong>8.</strong></span> The 11 buckets of $$m$$ are centered at 1, 2, 3, 5, 10, 20, 50, 100, 200, 500, and 1000. Quail puts $$m$$ in the bucket whose center is nearest on a log scale.
+<span id="note-8"><strong>8.</strong></span> Quail puts the values of $$m$$ into 11 buckets, from 1 to 1000 on a log scale.
 
-<span id="note-9"><strong>9.</strong></span> Quail uses $$\kappa = 8$$ pseudo-counts and a prior mean length $$L = 16$$. So, after 8 finished requests, the made-up requests and the real ones count equally. For the made-up drafts, Quail uses the center of the bucket in place of $$m$$.
+<span id="note-9"><strong>9.</strong></span> The lengths of the 8 initial answers follow a geometric distribution with a mean of 16 tokens. If the answer has $$k$$ tokens so far, then $$S(j) = P(N > k + j \mid N \ge k)$$.
 
 <span id="note-10"><strong>10.</strong></span> Kaixuan Huang, Xudong Guo, and Mengdi Wang. [SpecDec++: Boosting Speculative Decoding via Adaptive Candidate Lengths](https://arxiv.org/abs/2405.19715). In *Conference on Language Modeling (COLM)*, 2025.
 
@@ -275,17 +248,19 @@ this research.
 
 <span id="note-15"><strong>15.</strong></span> Gabriele Oliaro, Zhihao Jia, Daniel Campos, and Aurick Qiao. [SuffixDecoding: Extreme Speculative Decoding for Emerging AI Applications](https://arxiv.org/abs/2411.04975). In *Advances in Neural Information Processing Systems (NeurIPS)*, 2025.
 
-<span id="note-16"><strong>16.</strong></span> Both vLLM baselines run vLLM 0.26.0 with up to 25,305 tokens and 4,096 requests per forward pass, 91% of the GPU memory, and prefix caching. The n-gram baseline also uses <code>speculative_config={"method": "ngram", "num_speculative_tokens": 5, "prompt_lookup_max": 4}</code>, the example in the vLLM documentation. vLLM writes the answer freely, without the constraint that the answer is a substring of the document.
+<span id="note-16"><strong>16.</strong></span> Zhuoming Chen, Avner May, Ruslan Svirschevski, Yuhsun Huang, Max Ryabinin, Zhihao Jia, and Beidi Chen. [Sequoia: Scalable, Robust, and Hardware-aware Speculative Decoding](https://arxiv.org/abs/2402.12374). arXiv:2402.12374, 2024.
 
-<span id="note-17"><strong>17.</strong></span> Dan Hendrycks, Collin Burns, Anya Chen, and Spencer Ball. <a href="https://arxiv.org/abs/2103.06268">CUAD: An Expert-Annotated NLP Dataset for Legal Contract Review</a>. In <em>NeurIPS Datasets and Benchmarks</em>, 2021.
+<span id="note-17"><strong>17.</strong></span> Both vLLM baselines run vLLM 0.26.0 with up to 25,305 tokens and 4,096 requests per forward pass, 91% of the GPU memory, and prefix caching. The n-gram baseline also uses <code>speculative_config={"method": "ngram", "num_speculative_tokens": 5, "prompt_lookup_max": 4}</code>, the example in the vLLM documentation. vLLM writes the answer freely, without the constraint that the answer is a substring of the document. For a query with several fields, vLLM decodes the fields of a document after its first field has computed the document, so that the other fields read the document from the prefix cache.
 
-<span id="note-18"><strong>18.</strong></span> Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. <a href="https://aclanthology.org/P11-1015">Learning Word Vectors for Sentiment Analysis</a>. In <em>Proceedings of ACL</em>, 2011.
+<span id="note-18"><strong>18.</strong></span> Dan Hendrycks, Collin Burns, Anya Chen, and Spencer Ball. <a href="https://arxiv.org/abs/2103.06268">CUAD: An Expert-Annotated NLP Dataset for Legal Contract Review</a>. In <em>NeurIPS Datasets and Benchmarks</em>, 2021.
 
-<span id="note-19"><strong>19.</strong></span> Ivan Bercovich, Ivgeni Segal, Kexun Zhang, Shashwat Saxena, Aditi Raghunathan, and Ziqian Zhong. <a href="https://github.com/few-sh/terminal-wrench">Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories</a>. 2026.
+<span id="note-19"><strong>19.</strong></span> Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. <a href="https://aclanthology.org/P11-1015">Learning Word Vectors for Sentiment Analysis</a>. In <em>Proceedings of ACL</em>, 2011.
 
-<span id="note-20"><strong>20.</strong></span> For example, 3.40 million input tokens on CUAD-1, and 1.87 million on IMDB-ACTOR, for each system.
+<span id="note-20"><strong>20.</strong></span> Ivan Bercovich, Ivgeni Segal, Kexun Zhang, Shashwat Saxena, Aditi Raghunathan, and Ziqian Zhong. <a href="https://github.com/few-sh/terminal-wrench">Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories</a>. 2026.
 
-<span id="note-21"><strong>21.</strong></span> No real system knows the answers in advance, so no real system can reach the SoL time. The SoL time is a lower bound.
+<span id="note-21"><strong>21.</strong></span> The *KV regret*, i.e., the input tokens that a system computes beyond the minimum, is 4.0%, 4.4%, 0.7%, and 13.7% for Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16, and 3.4%, 2.9%, 64.0%, and 7.8% for stock vLLM.
+
+<span id="note-22"><strong>22.</strong></span> The SoL time assumes that the answers are known in advance, which is impossible. Therefore, the SoL estimate is *extremely* optimistic.
 
 # Cite this article
 
