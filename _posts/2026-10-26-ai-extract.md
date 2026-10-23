@@ -105,7 +105,7 @@ In this section, we discuss our key idea --- that Quail should pick a different 
 | $$\rho$$ | Time of the KV read of the document in one step, divided by the time to compute one token |
 | $$N$$ | Number of tokens in the answer |
 | $$S(j)$$ | Probability that the answer has more than $$j$$ tokens left |
-| $$m$$, $$p(m)$$ | Number of matches of the answer so far in the document, and probability that the first match is correct |
+| $$m$$, $$c(m)$$ | Number of matches of the answer so far in the document, and probability that the first match is correct |
 
 </div>
 </details>
@@ -126,28 +126,28 @@ We look at each part of the fraction in turn.
 
 However, this assumption does not hold for `AI.EXTRACT`. If the target model accepts the first draft token, the target model likely accepts the rest of the draft too, until the answer ends, because the answer is a substring of the document. In fact, the target model rejects a draft token for only one of two reasons. First, the answer so far can have more than one match, and Quail copies the draft from the *first* match, which can be incorrect. Second, the draft can copy past the end of the answer.
 
-So, we model the two reasons separately. Let $$m$$ be the number of matches, and let $$p(m)$$ be the probability that the first match is correct, i.e., that the answer continues from the first match. If $$m = 1$$, then $$p(m) = 1$$. Let $$S(j)$$ be the probability that the answer has more than $$j$$ tokens left. The step outputs at least one token, the own token of the target model, only if the answer does not end, i.e., with probability $$S(0)$$. For $$j \ge 1$$, the step outputs more than $$j$$ tokens only if the first match is correct and the answer has more than $$j$$ tokens left, i.e., with probability $$p(m) \cdot S(j)$$. $$E(\gamma)$$ is the sum of these probabilities, so Quail picks
+So, we model the two reasons separately. Let $$m$$ be the number of matches, and let $$c(m)$$ be the probability that the first match is correct, i.e., that the answer continues from the first match. If $$m = 1$$, then $$c(m) = 1$$. Let $$S(j)$$ be the probability that the answer has more than $$j$$ tokens left. The step outputs at least one token, the own token of the target model, only if the answer does not end, i.e., with probability $$S(0)$$. For $$j \ge 1$$, the step outputs more than $$j$$ tokens only if the first match is correct and the answer has more than $$j$$ tokens left, i.e., with probability $$c(m) \cdot S(j)$$. $$E(\gamma)$$ is the sum of these probabilities, so Quail picks
 
 $$
-\gamma^* = \arg\min_{\gamma} \frac{1 + \gamma + \rho}{S(0) + p(m) \, \bigl(S(1) + S(2) + \dots + S(\gamma)\bigr)}.
+\gamma^* = \arg\min_{\gamma} \frac{1 + \gamma + \rho}{S(0) + c(m) \, \bigl(S(1) + S(2) + \dots + S(\gamma)\bigr)}.
 $$
 
-Quail computes $$\gamma^*$$ for each document and step.<sup><a href="#note-6">6</a></sup> However, $$S$$ and $$p(m)$$ are different for each query, and Quail does not know them when the query starts.
+Quail computes $$\gamma^*$$ for each document and step.<sup><a href="#note-6">6</a></sup> However, $$S$$ and $$c(m)$$ are different for each query, and Quail does not know them when the query starts.
 
 ## 4.2 Learning the Length $$\gamma$$ During Execution
 
-Fortunately, queries run over many documents, so Quail can learn $$S$$ and $$p(m)$$ from the requests that finish first. For each field, Quail maintains two histograms:
+Fortunately, queries run over many documents, so Quail can learn $$S$$ and $$c(m)$$ from the requests that finish first. For each field, Quail maintains two histograms:
 
 - *A histogram of answer lengths.* When a request finishes, Quail adds the length of its answer to the histogram.<sup><a href="#note-7">7</a></sup> From the histogram, Quail estimates $$P(N > i)$$, the probability that an answer has more than $$i$$ tokens, where $$N$$ is the number of tokens in the answer.
-- *A histogram of match counts.* After each step with a draft, Quail records whether the target model accepted the first draft token, i.e., whether the first match was correct.<sup><a href="#note-8">8</a></sup> Quail counts the drafts and the accepted ones in a separate bin for each value of $$m$$. Then $$p(m)$$ is the fraction of drafts with $$m$$ matches whose first draft token was accepted.
+- *A histogram of match counts.* After each step with a draft, Quail records whether the target model accepted the first draft token, i.e., whether the first match was correct.<sup><a href="#note-8">8</a></sup> Quail counts the drafts and the accepted ones in a separate bin for each value of $$m$$. Then $$c(m)$$ is the fraction of drafts with $$m$$ matches whose first draft token was accepted.
 
-When the query starts, the counts are empty. So, Quail starts the histogram as if 8 answers had finished, with a mean length of 16 tokens. For each value of $$m$$, Quail starts the count as if 8 drafts with $$m$$ matches had run, and the target model accepted the first draft token of $$8/m$$ of these drafts. So, $$p(m)$$ starts at $$1/m$$, i.e., each match has the same probability to be correct. As the query runs, Quail adds each finished answer and each draft to the counts, so the 8 initial answers and drafts matter less and less.<sup><a href="#note-9">9</a></sup>
+When the query starts, the counts are empty. So, Quail starts the histogram as if 8 answers had finished, with a mean length of 16 tokens. For each value of $$m$$, Quail starts the count as if 8 drafts with $$m$$ matches had run, and the target model accepted the first draft token of $$8/m$$ of these drafts. So, $$c(m)$$ starts at $$1/m$$, i.e., each match has the same probability to be correct. As the query runs, Quail adds each finished answer and each draft to the counts, so the 8 initial answers and drafts matter less and less.<sup><a href="#note-9">9</a></sup>
 
-At each step, Quail uses the current estimates of $$S$$ and $$p(m)$$ in the formula of Section 4.1 to compute $$\gamma^*$$ for each request --- given its document, its answer so far, and its matches. Figure 3 shows how the draft length changes as answers finish, in two queries over legal contracts that we discuss in [Section 5](#5-experiments-on-quail-b).
+At each step, Quail uses the current estimates of $$S$$ and $$c(m)$$ in the formula of Section 4.1 to compute $$\gamma^*$$ for each request --- given its document, its answer so far, and its matches. Figure 3 shows how the draft length changes as answers finish, in two queries over legal contracts that we discuss in [Section 5](#5-experiments-on-quail-b).
 
 <figure id="figure-3" style="width: min(46rem, calc(100vw - 3rem));">
 <img src="{{ '/assets/blog/ai-extract/draft-length-over-query.svg' | relative_url }}?v=4" alt="The draft length at each step of CUAD-1 and CUAD-3. CUAD-1 falls to about 10, and CUAD-3 rises to about 45.">
-<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each query. In many steps, <em>γ</em> = 0, which means Quail decided not to draft any tokens at all—likely because the answer so far has too many matches in the document, leading to a low <em>p</em>(<em>m</em>).</figcaption>
+<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each query. In many steps, <em>γ</em> = 0, which means Quail decided not to draft any tokens at all—likely because the answer so far has too many matches in the document, leading to a low <em>c</em>(<em>m</em>).</figcaption>
 </figure>
 
 Figure 4 shows why $$\gamma$$ changes: as answers finish, the estimate of $$P(N > i)$$ moves toward the true curve.
@@ -165,7 +165,7 @@ Copying the draft from the input is not new either. For example, Sun et al.<sup>
 
 Perhaps the closest work is SuffixDecoding, by Oliaro et al. from Snowflake AI Research and CMU.<sup><a href="#note-15">15</a></sup> Like Quail, SuffixDecoding copies the draft and adapts the draft length. However, there are a few key differences. First, SuffixDecoding copies from the prompt and from previous outputs, so the end of the output can have *many* matches, and SuffixDecoding drafts a *tree* of the continuations that occur most often. Quail drafts *one* sequence, from the first match. Second, SuffixDecoding limits the draft length in proportion to the length of the match, while Quail picks the draft length that minimizes the expected time per output token under its cost model.
 
-Quail could also draft a tree. When the partially decoded answer has many matches, i.e., $$p(m)$$ is quite low, Quail does not draft any tokens (and therefore decodes token by token). Like SuffixDecoding, Quail could draft a token tree with one branch for each match, and the target model could verify all of the branches in one forward pass. Sequoia, by Chen et al.,<sup><a href="#note-16">16</a></sup> shows how to choose such a tree: Sequoia uses dynamic programming to find the optimal tree structure for a speculation budget, and a hardware-aware optimizer to select the size and depth of the tree for a given GPU. A similar optimizer could use $$p(m)$$ to choose the branches. We leave this to future work.
+Quail could also draft a tree. When the partially decoded answer has many matches, i.e., $$c(m)$$ is quite low, Quail does not draft any tokens (and therefore decodes token by token). Like SuffixDecoding, Quail could draft a token tree with one branch for each match, and the target model could verify all of the branches in one forward pass. Sequoia, by Chen et al.,<sup><a href="#note-16">16</a></sup> shows how to choose such a tree: Sequoia uses dynamic programming to find the optimal tree structure for a speculation budget, and a hardware-aware optimizer to select the size and depth of the tree for a given GPU. A similar optimizer could use $$c(m)$$ to choose the branches. We leave this to future work.
 
 # 5. Experiments on QUAIL-B
 
@@ -228,7 +228,7 @@ this research.
 
 <span id="note-5"><strong>5.</strong></span> Here is the intuition. Term $$j$$ is the probability that the step outputs more than $$j$$ tokens. The step always outputs the own token of the target model, so term 0 is 1. The step outputs more than $$j$$ tokens only if the target model accepts the first $$j$$ draft tokens, which has probability $$\alpha^j$$. Leviathan et al. write the sum in closed form, as $$(1 - \alpha^{\gamma+1}) / (1 - \alpha)$$.
 
-<span id="note-6"><strong>6.</strong></span> Quail applies $$p(m)$$ to the whole draft. That is, Quail treats a draft as copied either entirely from the correct match or entirely from an incorrect match. Quail also assumes that whether the first match is correct does not depend on how long the answer is.
+<span id="note-6"><strong>6.</strong></span> Quail applies $$c(m)$$ to the whole draft. That is, Quail treats a draft as copied either entirely from the correct match or entirely from an incorrect match. Quail also assumes that whether the first match is correct does not depend on how long the answer is.
 
 <span id="note-7"><strong>7.</strong></span> The histogram has 65 bins, one for each answer length from 0 to 64 tokens, because Quail limits answers to 64 tokens.
 
