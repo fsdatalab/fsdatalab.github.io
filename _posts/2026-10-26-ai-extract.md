@@ -229,7 +229,7 @@ this research.
 
 <span id="note-5"><strong>5.</strong></span> Here is the intuition. Term $$j$$ is the probability that the step outputs more than $$j$$ tokens. The step always outputs the own token of the target model, so term 0 is 1. The step outputs more than $$j$$ tokens only if the target model accepts the first $$j$$ draft tokens, which has probability $$\alpha^j$$. Leviathan et al. write the sum in closed form, as $$(1 - \alpha^{\gamma+1}) / (1 - \alpha)$$.
 
-<span id="note-6"><strong>6.</strong></span> Quail uses one $$\alpha(m)$$ for the whole draft, because Quail treats a draft as copied either entirely from the correct match or entirely from an incorrect match. So the draft is either correct up to the end of the answer, or wrong from its first token. Quail also assumes that whether the first match is correct does not depend on how long the answer is.
+<span id="note-6"><strong>6.</strong></span> More concretely, $$\alpha(m)$$ is the probability that the whole draft is correct, up to the end of the answer. Quail assumes that this probability does not depend on how long the answer is.
 
 <span id="note-7"><strong>7.</strong></span> The histogram has 65 bins, one for each answer length from 0 to 64 tokens, because Quail limits answers to 64 tokens.
 
