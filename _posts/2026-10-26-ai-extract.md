@@ -147,8 +147,8 @@ When the query starts, the counts are empty. So, Quail starts the histogram as i
 At each step, Quail uses the current estimates of $$S$$ and $$\alpha(m)$$ in the formula of Section 4.1 to compute $$\gamma^*$$ for each request --- given its document, its answer so far, and its matches. Figure 3 shows how the draft length changes as answers finish, in two queries over legal contracts that we discuss in [Section 5](#5-experiments-on-quail-b).
 
 <figure id="figure-3" style="width: min(46rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/draft-length-over-query.svg' | relative_url }}?v=4" alt="The draft length at each step of CUAD-1 and CUAD-3. CUAD-1 falls to about 10, and CUAD-3 rises to about 45.">
-<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each query. In many steps, <em>γ</em> = 0, which means Quail decided not to draft any tokens at all—likely because the answer so far has too many matches in the document, leading to a low <em>α</em>(<em>m</em>).</figcaption>
+<img src="{{ '/assets/blog/ai-extract/draft-length-over-query.svg' | relative_url }}?v=5" alt="The draft length at each step of CUAD-1 and CUAD-3. Counting only steps that draft, CUAD-1 falls to about 10, and CUAD-3 rises to about 57.">
+<figcaption>Figure 3. The draft length <em>γ</em> that Quail picks in two <code>AI.EXTRACT</code> queries over 449 legal contracts from the CUAD dataset in QUAIL-B. <em>γ</em> varies widely, both between the queries and within each query. In CUAD-3, 22% of steps have <em>γ</em> = 0, which means Quail decided not to draft any tokens at all—likely because the answer so far has too many matches in the document, leading to a low <em>α</em>(<em>m</em>); in contrast, in CUAD-1, <em>γ</em> &gt; 0 for 99% of steps.</figcaption>
 </figure>
 
 Figure 4 shows why $$\gamma$$ changes: as answers finish, the estimate of $$P(N > i)$$ moves toward the true curve.
