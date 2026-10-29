@@ -539,12 +539,12 @@ a:hover { opacity: 0.75; }
   padding: 0.4rem 0.65rem;
 }
 
-@media (min-width: 1650px) {
+@media (min-width: 1150px) {
   .prose .sidenote {
     position: absolute;
-    left: calc(100% + 8rem);
+    left: calc(100% + 2rem);
     display: block;
-    width: 20rem;
+    width: 15rem;
     font-family: var(--body);
     font-size: 0.8125rem;
     line-height: 1.5;
@@ -561,16 +561,36 @@ a:hover { opacity: 0.75; }
     font-size: 0.6875rem;
     padding: 0.0625rem 0.25rem;
   }
-  .prose .sidenote:has(.sidenote-sql[open]) {
-    left: calc(100% + 0.5rem);
-    width: 28rem;
-  }
   .prose.has-sidenotes > #notes,
   .prose.has-sidenotes > #references,
   .prose.has-sidenotes p:has(> span[id^="note-"]),
   .prose.has-sidenotes > .note-1-sql,
   .prose.has-sidenotes > .note-2-example {
     display: none;
+  }
+}
+
+/* Between 1150px and 1650px, sidenotes are narrower and the article moves
+   left by half the sidenote column, so the text and sidenotes stay centered
+   together. Wide figures and tables move back to stay centered on the page. */
+@media (min-width: 1150px) and (max-width: 1649.98px) {
+  .content-narrow.prose.has-sidenotes {
+    left: -8.5rem;
+  }
+  .prose.has-sidenotes figure:not(.figure-full),
+  .prose.has-sidenotes figure.figure-full.figure-readable,
+  .prose.has-sidenotes #table-3 {
+    transform: translateX(calc(-50% + 8.5rem));
+  }
+}
+@media (min-width: 1650px) {
+  .prose .sidenote {
+    left: calc(100% + 8rem);
+    width: 20rem;
+  }
+  .prose .sidenote:has(.sidenote-sql[open]) {
+    left: calc(100% + 0.5rem);
+    width: 28rem;
   }
 }
 
