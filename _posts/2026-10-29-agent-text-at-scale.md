@@ -32,7 +32,7 @@ image:
 
 # The Problem
 
-Thanks to modern AI, we humans find ourselves reading AI-generated text at an unprecedented scale! Many of our daily driver products show feeds of such text, e.g., in Claude Code or Codex, there is a sidebar with AI-generated titles of our past agent sessions; on an iPhone, Apple Intelligence now groups and summarizes "stacks" of notifications. People also generate many temporary dashboards and web pages with AI, and share them broadly --- for example, Google publishes a [list of the bugs](https://issuetracker.google.com/issues?q=componentid:1836411&s=type:desc&s=issue_id:desc) found by Big Sleep, its AI bug-finding agent.
+Thanks to modern AI, we humans find ourselves reading AI-generated text at an unprecedented scale! Many of our daily driver products show feeds of such text, e.g., in Claude Code or Codex, there is a sidebar with AI-generated titles of our past agent sessions; on an iPhone, Apple Intelligence now groups and summarizes "stacks" of notifications. People also generate many temporary dashboards and web pages with AI, and share them broadly.
 
 Unfortunately, such feeds of AI-generated texts are quite difficult for humans to read. This isn't very surprising, as it's well-known that text items need to be _predictable_ and _consistent_ for humans to read many of them quickly.
 
