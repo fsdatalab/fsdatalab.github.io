@@ -54,7 +54,7 @@ layout: default
       sidenotes.push({ reference, sidenote });
     }
 
-    const wideScreen = window.matchMedia("(min-width: 1650px)");
+    const wideScreen = window.matchMedia("(min-width: 1150px)");
     const layoutSidenotes = () => {
       const enabled = wideScreen.matches;
       article.classList.toggle("has-sidenotes", enabled);
