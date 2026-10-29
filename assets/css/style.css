@@ -572,7 +572,11 @@ a:hover { opacity: 0.75; }
 
 /* Between 1150px and 1650px, sidenotes are narrower and the article moves
    left by half the sidenote column, so the text and sidenotes stay centered
-   together. Wide figures and tables move back to stay centered on the page. */
+   together. The sidenote column starts 2rem right of the text, so a wide
+   figure or table may not pass the text's right edge. It keeps its own width
+   up to the space between the left gutter and that edge, which is
+   50vw + 11rem, and grows leftward from that edge. One no wider than the
+   text (42rem) stays centered on the text. */
 @media (min-width: 1150px) and (max-width: 1649.98px) {
   .content-narrow.prose.has-sidenotes {
     left: -8.5rem;
@@ -580,7 +584,8 @@ a:hover { opacity: 0.75; }
   .prose.has-sidenotes figure:not(.figure-full),
   .prose.has-sidenotes figure.figure-full.figure-readable,
   .prose.has-sidenotes #table-3 {
-    transform: translateX(calc(-50% + 8.5rem));
+    max-width: calc(50vw + 11rem);
+    transform: translateX(-50%) translateX(min(0px, calc(21rem - 50%)));
   }
 }
 @media (min-width: 1650px) {
