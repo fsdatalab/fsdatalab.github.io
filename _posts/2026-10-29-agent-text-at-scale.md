@@ -13,6 +13,23 @@ image:
   alt: "Five Principles for Generating Readable AI Text in Bulk: the five principles, next to a sketch of a list of inconsistent text rows and the same list with every row in one pattern."
 ---
 
+<nav class="post-toc" aria-label="Table of contents">
+<strong>Contents</strong>
+<ol>
+  <li><a href="#the-problem">The Problem.</a></li>
+  <li><a href="#checklist">Checklist.</a>
+    <ol>
+      <li><a href="#1-match-how-human-readers-parse-sentences">Match How Human Readers Parse Sentences.</a></li>
+      <li><a href="#2-put-the-most-important-words-first">Put the Most Important Words First.</a></li>
+      <li><a href="#3-use-the-same-structure-and-the-same-vocabulary">Use the Same Structure and the Same Vocabulary.</a></li>
+      <li><a href="#4-use-variation-only-to-show-a-meaningful-difference">Use Variation Only to Show a Meaningful Difference.</a></li>
+      <li><a href="#5-align-the-connotation-of-verbs-with-the-purpose-of-the-dashboard">Align the Connotation of Verbs with the Purpose of the Dashboard.</a></li>
+    </ol>
+  </li>
+  <li><a href="#takeaways">Takeaways.</a></li>
+</ol>
+</nav>
+
 # The Problem
 
 Thanks to modern AI, we humans find ourselves reading AI-generated text at an unprecedented scale! Many of our daily driver products show feeds of such text, e.g., in Claude Code or Codex, there is a sidebar with AI-generated titles of our past agent sessions; on an iPhone, Apple Intelligence now groups and summarizes "stacks" of notifications. People also generate many temporary dashboards and web pages with AI, and share them broadly --- for example, Google publishes a [list of the bugs](https://issuetracker.google.com/issues?q=componentid:1836411&s=type:desc&s=issue_id:desc) found by Big Sleep, its AI bug-finding agent.
