@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 952 175" role="img" aria-labelledby="t1 d1">
+<title id="t1">Order emails with the status last and with the status first</title>
+<desc id="d1">Left: an inbox with four order emails whose subject lines all start with "Your order" and end with the status. Right: four Amazon order emails whose subject lines start with the status, e.g., "Shipped:" or "Delivered:".</desc>
+<style>.panel{fill:#fff;stroke:#d0d5dd;stroke-width:1.2} .side{fill:#faf9f5;stroke:#d0d5dd;stroke-width:1.2} .row{stroke:#eaecf0;stroke-width:1} .colhead{fill:#101828;font:600 14px Inter, sans-serif;text-anchor:middle} .group{fill:#8a8780;font:500 14px Inter, sans-serif} .t{fill:#1f1e1d;font:400 14px Inter, sans-serif;dominant-baseline:middle} .sender{fill:#1f1e1d;font:500 14px Inter, sans-serif;dominant-baseline:middle} .date{fill:#667085;font:400 14px Inter, sans-serif;dominant-baseline:middle;text-anchor:end} .icon,.box{fill:none;stroke:#a3a09a;stroke-width:1.2}</style>
+<text class="colhead" x="230.0" y="17">Status last</text>
+<rect class="panel" x="0.6" y="30" width="458.8" height="144" rx="10"/>
+<rect class="box" x="14" y="41.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="40" y="48.0">Store</text>
+<text class="t" x="132" y="48.0">Your order #1001 has been delivered</text>
+<text class="date" x="446" y="48.0">Oct 27</text>
+<line class="row" x1="1" x2="459" y1="66" y2="66"/>
+<rect class="box" x="14" y="77.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="40" y="84.0">Store</text>
+<text class="t" x="132" y="84.0">Your order #1001 has shipped</text>
+<text class="date" x="446" y="84.0">Oct 25</text>
+<line class="row" x1="1" x2="459" y1="102" y2="102"/>
+<rect class="box" x="14" y="113.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="40" y="120.0">Store</text>
+<text class="t" x="132" y="120.0">Your order #1002 has shipped</text>
+<text class="date" x="446" y="120.0">Oct 24</text>
+<line class="row" x1="1" x2="459" y1="138" y2="138"/>
+<rect class="box" x="14" y="149.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="40" y="156.0">Store</text>
+<text class="t" x="132" y="156.0">Your order #1001 is confirmed</text>
+<text class="date" x="446" y="156.0">Oct 23</text>
+<text class="colhead" x="722.0" y="17">Status first (Amazon)</text>
+<rect class="panel" x="492.6" y="30" width="458.8" height="144" rx="10"/>
+<rect class="box" x="506" y="41.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="532" y="48.0">Amazon.com</text>
+<text class="t" x="624" y="48.0">Delivered: &quot;Bounty Essentials...&quot;</text>
+<text class="date" x="938" y="48.0">Oct 27</text>
+<line class="row" x1="493" x2="951" y1="66" y2="66"/>
+<rect class="box" x="506" y="77.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="532" y="84.0">Amazon.com</text>
+<text class="t" x="624" y="84.0">Shipped: &quot;Bounty Essentials...&quot;</text>
+<text class="date" x="938" y="84.0">Oct 25</text>
+<line class="row" x1="493" x2="951" y1="102" y2="102"/>
+<rect class="box" x="506" y="113.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="532" y="120.0">Amazon.com</text>
+<text class="t" x="624" y="120.0">Shipped: &quot;Desk lamp...&quot;</text>
+<text class="date" x="938" y="120.0">Oct 24</text>
+<line class="row" x1="493" x2="951" y1="138" y2="138"/>
+<rect class="box" x="506" y="149.5" width="13" height="13" rx="2.5"/>
+<text class="sender" x="532" y="156.0">Amazon.com</text>
+<text class="t" x="624" y="156.0">Ordered: &quot;Bounty Essentials...&quot;</text>
+<text class="date" x="938" y="156.0">Oct 23</text>
+</svg>
