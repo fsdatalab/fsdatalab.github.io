@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 600" width="1340" height="600" role="img" aria-label="The state-carrying part of a Qwen3.5-4B Gated DeltaNet layer: input, projections, convolution, and the gated delta rule.">
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#667085"/>
+    </marker>
+    <style>
+      .t { font-family: "Lora", Georgia, "Times New Roman", serif; fill: #344054; font-size: 24px; }
+      .m { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; fill: #344054; font-size: 21px; }
+      .mid { text-anchor: middle; }
+      .h { font-weight: bold; font-size: 28px; }
+      .s { font-size: 20px; }
+      .i { font-style: italic; }
+      .lane { stroke-width: 2; }
+      .card { fill: #fff; stroke: #98a2b3; stroke-width: 2; }
+      .arr { stroke: #667085; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <!-- Input -->
+  <rect class="lane" x="10" y="20" width="200" height="560" rx="14" fill="#f3f2ee" stroke="#a8a59c"/>
+  <text class="t h mid" x="110" y="64" fill="#6b6859" style="fill:#6b6859">Input</text>
+  <text class="t s mid" x="110" y="92" style="fill:#8a8777">previous layer</text>
+  <rect class="card" x="35" y="160" width="150" height="110" rx="10"/>
+  <text class="m mid" x="110" y="200">token</text>
+  <text class="m mid" x="110" y="228">vector</text>
+  <text class="t i mid" x="110" y="256">h: 2560</text>
+
+  <!-- Projections -->
+  <rect class="lane" x="250" y="20" width="360" height="560" rx="14" fill="#efeefb" stroke="#8f8ad8"/>
+  <text class="t h mid" x="430" y="64" style="fill:#5c55c4">Projections</text>
+  <text class="t s mid" x="430" y="92" style="fill:#7d78d0">learned linear layers</text>
+  <rect class="card" x="272" y="130" width="316" height="100" rx="10"/>
+  <text class="m mid" x="430" y="170">in_proj_qkvz</text>
+  <text class="m mid" x="430" y="204">2560 → 12,288</text>
+  <rect x="268" y="252" width="82" height="42" rx="8" fill="#bfe9d8" stroke="#2d8f6f" stroke-width="2"/><text class="t s mid" x="309" y="279" style="fill:#14523f"><tspan class="i">q</tspan> 2048</text>
+  <rect x="358" y="252" width="82" height="42" rx="8" fill="#bfe9d8" stroke="#2d8f6f" stroke-width="2"/><text class="t s mid" x="399" y="279" style="fill:#14523f"><tspan class="i">k</tspan> 2048</text>
+  <rect x="448" y="252" width="82" height="42" rx="8" fill="#bfe9d8" stroke="#2d8f6f" stroke-width="2"/><text class="t s mid" x="489" y="279" style="fill:#14523f"><tspan class="i">v</tspan> 4096</text>
+  <rect x="538" y="252" width="62" height="42" rx="8" fill="#e4e4e1" stroke="#9a9a96" stroke-width="2"/><text class="t s mid" x="569" y="279" style="fill:#555"><tspan class="i">z</tspan> 4096</text>
+  <rect class="card" x="272" y="340" width="316" height="100" rx="10"/>
+  <text class="m mid" x="430" y="380">in_proj_ba</text>
+  <text class="m mid" x="430" y="414">2560 → 64</text>
+  <rect x="318" y="462" width="96" height="42" rx="8" fill="#fcd3cb" stroke="#d1604b" stroke-width="2"/><text class="t s mid" x="366" y="489" style="fill:#7a2415"><tspan class="i">β</tspan> 32</text>
+  <rect x="446" y="462" width="96" height="42" rx="8" fill="#fcd3cb" stroke="#d1604b" stroke-width="2"/><text class="t s mid" x="494" y="489" style="fill:#7a2415"><tspan class="i">α</tspan> 32</text>
+
+  <!-- Convolution -->
+  <rect class="lane" x="650" y="20" width="310" height="560" rx="14" fill="#e6f5ee" stroke="#5fb894"/>
+  <text class="t h mid" x="805" y="64" style="fill:#1f7a58">Convolution</text>
+  <text class="t s mid" x="805" y="92" style="fill:#3b9b77">depthwise, window 4</text>
+  <rect class="card" x="675" y="130" width="260" height="80" rx="10"/>
+  <text class="t mid" x="805" y="164"><tspan class="i">q, k, v</tspan> joined</text>
+  <text class="t mid" x="805" y="192">8192 channels</text>
+  <rect class="card" x="675" y="270" width="260" height="80" rx="10"/>
+  <text class="t mid" x="805" y="304">convolution + SiLU</text>
+  <text class="t mid" x="805" y="332">per channel</text>
+  <rect class="card" x="675" y="410" width="260" height="80" rx="10"/>
+  <text class="t mid" x="805" y="444">output <tspan class="i">q, k, v</tspan></text>
+  <text class="t mid" x="805" y="472">8192 channels</text>
+  <line class="arr" x1="805" y1="212" x2="805" y2="266"/>
+  <line class="arr" x1="805" y1="352" x2="805" y2="406"/>
+  <text class="t s mid" x="805" y="530" style="fill:#3b9b77">needs the last 3 inputs:</text>
+  <text class="t s mid" x="805" y="556" style="fill:#3b9b77">3 × 8192 = 24,576 numbers</text>
+
+  <!-- Gated delta rule -->
+  <rect class="lane" x="1000" y="20" width="330" height="560" rx="14" fill="#fdeeea" stroke="#e08f7d"/>
+  <text class="t h mid" x="1165" y="64" style="fill:#b5432c">Gated delta rule</text>
+  <text class="t s mid" x="1165" y="92" style="fill:#d1604b">per head</text>
+  <rect class="card" x="1022" y="130" width="286" height="80" rx="10"/>
+  <text class="t mid" x="1165" y="164">normalize <tspan class="i">q, k</tspan></text>
+  <text class="t mid" x="1165" y="192">repeat 16 → 32 heads</text>
+  <rect class="card" x="1022" y="270" width="286" height="80" rx="10"/>
+  <text class="t mid" x="1165" y="304">state update</text>
+  <text class="t i mid" x="1165" y="332">αS(I − βkkᵀ) + βokᵀ</text>
+  <rect class="card" x="1022" y="410" width="286" height="80" rx="10"/>
+  <text class="t mid" x="1165" y="444">read out <tspan class="i">o = Sq</tspan></text>
+  <text class="t mid" x="1165" y="472">32 × 128 = 4096</text>
+  <line class="arr" x1="1165" y1="212" x2="1165" y2="266"/>
+  <line class="arr" x1="1165" y1="352" x2="1165" y2="406"/>
+  <text class="t s mid" x="1165" y="530" style="fill:#d1604b"><tspan class="i">S</tspan>: 32 × 128 × 128 per request</text>
+  <text class="t s mid" x="1165" y="556" style="fill:#d1604b">= 524,288 numbers</text>
+
+  <!-- lane arrows -->
+  <line class="arr" x1="212" y1="300" x2="246" y2="300"/>
+  <line class="arr" x1="612" y1="300" x2="646" y2="300"/>
+  <line class="arr" x1="962" y1="300" x2="996" y2="300"/>
+</svg>
