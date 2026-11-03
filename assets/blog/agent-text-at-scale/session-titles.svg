@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 832 373" role="img" aria-labelledby="t1 d1">
+<title id="t1">Chat sidebar titles as written and rewritten</title>
+<desc id="d1">Left: a stylized chat sidebar with seven session titles that mix noun phrases, gerunds, and imperatives. Right: the same sidebar with each title rewritten to start with a verb in the continuous form.</desc>
+<style>.panel{fill:#fff;stroke:#d0d5dd;stroke-width:1.2} .side{fill:#faf9f5;stroke:#d0d5dd;stroke-width:1.2} .row{stroke:#eaecf0;stroke-width:1} .colhead{fill:#101828;font:600 14px Inter, sans-serif;text-anchor:middle} .group{fill:#8a8780;font:500 14px Inter, sans-serif} .t{fill:#1f1e1d;font:400 14px Inter, sans-serif;dominant-baseline:middle} .sender{fill:#1f1e1d;font:500 14px Inter, sans-serif;dominant-baseline:middle} .date{fill:#667085;font:400 14px Inter, sans-serif;dominant-baseline:middle;text-anchor:end} .icon,.box{fill:none;stroke:#a3a09a;stroke-width:1.2}</style>
+<text class="colhead" x="200.0" y="17">As written</text>
+<rect class="side" x="0.6" y="30" width="398.8" height="342" rx="10"/>
+<text class="group" x="16" y="59">Pinned ▾</text>
+<text class="t" x="16" y="83.0">KV persistence across queries</text>
+<path class="icon" d="M370,87.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="16" y="117">Today ▾</text>
+<text class="t" x="16" y="141.0">vLLM performance on eviction queries</text>
+<path class="icon" d="M370,145.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="16" y="171.0">Nemotron-3.5-Parse on OfficeQA benchmark</text>
+<path class="icon" d="M370,175.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="16" y="205">Yesterday ▾</text>
+<text class="t" x="16" y="229.0">Liquid 1.7B model integration</text>
+<path class="icon" d="M370,233.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="16" y="259.0">Quail grant application strategy</text>
+<path class="icon" d="M370,263.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="16" y="289.0">Fine-tune model on personal writing</text>
+<path class="icon" d="M370,293.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="16" y="323">Oct 26 ▾</text>
+<text class="t" x="16" y="347.0">Switching to main and fast-forwarding</text>
+<path class="icon" d="M370,351.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="colhead" x="632.0" y="17">Rewritten</text>
+<rect class="side" x="432.6" y="30" width="398.8" height="342" rx="10"/>
+<text class="group" x="448" y="59">Pinned ▾</text>
+<text class="t" x="448" y="83.0">Persisting KV across queries</text>
+<path class="icon" d="M802,87.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="448" y="117">Today ▾</text>
+<text class="t" x="448" y="141.0">Measuring vLLM performance on eviction queries</text>
+<path class="icon" d="M802,145.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="448" y="171.0">Running Nemotron-3.5-Parse on OfficeQA</text>
+<path class="icon" d="M802,175.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="448" y="205">Yesterday ▾</text>
+<text class="t" x="448" y="229.0">Integrating Liquid 1.7B model</text>
+<path class="icon" d="M802,233.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="448" y="259.0">Planning Quail grant application</text>
+<path class="icon" d="M802,263.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="t" x="448" y="289.0">Fine-tuning model on personal writing</text>
+<path class="icon" d="M802,293.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+<text class="group" x="448" y="323">Oct 26 ▾</text>
+<text class="t" x="448" y="347.0">Switching to main and fast-forwarding</text>
+<path class="icon" d="M802,351.5 h13 a4,4 0 0 0 0,-8 a5.2,5.2 0 0 0 -10,-1.3 a4,4 0 0 0 -3,9.3 z"/>
+</svg>

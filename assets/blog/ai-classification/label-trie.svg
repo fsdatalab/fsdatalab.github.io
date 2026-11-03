@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="29 98 1061 637" role="img" aria-labelledby="title desc">
+<title id="title">Label trie for the running example</title>
+<desc id="desc">The trie of the 10 support labels. The ANSWER token is the root. The labels branch at three nodes: the ANSWER token, refund, and shipping. Each label ends at a leaf.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<style>
+  .frame { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .doc { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+  .pos { fill: #dcebd3; stroke: #667085; stroke-width: 2; }
+  .leaf { fill: #ffffff; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 5; }
+  .end { fill: #ffffff; stroke: #101828; stroke-width: 3; }
+  .edge { fill: none; stroke: #667085; stroke-width: 2; }
+  .heading { fill: #101828; font: 600 25px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .colhead { fill: #101828; font: 600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .label { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .left { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .note { fill: #3b6ea8; font: 600 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+</style>
+</defs>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 131.0 250 131.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 215.0 250 215.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 355.0 250 355.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 467.0 250 467.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 523.0 250 523.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 579.0 250 579.0"/>
+<path class="edge" d="M 208 415.0 C 229.0 415.0 229.0 635.0 250 635.0"/>
+<path class="edge" d="M 418 215.0 C 444.0 215.0 444.0 187.0 470 187.0"/>
+<path class="edge" d="M 418 215.0 C 444.0 215.0 444.0 243.0 470 243.0"/>
+<path class="edge" d="M 418 355.0 C 444.0 355.0 444.0 299.0 470 299.0"/>
+<path class="edge" d="M 418 355.0 C 444.0 355.0 444.0 355.0 470 355.0"/>
+<path class="edge" d="M 418 355.0 C 444.0 355.0 444.0 411.0 470 411.0"/>
+<path class="edge" d="M 638 411.0 C 664.0 411.0 664.0 411.0 690 411.0"/>
+<path class="edge" d="M 418 467.0 C 444.0 467.0 444.0 467.0 470 467.0"/>
+<path class="edge" d="M 418 523.0 C 444.0 523.0 444.0 523.0 470 523.0"/>
+<path class="edge" d="M 638 523.0 C 664.0 523.0 664.0 523.0 690 523.0"/>
+<path class="edge" d="M 858 523.0 C 884.0 523.0 884.0 523.0 910 523.0"/>
+<rect class="pos" x="40" y="394.0" width="168" height="42" rx="10"/>
+<text class="label" x="124.0" y="416.0">ANSWER:</text>
+<rect class="pos" x="250" y="194.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="216.0">refund</text>
+<rect class="pos" x="250" y="334.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="356.0">shipping</text>
+<rect class="doc" x="470" y="390.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="412.0">address</text>
+<rect class="doc" x="250" y="446.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="468.0">product</text>
+<rect class="doc" x="250" y="502.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="524.0">two</text>
+<rect class="doc" x="470" y="502.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="524.0">-factor</text>
+<rect class="doc" x="690" y="502.0" width="168" height="42" rx="10"/>
+<text class="label" x="774.0" y="524.0">authentication</text>
+<rect class="end" x="250" y="110.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="132.0">billing</text>
+<rect class="end" x="470" y="166.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="188.0">request</text>
+<rect class="end" x="470" y="222.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="244.0">status</text>
+<rect class="end" x="470" y="278.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="300.0">delay</text>
+<rect class="end" x="470" y="334.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="356.0">damage</text>
+<rect class="end" x="690" y="390.0" width="168" height="42" rx="10"/>
+<text class="label" x="774.0" y="412.0">change</text>
+<rect class="end" x="470" y="446.0" width="168" height="42" rx="10"/>
+<text class="label" x="554.0" y="468.0">defect</text>
+<rect class="end" x="910" y="502.0" width="168" height="42" rx="10"/>
+<text class="label" x="994.0" y="524.0">issue</text>
+<rect class="end" x="250" y="558.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="580.0">praise</text>
+<rect class="end" x="250" y="614.0" width="168" height="42" rx="10"/>
+<text class="label" x="334.0" y="636.0">other</text>
+<rect class="pos" x="170" y="689" width="44" height="34" rx="8"/>
+<text class="left" x="226" y="707">Node where the labels branch</text>
+<rect class="end" x="600" y="689" width="44" height="34" rx="8"/>
+<text class="left" x="656" y="707">Last token of a label</text>
+</svg>

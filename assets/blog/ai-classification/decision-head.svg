@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 1084 554" role="img" aria-labelledby="t5 d5">
+<title id="t5">Decision 2.0 Kai prompt and decision head</title>
+<desc id="d5">The prompt puts each label in its own option block. The decision head reads the hidden state at the last token of each option block and at the last token of the prompt, and returns a probability for each label.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/></marker>
+<style>
+  .frame { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .doc { fill: #f2f4f7; stroke: #667085; stroke-width: 2; }
+  .pos { fill: #dcebd3; stroke: #667085; stroke-width: 2; }
+  .leaf { fill: #ffffff; stroke: #667085; stroke-width: 2; stroke-dasharray: 6 5; }
+  .end { fill: #ffffff; stroke: #101828; stroke-width: 3; }
+  .edge { fill: none; stroke: #667085; stroke-width: 2; }
+  .heading { fill: #101828; font: 600 25px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .colhead { fill: #101828; font: 600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  .label { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: middle; }
+  .left { fill: #101828; font: 500 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: start; dominant-baseline: middle; }
+  .note { fill: #3b6ea8; font: 600 21px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+</style>
+<style>.mono { fill: #101828; font: 500 24px "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; dominant-baseline: middle; } .big { fill: #101828; font: 500 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; dominant-baseline: middle; } .bigc { fill: #101828; font: 600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; dominant-baseline: middle; text-anchor: middle; }</style>
+</defs>
+<rect class="doc" x="10" y="10" width="642" height="532" rx="10"/>
+<text class="mono" x="30" y="54.0">Context:</text>
+<text class="mono" x="30" y="100.0">&lt;support message&gt;</text>
+<text class="mono" x="30" y="162.0">Question: Classify the ticket.</text>
+<text class="mono" x="30" y="208.0">Options:</text>
+<text class="mono" x="30" y="254.0">&lt;option&gt;{"key":"billing"}</text>
+<rect x="392.0" y="235.0" width="139.6" height="36" rx="5" fill="#dcebd3" stroke="#3b6ea8" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text class="mono" x="397.0" y="254.0">&lt;/option&gt;</text>
+<text class="mono" x="30" y="300.0">&lt;option&gt;{"key":"refund request"}</text>
+<rect x="492.8" y="281.0" width="139.6" height="36" rx="5" fill="#dcebd3" stroke="#3b6ea8" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text class="mono" x="497.8" y="300.0">&lt;/option&gt;</text>
+<text class="mono" x="30" y="346.0">⋮</text>
+<text class="mono" x="30" y="392.0">&lt;option&gt;{"key":"other"}</text>
+<rect x="363.2" y="373.0" width="139.6" height="36" rx="5" fill="#dcebd3" stroke="#3b6ea8" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text class="mono" x="368.2" y="392.0">&lt;/option&gt;</text>
+<text class="mono" x="30" y="454.0">Select the single option ...</text>
+<rect x="25.0" y="481.0" width="139.6" height="36" rx="5" fill="#dcebd3" stroke="#3b6ea8" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text class="mono" x="30.0" y="500.0">Decision:</text>
+<rect x="702" y="217.0" width="120" height="318.0" rx="10" fill="#ffffff" stroke="#101828" stroke-width="3"/>
+<text class="bigc" x="762" y="360.0">Decision</text>
+<text class="bigc" x="762" y="392.0">head</text>
+<path class="edge" style="marker-end:url(#arrow)" d="M 537.6 253.0 L 696 253.0"/>
+<path class="edge" style="marker-end:url(#arrow)" d="M 638.4 299.0 L 696 299.0"/>
+<path class="edge" style="marker-end:url(#arrow)" d="M 508.8 391.0 L 696 391.0"/>
+<path class="edge" style="marker-end:url(#arrow)" d="M 170.6 499.0 L 696 499.0"/>
+<path class="edge" style="marker-end:url(#arrow)" d="M 826 253.0 L 866 253.0"/>
+<text class="big" x="872" y="254.0">P(billing)</text>
+<path class="edge" style="marker-end:url(#arrow)" d="M 826 299.0 L 866 299.0"/>
+<text class="big" x="872" y="300.0">P(refund request)</text>
+<path class="edge" style="marker-end:url(#arrow)" d="M 826 391.0 L 866 391.0"/>
+<text class="big" x="872" y="392.0">P(other)</text>
+<text class="bigc" x="912" y="345.0">⋮</text>
+</svg>

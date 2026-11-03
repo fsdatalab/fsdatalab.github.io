@@ -196,7 +196,7 @@
           SW = N;
           SR = 0;
         } else {
-          docsIn = Math.round(expected);
+          docsIn = expected;
           n = docsIn * q;
           A = docsIn * (q * p + (q * (q + 1)) / 2);
           W = n;

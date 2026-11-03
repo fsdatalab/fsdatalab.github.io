@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 956 542" role="img" aria-labelledby="t1 d1">
+<title id="t1">Notion AI autofill summaries of four GitHub issues</title>
+<desc id="d1">A stylized Notion database with an Issue column and a Summary column that Notion AI filled in. The summaries start with "The issue reports that", "The page reports", or "Pressing Ctrl+C".</desc>
+<style>.grid{stroke:#e9e9e7;stroke-width:1} .h1{fill:#37352f;font:700 26px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif} .pill{fill:#f1f1ef} .pt{fill:#37352f;font:500 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;dominant-baseline:middle} .hd{fill:#787774;font:400 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;dominant-baseline:middle} .ttl{fill:#37352f;font:500 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif} .t{fill:#37352f;font:400 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif} .code{fill:#eb5757;font:400 12.5px SFMono-Regular, Menlo, Consolas, monospace} .chip{fill:#87837826} .hl{fill:#ffd43b;opacity:.45} .lab{fill:#b54708;font:500 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif} .arr{stroke:#b54708;stroke-width:1.3;fill:none} .ic{fill:none;stroke:#9b9a97;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round} .icf{fill:#9b9a97;font:600 14px ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;dominant-baseline:middle}</style>
+<rect width="956" height="542" fill="#fff"/>
+<g transform="translate(0,-86)">
+<text class="icf" x="9" y="105.0">Aa</text><text class="hd" x="32" y="105.0">Issue</text>
+<path class="ic" d="M287,99.0 h13 M287,104.0 h13 M287,109.0 h9"/>
+<text class="hd" x="309" y="105.0">Summary</text>
+<path class="ic" d="M387,104.0 m0,-7 l0,4"/><path class="ic" d="M387,104.0 m0,3 l0,4"/><path class="ic" d="M387,104.0 m-7,0 l4,0"/><path class="ic" d="M387,104.0 m3,0 l4,0"/><path class="ic" d="M387,104.0 m-5,-5 l2.5,2.5"/><path class="ic" d="M387,104.0 m2.5,2.5 l2.5,2.5"/><path class="ic" d="M387,104.0 m5,-5 l-2.5,2.5"/><path class="ic" d="M387,104.0 m-2.5,2.5 l-2.5,2.5"/>
+<line class="grid" x1="1" x2="755" y1="86" y2="86"/><line class="grid" x1="1" x2="755" y1="122" y2="122"/>
+<path class="ic" d="M8,135 h8 l4,4 v12 h-12 z M16,135 v4 h4"/>
+<text class="ttl" x="30" y="147">Claude Desktop Conversation:</text>
+<text class="ttl" x="30" y="168">~17K initial prefill, HTTP 500</text>
+<text class="ttl" x="30" y="189">retries, MLX cache loss</text>
+<text class="ttl" x="30" y="210">(0.40.11–0.40.12)</text>
+<text class="t" x="287" y="147" xml:space="preserve">The issue reports that Claude Desktop Conversation</text>
+<text class="t" x="287" y="168" xml:space="preserve">experiences a long (~70–90 s) initial prefill of ~17 K</text>
+<text class="t" x="287" y="189" xml:space="preserve">tokens, frequent HTTP 500 errors, and cache loss on MLX</text>
+<text class="t" x="287" y="210" xml:space="preserve">versions 0.40.11–0.40.12, despite later messages being</text>
+<text class="t" x="287" y="231" xml:space="preserve">faster.</text>
+<line class="grid" x1="1" x2="755" y1="247" y2="247"/>
+<path class="ic" d="M8,260 h8 l4,4 v12 h-12 z M16,260 v4 h4"/>
+<text class="ttl" x="30" y="272">ollama show --modelfile writes</text>
+<text class="ttl" x="30" y="293">a Modelfile that ollama create</text>
+<text class="ttl" x="30" y="314">rejects when a SYSTEM/TEMPLATE</text>
+<text class="ttl" x="30" y="335">/LICENSE/MESSAGE value</text>
+<text class="ttl" x="30" y="356">contains &quot;&quot;&quot; followed by</text>
+<text class="ttl" x="30" y="377">whitespace</text>
+<text class="t" x="287" y="272" xml:space="preserve">The issue reports that </text>
+<rect class="chip" x="435.3" y="258" width="181" height="19" rx="3"/><text class="code" x="439.3" y="272">ollama show --modelfile</text>
+<text class="t" x="618.3" y="272" xml:space="preserve"> incorrectly</text>
+<text class="t" x="287" y="293" xml:space="preserve">wraps values containing triple quotes followed by whitespace,</text>
+<text class="t" x="287" y="314" xml:space="preserve">causing unparseable Modelfiles that fail to recreate the model.</text>
+<line class="grid" x1="1" x2="755" y1="393" y2="393"/>
+<path class="ic" d="M8,406 h8 l4,4 v12 h-12 z M16,406 v4 h4"/>
+<text class="ttl" x="30" y="418">Error reading GGUF metadata on</text>
+<text class="ttl" x="30" y="439">large MoE model with MXFP4</text>
+<text class="ttl" x="30" y="460">format</text>
+<text class="t" x="287" y="418" xml:space="preserve">The page reports an error reading GGUF metadata for a</text>
+<text class="t" x="287" y="439" xml:space="preserve">large MoE model in MXFP4 format due to an oversized</text>
+<text class="t" x="287" y="460" xml:space="preserve">unsupported tensor, references a similar bug, and includes</text>
+<text class="t" x="287" y="481" xml:space="preserve">a link to the related GitHub issue.</text>
+<line class="grid" x1="1" x2="755" y1="497" y2="497"/>
+<path class="ic" d="M8,510 h8 l4,4 v12 h-12 z M16,510 v4 h4"/>
+<text class="ttl" x="30" y="522">ollama run: Ctrl+C during &quot;&quot;&quot;</text>
+<text class="ttl" x="30" y="543">multiline input leaves session</text>
+<text class="ttl" x="30" y="564">in multiline mode, so later</text>
+<text class="ttl" x="30" y="585">input is swallowed or saved as</text>
+<text class="ttl" x="30" y="606">the system message</text>
+<text class="t" x="287" y="522" xml:space="preserve">Pressing Ctrl +C while entering a &quot;&quot;&quot; multiline message in</text>
+<text class="t" x="287" y="543" xml:space="preserve">ollama run clears the buffer but leaves the REPL in</text>
+<text class="t" x="287" y="564" xml:space="preserve">multiline mode, so the following input is mistakenly</text>
+<text class="t" x="287" y="585" xml:space="preserve">treated as a continuation or system message.</text>
+<line class="grid" x1="1" x2="755" y1="622" y2="622"/>
+<line class="grid" x1="277" x2="277" y1="86" y2="622"/>
+<rect class="hl" x="285" y="133" width="145.6" height="19" rx="2"/>
+<rect class="hl" x="285" y="258" width="145.6" height="19" rx="2"/>
+<rect class="hl" x="285" y="404" width="115.1" height="19" rx="2"/>
+<path class="arr" d="M774,413.5 h-8 m4,-4 l-4,4 l4,4"/>
+<text class="lab" x="780" y="418">Calls the issue a “page”</text>
+<rect class="hl" x="285" y="508" width="109.0" height="19" rx="2"/>
+<path class="arr" d="M774,517.5 h-8 m4,-4 l-4,4 l4,4"/>
+<text class="lab" x="780" y="522">Starts with an action</text>
+</g>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 492" role="img" aria-labelledby="t1 d1">
+<title id="t1">Headlines from the Perplexity Discover feed</title>
+<desc id="d1">A stylized Perplexity Discover feed with one lead story and three story cards. Each headline has a subject, a verb in the present tense, and an object.</desc>
+<style>.page{fill:#fcfcf9;stroke:#d0d5dd;stroke-width:1.2} .img{fill:#e4e7ec} .card{fill:#fff;stroke:#e4e7ec;stroke-width:1} .nav{fill:#101828;font:500 14px Inter, sans-serif} .muted{fill:#667085;font:400 14px Inter, sans-serif} .hero{fill:#101828;font:400 20px Georgia, "Times New Roman", serif} .h{fill:#101828;font:400 14px Georgia, "Times New Roman", serif} .sum{fill:#344054;font:400 14px Georgia, "Times New Roman", serif} .src{fill:#667085;font:400 14px Inter, sans-serif} .fav{stroke:#fff;stroke-width:1.2}</style>
+<rect class="page" x="0.6" y="0.6" width="638.8" height="490.8" rx="10"/>
+<text class="nav" x="16" y="30">Discover</text>
+<text class="nav" x="286.0" y="30">Top</text><line x1="285.0" x2="309.0" y1="38" y2="38" stroke="#101828" stroke-width="1.5"/>
+<text class="muted" x="324.0" y="30">Topics ▾</text>
+<line x1="1" x2="639" y1="50" y2="50" stroke="#eaecf0"/>
+<text class="hero" x="16" y="92">Brewers beat Rays in Game</text>
+<text class="hero" x="16" y="122">5 for first World Series</text>
+<text class="hero" x="16" y="152">title</text>
+<text class="sum" x="16" y="186">Jacob Misiorowski blanked Tampa Bay over 5</text>
+<text class="sum" x="16" y="206">2/3 innings as Milwaukee won 4-1, capping an</text>
+<text class="sum" x="16" y="226">11-2 postseason run.</text>
+<circle class="fav" cx="22" cy="252" r="6" fill="#d92d20"/><circle class="fav" cx="31" cy="252" r="6" fill="#2e90fa"/><circle class="fav" cx="40" cy="252" r="6" fill="#12b76a"/><text class="src" x="52" y="256">59 sources</text>
+<rect class="img" x="374" y="70" width="250" height="170" rx="8"/>
+<rect class="card" x="16.0" y="280" width="193.33333333333334" height="194" rx="8"/>
+<path class="img" d="M24.0,280 h177.33333333333334 a8,8 0 0 1 8,8 v80 h-193.33333333333334 v-80 a8,8 0 0 1 8,-8 z"/>
+<text class="h" x="28.0" y="390">Bank of Canada hikes</text>
+<text class="h" x="28.0" y="410">rate to 2.5%, first</text>
+<text class="h" x="28.0" y="430">since July 2023</text>
+<circle class="fav" cx="34.0" cy="460" r="6" fill="#d92d20"/><circle class="fav" cx="43.0" cy="460" r="6" fill="#2e90fa"/><circle class="fav" cx="52.0" cy="460" r="6" fill="#12b76a"/><text class="src" x="64.0" y="464">30 sources</text>
+<rect class="card" x="223.33333333333334" y="280" width="193.33333333333334" height="194" rx="8"/>
+<path class="img" d="M231.33333333333334,280 h177.33333333333334 a8,8 0 0 1 8,8 v80 h-193.33333333333334 v-80 a8,8 0 0 1 8,-8 z"/>
+<text class="h" x="235.33333333333334" y="390">Weil Gotshal to wind</text>
+<text class="h" x="235.33333333333334" y="410">down after partner</text>
+<text class="h" x="235.33333333333334" y="430">exodus</text>
+<circle class="fav" cx="241.33333333333334" cy="460" r="6" fill="#d92d20"/><circle class="fav" cx="250.33333333333334" cy="460" r="6" fill="#2e90fa"/><circle class="fav" cx="259.33333333333337" cy="460" r="6" fill="#12b76a"/><text class="src" x="271.33333333333337" y="464">31 sources</text>
+<rect class="card" x="430.6666666666667" y="280" width="193.33333333333334" height="194" rx="8"/>
+<path class="img" d="M438.6666666666667,280 h177.33333333333334 a8,8 0 0 1 8,8 v80 h-193.33333333333334 v-80 a8,8 0 0 1 8,-8 z"/>
+<text class="h" x="442.6666666666667" y="390">HHS lets pharmacies make</text>
+<text class="h" x="442.6666666666667" y="410">six unapproved peptides</text>
+<circle class="fav" cx="448.6666666666667" cy="460" r="6" fill="#d92d20"/><circle class="fav" cx="457.6666666666667" cy="460" r="6" fill="#2e90fa"/><circle class="fav" cx="466.6666666666667" cy="460" r="6" fill="#12b76a"/><text class="src" x="478.6666666666667" y="464">15 sources</text>
+</svg>
