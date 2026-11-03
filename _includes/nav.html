@@ -5,6 +5,7 @@
   </a>
   <ul class="nav-links">
     <li><a href="{{ '/blog/' | relative_url }}" {% if page.url contains '/blog' or page.layout == 'post' %}class="active"{% endif %}>Blog</a></li>
+    <li><a href="{{ '/people/' | relative_url }}" {% if page.url contains '/people' %}class="active"{% endif %}>People</a></li>
     <li><a href="https://github.com/fsdatalab" target="_blank" rel="noopener noreferrer">GitHub</a></li>
   </ul>
 </nav>
