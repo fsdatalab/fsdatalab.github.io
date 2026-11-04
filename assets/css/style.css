@@ -831,6 +831,29 @@ a:hover { opacity: 0.75; }
 .prose .highlight .nf,
 .prose .highlight .nc { color: #245f9e; }
 .prose .highlight .o { color: #8a3b12; }
+.prose .highlight .map-planning-call,
+.prose .highlight .map-execution-call {
+  color: #245f9e;
+  text-decoration: none;
+}
+.prose .map-algorithm code { white-space: normal; }
+.prose .map-algorithm .algorithm-line {
+  display: block;
+  min-width: max-content;
+  white-space: pre;
+  scroll-margin-top: 5rem;
+}
+.prose .map-algorithm .algorithm-line::before {
+  content: attr(data-line);
+  display: inline-block;
+  width: 2ch;
+  margin-right: 1.5ch;
+  color: var(--faint);
+  text-align: right;
+  user-select: none;
+}
+.prose .map-algorithm .algorithm-line:target { background: #fff4ce; }
+
 
 .prose figure.figure-full {
   width: 100%;
