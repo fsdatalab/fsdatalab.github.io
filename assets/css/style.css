@@ -833,12 +833,9 @@ a:hover { opacity: 0.75; }
 .prose .highlight .o { color: #8a3b12; }
 .prose .highlight .map-planning-call,
 .prose .highlight .map-execution-call {
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: #245f9e;
+  text-decoration: none;
 }
-.prose .highlight .map-planning-call { color: #c41230; }
-.prose .highlight .map-execution-call { color: #08746e; }
 .prose .map-algorithm code { white-space: normal; }
 .prose .map-algorithm .algorithm-line {
   display: block;
