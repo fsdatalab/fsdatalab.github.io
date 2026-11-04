@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" role="img" aria-labelledby="att-t att-d">
+<title id="att-t">Reads of the shared trace KV in one decode step</title>
+<desc id="att-d">Left: standard attention runs one call per map, so each tile of the trace KV is loaded from GPU memory (HBM) into on-chip memory (SRAM) three times. Right: shared-prefix attention loads each tile once and scores it against the queries of all three maps, then merges each map's result with attention over its own instruction and output.</desc>
+<defs>
+<style>
+  .box { fill: #ffffff; stroke: #667085; stroke-width: 2; }
+  .tile { fill: #eef0f3; stroke: #98a2b3; stroke-width: 2; }
+  .shared { fill: #dcebd3; stroke: #3b7d3b; stroke-width: 2; }
+  .merge { fill: #ffffff; stroke: #3b7d3b; stroke-width: 2; stroke-dasharray: 5 4; }
+  .head { fill: #101828; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .lab { fill: #101828; font: 500 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .row { fill: #667085; font: 600 14px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .bad { fill: #667085; font: 600 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .good { fill: #3b7d3b; font: 600 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .gray { stroke: #98a2b3; stroke-width: 2.5; fill: none; }
+  .green { stroke: #3b7d3b; stroke-width: 3; fill: none; }
+</style>
+<marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#98a2b3"/></marker>
+<marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3b7d3b"/></marker>
+</defs>
+
+<!-- left: standard attention -->
+<text class="head" x="20" y="28">Standard attention, one call per map</text>
+<text class="row" x="20" y="83">HBM</text>
+<rect class="box" x="72" y="58" width="338" height="40" rx="6"/>
+<text class="lab" x="241" y="84" text-anchor="middle">trace KV, stored once</text>
+<text class="row" x="20" y="177">SRAM</text>
+<line class="gray" x1="122" y1="100" x2="122" y2="148" marker-end="url(#ag)"/>
+<line class="gray" x1="241" y1="100" x2="241" y2="148" marker-end="url(#ag)"/>
+<line class="gray" x1="360" y1="100" x2="360" y2="148" marker-end="url(#ag)"/>
+<rect class="tile" x="72" y="152" width="100" height="40" rx="6"/>
+<rect class="tile" x="191" y="152" width="100" height="40" rx="6"/>
+<rect class="tile" x="310" y="152" width="100" height="40" rx="6"/>
+<text class="lab" x="122" y="178" text-anchor="middle">map 1</text>
+<text class="lab" x="241" y="178" text-anchor="middle">map 2</text>
+<text class="lab" x="360" y="178" text-anchor="middle">map 3</text>
+<text class="bad" x="241" y="298" text-anchor="middle">each tile loaded 3 times</text>
+
+<!-- right: shared-prefix attention -->
+<text class="head" x="480" y="28">Shared-prefix attention (Quail)</text>
+<text class="row" x="480" y="83">HBM</text>
+<rect class="box" x="532" y="58" width="338" height="40" rx="6"/>
+<text class="lab" x="701" y="84" text-anchor="middle">trace KV, stored once</text>
+<text class="row" x="480" y="177">SRAM</text>
+<line class="green" x1="701" y1="100" x2="701" y2="148" marker-end="url(#ac)"/>
+<rect class="shared" x="532" y="152" width="338" height="40" rx="6"/>
+<text class="lab" x="701" y="178" text-anchor="middle">maps 1, 2, and 3 together</text>
+<text class="row" x="480" y="253">merge</text>
+<line class="green" x1="582" y1="194" x2="582" y2="224" marker-end="url(#ac)"/>
+<line class="green" x1="701" y1="194" x2="701" y2="224" marker-end="url(#ac)"/>
+<line class="green" x1="820" y1="194" x2="820" y2="224" marker-end="url(#ac)"/>
+<rect class="merge" x="532" y="228" width="100" height="38" rx="6"/>
+<rect class="merge" x="651" y="228" width="100" height="38" rx="6"/>
+<rect class="merge" x="770" y="228" width="100" height="38" rx="6"/>
+<text class="lab" x="582" y="253" text-anchor="middle">map 1</text>
+<text class="lab" x="701" y="253" text-anchor="middle">map 2</text>
+<text class="lab" x="820" y="253" text-anchor="middle">map 3</text>
+<text class="good" x="701" y="298" text-anchor="middle">each tile loaded once</text>
+</svg>

@@ -857,32 +857,6 @@ a:hover { opacity: 0.75; }
 }
 .prose .map-algorithm .algorithm-line:target { background: #fff4ce; }
 
-.prose .attention-memory-panels {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: 1.5rem;
-}
-.prose .attention-memory-panels img { width: 100%; }
-.prose .attention-gpu-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1rem 0;
-  text-align: left;
-  font-family: var(--body);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-.prose .attention-gpu-steps > div {
-  padding: 0.75rem 1rem;
-  border-top: 2px solid var(--red);
-  background: #fafafa;
-}
-.prose .attention-gpu-steps strong,
-.prose .attention-gpu-steps span { display: block; }
-@media (max-width: 640px) {
-  .prose .attention-gpu-steps { grid-template-columns: 1fr; }
-}
 
 .prose figure.figure-full {
   width: 100%;
