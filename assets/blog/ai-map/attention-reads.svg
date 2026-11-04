@@ -10,13 +10,13 @@
   .slot { fill: #ffffff; stroke: #98a2b3; stroke-width: 2; }
   .merge { fill: #ffffff; stroke: #3b7d3b; stroke-width: 2; stroke-dasharray: 5 4; }
   .mergebox { fill: #dcebd3; stroke: #3b7d3b; stroke-width: 2; }
-  .note { fill: #475467; font: 500 14px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .note { fill: #475467; font: 500 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .slotg { fill: #ffffff; stroke: #3b7d3b; stroke-width: 2; }
-  .head { fill: #101828; font: 600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .memlab { fill: #475467; font: 700 14px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .lab { fill: #101828; font: 500 15px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .bad { fill: #475467; font: 700 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .good { fill: #3b7d3b; font: 700 16px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .head { fill: #101828; font: 600 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .memlab { fill: #475467; font: 700 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .lab { fill: #101828; font: 500 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .bad { fill: #475467; font: 700 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .good { fill: #3b7d3b; font: 700 16.5px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .ag { stroke: #667085; stroke-width: 2.5; fill: none; }
   .ac { stroke: #3b7d3b; stroke-width: 3; fill: none; }
 </style>
