@@ -211,7 +211,7 @@ We use two groups of QUAIL-B queries.
 <figcaption>Figure 7. Tokens per second of each system on the queries of Figure 6, against the speed of light. Each system gets the tokens of the speed-of-light run: each document once, and each question and answer. The percentages are the shares of the speed-of-light throughput.</figcaption>
 </figure>
 
-**Where the rest of the time goes.** Timing each forward pass with CUDA events, we find that the GPU is busy 81% of the time on IMDB-ACTING. A `torch.profiler` trace of the same query shows where the host is while the GPU waits: in 73% of the idle time in a 5-second window, it is building the next forward pass. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
+**The GPU is busy 81% of the time.** On IMDB-ACTING, the GPU is idle for about a fifth of the query. Most of that time, it waits for the CPU to prepare the next forward pass: to choose which documents and answers go into it, and to lay out their tokens. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
 
 # 6. Conclusion and Future Work
 
