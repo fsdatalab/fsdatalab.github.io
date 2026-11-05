@@ -13,7 +13,7 @@ image:
   path: /assets/blog/ai-extract/social-preview.png
   width: 1200
   height: 630
-  alt: "Copy That: Faster AI-Powered Extraction by Drafting from the Document: query time of vLLM and Quail on agent traces, SEC filings, filtered SEC filings, and legal contracts; Quail is 1.2x, 1.4x, 2.8x, and 1.5x faster than vLLM."
+  alt: "Copy That? Faster AI-Powered Extraction by Drafting from the Document: a command in an agent trace, copied from the document into the answer."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> How do you run LLM-powered extraction at scale, as fast as possible? Our implementation of <code>AI.EXTRACT</code> in <a href="https://github.com/fsdatalab/quail">Quail</a> is <strong>1.7x faster on average (up to 2.8x)</strong> than a well-tuned vLLM baseline with sorted prompts and n-gram speculation, and up to 17x faster than stock vLLM. Read this post to find out how!</aside>
