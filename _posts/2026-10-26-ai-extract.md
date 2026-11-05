@@ -211,7 +211,7 @@ We use two groups of QUAIL-B queries.
 <figcaption>Figure 7. Tokens per second of each system on the queries of Figure 6, against the speed of light. Each system gets the tokens of the speed-of-light run: each document once, and each question and answer. The percentages are the shares of the speed-of-light throughput.</figcaption>
 </figure>
 
-**The GPU is busy 93% of the time.** In a 5-second window in the middle of IMDB-ACTING, the GPU is idle for 7% of the time, about 20 ms per forward pass while the host prepares the next one. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
+**The GPU is busy most of the time.** In a 5-second window in the middle of IMDB-ACTING, the GPU is busy 93% of the time, which is good, especially for a decode-heavy workload. However, some of the GPU's work is wasted, i.e., on rejected draft tokens. We leave squeezing out more performance to future work.
 
 # 6. Conclusion and Future Work
 
