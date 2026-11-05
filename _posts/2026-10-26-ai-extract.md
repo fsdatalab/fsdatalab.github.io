@@ -211,7 +211,7 @@ We use two groups of QUAIL-B queries.
 <figcaption>Figure 7. Tokens per second of each system on the queries of Figure 6, against the speed of light. Each system gets the tokens of the speed-of-light run: each document once, and each question and answer. The percentages are the shares of the speed-of-light throughput.</figcaption>
 </figure>
 
-**The GPU is busy 81% of the time.** On IMDB-ACTING, the GPU is idle for about a fifth of the query. A `torch.profiler` trace shows the host preparing the next forward pass for most of that idle time: 73% in `_build`, which packs the scheduled document groups into the pass's input tensors (`pack_chunk`), and 17% in `next_chunk`, which picks those groups and reserves their KV pages. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
+**The GPU is busy 81% of the time.** On IMDB-ACTING, the GPU waits for the host for about a fifth of the query. The host does much of its work one document at a time, in Python: it builds the index of document positions that Quail copies drafts from, reserves each document's KV pages, and packs each document's inputs into the next forward pass. Also, some of the GPU's work is wasted, e.g., on rejected draft tokens. We leave squeezing out more performance to future work.
 
 # 6. Conclusion and Future Work
 
