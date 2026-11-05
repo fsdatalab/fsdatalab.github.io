@@ -172,7 +172,7 @@ When the answer so far has many matches, Quail may draft no tokens and decode on
 
 # 5. Experiments on QUAIL-B
 
-**Setup.** All systems run Qwen3-4B (FP8) on one H100 with the same prompts. We test Quail with adaptive draft lengths and fixed lengths $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. Quail limits each extracted answer to 64 tokens. As in [our `AI.MAP` post]({{ '/blog/ai-map/' | relative_url }}), we compare Quail with two vLLM baselines:<sup><a href="#note-17">17</a></sup>
+**Setup.** All systems run Qwen3-4B (FP8) on one H100 with the same prompts. We test Quail with adaptive draft lengths and fixed lengths $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. Quail limits each extracted answer to 64 tokens. We compare Quail with two vLLM baselines:<sup><a href="#note-17">17</a></sup>
 
 - *Stock vLLM.* We compile each query into LLM calls, one for every field of every document. Then we pass all of the calls to `LLM.generate` in one batch, in random order. vLLM generates each answer one token at a time.
 - *vLLM sorted + n-gram.* Same as stock vLLM, but we sort the calls so that the fields of one document are next to each other, so that vLLM's prefix caching computes each document once. We also turn on n-gram speculation: vLLM finds the last few answer tokens in the prompt and drafts the next five tokens.
