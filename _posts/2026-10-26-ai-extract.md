@@ -204,7 +204,7 @@ We use two groups of QUAIL-B queries.
 <figcaption>Figure 6. Query time of stock vLLM (random order), vLLM sorted + n-gram speculation, and Quail on four queries that ask several questions of each document. Quail is the fastest on every query. The bar of stock vLLM on CUAD-16 is cut off at 300 s.</figcaption>
 </figure>
 
-**Quail runs at 38–42% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}), the *speed-of-light* (SoL) time of a query is a lower bound from the peak FLOPs and the memory bandwidth of one H100. To extract a field from a document, the SoL time counts two forward passes. The first pass prefills the document and the question, and picks the first token of the answer. The second pass checks the whole answer, as if we knew the answer.<sup><a href="#note-22">22</a></sup> If there are several fields, we count the prefill of the document only once. Figure 7 compares the throughput of each system, in tokens per second, with the SoL throughput. Quail reaches 38–42% of the SoL throughput, vLLM sorted + n-gram 14–32%, and stock vLLM 2–20%.
+**Quail runs at 38–42% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}), the *speed-of-light* (SoL) time of a query is a lower bound from the peak FLOPs and the memory bandwidth of one H100. To extract a field from a document, the SoL time counts two forward passes. The first pass prefills the document and the question, and picks the first token of the answer. The second pass checks the whole answer at once, as if speculation drafted the entire answer perfectly on the first try.<sup><a href="#note-22">22</a></sup> If there are several fields, we count the prefill of the document only once. Figure 7 compares the throughput of each system, in tokens per second, with the SoL throughput. Quail reaches 38–42% of the SoL throughput, vLLM sorted + n-gram 14–32%, and stock vLLM 2–20%.
 
 <figure id="figure-7" style="width: min(52rem, calc(100vw - 3rem));">
 <img src="{{ '/assets/blog/ai-extract/throughput-vs-sol.svg' | relative_url }}?v=13" alt="Tokens per second of stock vLLM in random order, vLLM sorted with n-gram speculation, and Quail, against the speed of light, on WRENCH-8, SEC-9, SEC-10, and CUAD-16. Quail reaches 39%, 41%, 42%, and 38% of the speed of light.">
@@ -268,7 +268,7 @@ this research.
 
 <span id="note-21"><strong>21.</strong></span> The *KV regret*, i.e., the input tokens that a system computes beyond the minimum, is 5.0%, 5.0%, 0.9%, and 15.8% for Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16; 3.4%, 2.8%, 63.8%, and 7.9% for vLLM sorted + n-gram; and 43.3%, 71.3%, 68.6%, and 96.0% for stock vLLM.
 
-<span id="note-22"><strong>22.</strong></span> The SoL time assumes that the answers are known in advance, which is impossible. Therefore, the SoL estimate is *extremely* optimistic.
+<span id="note-22"><strong>22.</strong></span> The SoL time assumes perfect speculation: the answers are known in advance, so every drafted token is accepted and no pass is spent on rejected tokens. This is impossible. Therefore, the SoL estimate is *extremely* optimistic.
 
 # Cite this article
 
