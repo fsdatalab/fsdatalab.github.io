@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 540" width="2000" height="540" role="img" aria-label="A database instance of two sales calls, the SALES-4 AI_IF conjunction query with a discount and a commit filter, and the expected TRUE/FALSE output.">
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#667085"/>
+    </marker>
+    <style>
+      .serif { font-family: "Lora", Georgia, "Times New Roman", serif; fill: #344054; font-size: 32px; }
+      .bold { fill: #101828; font-weight: bold; }
+      .cap { font-size: 30px; }
+      .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace; fill: #344054; font-size: 24px; }
+      .kw { fill: #a31545; font-weight: bold; }
+      .fn { fill: #245f9e; font-weight: bold; }
+      .str { fill: #287a4d; }
+      .box { fill: none; stroke: #667085; stroke-width: 2; }
+      .thick { stroke: #667085; stroke-width: 4; }
+      .thin { stroke: #667085; stroke-width: 2; }
+      .mid { text-anchor: middle; }
+      .arr { stroke: #667085; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <!-- Database instance -->
+  <rect class="box" x="15" y="60" width="560" height="320" rx="18"/>
+  <text class="serif bold" x="38" y="110">sales_calls</text>
+  <line class="thick" x1="38" y1="130" x2="552" y2="130"/>
+  <text class="serif bold" x="38" y="170">id</text>
+  <text class="serif bold" x="200" y="170">transcript</text>
+  <line class="thin" x1="38" y1="188" x2="552" y2="188"/>
+  <text class="serif" x="38" y="230">sc00356</text>
+  <text class="serif" x="200" y="230">call 3, two BMW X5 Ms</text>
+  <text class="serif" x="38" y="278">sc00638</text>
+  <text class="serif" x="200" y="278">call 4, Toyota Camry Hybrid</text>
+  <text class="serif" x="38" y="326">…</text>
+  <text class="serif" x="200" y="326">…</text>
+  <line class="thick" x1="38" y1="344" x2="552" y2="344"/>
+  <text class="serif cap mid" x="295" y="436">Database Instance</text>
+
+  <line class="arr" x1="590" y1="220" x2="650" y2="220"/>
+
+  <!-- Query -->
+  <rect class="box" x="662" y="30" width="780" height="360" rx="18"/>
+  <text class="mono" x="690" y="76"><tspan class="kw">SELECT</tspan> id <tspan class="kw">FROM</tspan> sales_calls</text>
+  <text class="mono" x="690" y="112"><tspan class="kw">WHERE</tspan> <tspan class="fn">AI_IF</tspan>(<tspan class="fn">PROMPT</tspan>(</text>
+  <text class="mono str" x="714" y="148">"DOCUMENT: {} … Does the sales</text>
+  <text class="mono str" x="714" y="184">rep offer a discount? ANSWER:"</text>
+  <text class="mono" x="690" y="220">), transcript)</text>
+  <text class="mono" x="690" y="256"><tspan class="kw">AND</tspan> <tspan class="fn">AI_IF</tspan>(<tspan class="fn">PROMPT</tspan>(</text>
+  <text class="mono str" x="714" y="292">"DOCUMENT: {} … Does the</text>
+  <text class="mono str" x="714" y="328">customer commit to buying?</text>
+  <text class="mono str" x="714" y="364">ANSWER:"</text>
+  <text class="mono" x="850" y="364">), transcript);</text>
+  <text class="serif cap mid" x="1052" y="436">AI Filter query</text>
+
+  <line class="arr" x1="1456" y1="220" x2="1516" y2="220"/>
+
+  <!-- Result -->
+  <rect class="box" x="1528" y="60" width="460" height="320" rx="18"/>
+  <text class="serif bold" x="1550" y="110">Conjunction Result</text>
+  <line class="thick" x1="1550" y1="130" x2="1966" y2="130"/>
+  <text class="serif bold" x="1550" y="170">id</text>
+  <text class="serif bold" x="1720" y="170"><tspan font-style="italic">φ</tspan><tspan font-size="22" dy="6">d</tspan></text>
+  <text class="serif bold" x="1850" y="170"><tspan font-style="italic">φ</tspan><tspan font-size="22" dy="6">c</tspan></text>
+  <line class="thin" x1="1550" y1="188" x2="1966" y2="188"/>
+  <text class="serif" x="1550" y="230" font-size="28">sc00356</text>
+  <text class="serif" x="1720" y="230" font-size="28">TRUE</text>
+  <text class="serif" x="1850" y="230" font-size="28">TRUE</text>
+  <text class="serif" x="1550" y="278" font-size="28">sc00638</text>
+  <text class="serif" x="1720" y="278" font-size="28">TRUE</text>
+  <text class="serif" x="1850" y="278" font-size="28">FALSE</text>
+  <text class="serif" x="1720" y="326" font-size="28">FALSE</text>
+  <text class="serif" x="1870" y="326" font-size="28">—</text>
+  <line class="thick" x1="1550" y1="344" x2="1966" y2="344"/>
+  <text class="serif cap mid" x="1758" y="436">Expected Output</text>
+</svg>
