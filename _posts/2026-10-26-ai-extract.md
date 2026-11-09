@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Copy That? Faster AI-Powered Extraction by Drafting from the Document"
-date: 2026-10-26
+date: 2026-11-09
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-extract/
 unlisted: true
@@ -307,7 +307,7 @@ this research.
   title = {Copy That: Faster AI-Powered Extraction by Drafting from the Document},
   author = {Shankar, Shreya and Frye, Charles},
   year = {2026},
-  month = oct,
+  month = nov,
   url = {https://fsdatalab.github.io/blog/ai-extract/}
 }
 ```
