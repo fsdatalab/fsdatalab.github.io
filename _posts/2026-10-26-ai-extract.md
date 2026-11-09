@@ -12,7 +12,7 @@ image:
   path: /assets/blog/ai-extract/social-preview.png
   width: 1200
   height: 630
-  alt: "Copy That? Faster AI-Powered Extraction by Drafting from the Document: a command in an agent trace, copied from the document into the answer."
+  alt: "Copy That? Faster AI-Powered Extraction by Drafting from the Document: Figure 1, with Quail 4.7x faster than naive vLLM (tuned vLLM 2.6x) and $0.07 per query, compared with $0.69 and $0.13."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> Our implementation of <code>AI.EXTRACT</code> in <a href="https://github.com/fsdatalab/quail">Quail</a> is <strong>4.7x faster on average (up to 19x)</strong> than a naive vLLM baseline, and <strong>1.8x faster on average (up to 3.0x)</strong> than a hand-written, well-tuned vLLM baseline. The key technique is a novel “inference-time-learned” adaptive draft length, used for speculative decoding with draft tokens copied from the document. Read this post for the details!</aside>
