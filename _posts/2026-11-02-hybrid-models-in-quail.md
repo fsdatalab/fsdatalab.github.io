@@ -50,18 +50,11 @@ description: "How Quail supports hybrid models that mix full attention with Gate
 
 # 1. Introduction
 
-We recently released [Quail](https://fsdatalab.github.io/blog/introducing-quail/)<sup><a href="#note-1">1</a></sup>, an execution engine for AI-SQL. Currently, Quail only supports Qwen3-4B along with Qwen3-32B<sup><a href="#note-2">2</a></sup> and DiffusionGemma 26B-A4B. Across 29 QUAIL-B queries, it is 1.84&times; faster on average than well-tuned vLLM baselines. It controls what the KV cache keeps instead of treating every row as an independent request.
+We have been hard at work building [Quail](https://fsdatalab.github.io/blog/introducing-quail/)<sup><a href="#note-1">1</a></sup>, our inference engine for AI functions in SQL. Most of Quail's speed comes from good scheduling and memory management of the KV cache. Instead of treating every document (i.e., row in a table) as an independent LLM request, Quail decides which documents to keep in the KV cache and reuses them across operators.
 
-Qwen3 models are transformers, i.e., they store a key and a value in every layer for every token, so the KV cache grows linearly with document length. The growth limits how far Quail can scale as long documents take a larger share of the KV and can force evictions and recomputations. Additionally, different workloads favor different architectures. Qwen3-4B stores 147,456 B of KV per token, 4.5&times; the 32,768 B of Qwen3.5-4B. A hybrid pays a fixed 49 MiB checkpoint per retained document, which is 88% of the pages of a 200-token document and 9% for a 16,000-token document ([Table 2](#table-2)), so short documents favor the transformer.
+So far, Quail has only supported transformers like Qwen3<sup><a href="#note-2">2</a></sup>, where the KV cache grows linearly with document length and quickly fills GPU memory. Many new open-weight models, like Qwen3.5, are hybrids, which replace most attention layers with Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup> layers, a type of linear attention. GDN layers keep a fixed-size state regardless of document length, which dramatically reduces memory for long documents (e.g., a 16,000-token document takes up 2.4 GB with Qwen3-4B but only 580 MB with Qwen3.5-4B). With less memory per document, Quail can keep more documents in memory.
 
-Hybrid models combine full-attention layers with linear-attention layers that use a gated delta-rule update, Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup>. GDN keeps a fixed-size state regardless of document length and token count. The fixed-size state breaks Quail on certain assumptions we made, such as every layer having KV and having the "rewind" ability. The state is overwritten at every token, so it cannot be rewound to a specific token, forcing us to adapt our scheduler, memory budget, and eviction policy to account for it. We propose the addition of checkpoints of the recurrent state $$S_t$$ at document-length intervals to suit use cases of Quail.
-
-In this article, we use Qwen3.5-4B<sup><a href="#note-4">4</a></sup> to show the minimal changes needed to adapt Quail's memory accounting and cost model to a hybrid architecture. We will go through:
-
-- The recurrent layers (GDN) and how they differ from attention ([Section 2](#2-gated-deltanet-vs-attention)).
-- Checkpoints in Quail's reuse scheme ([Section 3](#3-checkpoints-in-quail)).
-- The cost-model changes for hybrids ([Section 4](#4-updated-cost-model)).
-- Results on QUAIL-B ([Section 5](#5-results)), and interactive playgrounds for the checkpoint budget and the cost model ([Section 7](#7-hybrid-playgrounds)).
+It turns out that supporting hybrids in Quail is not that straightforward, because the way Quail reuses a document's KV cache does not carry over to GDN layers. In this post, we describe how we adapt Quail to hybrids using Qwen3.5-4B<sup><a href="#note-4">4</a></sup>. We explain GDN ([Section 2](#2-gated-deltanet-vs-attention)), add checkpoints of the GDN state to Quail's memory budget and eviction policy ([Section 3](#3-checkpoints-in-quail)), update the cost model ([Section 4](#4-updated-cost-model)), and compare with vLLM on QUAIL-B ([Section 5](#5-results)).
 
 # 2. Gated DeltaNet vs. Attention
 
