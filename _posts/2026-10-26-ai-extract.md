@@ -4,8 +4,7 @@ title: "Copy That? Faster AI-Powered Extraction by Drafting from the Document"
 date: 2026-11-09
 author: "Shreya Shankar, Charles Frye"
 permalink: /blog/ai-extract/
-unlisted: true
-sitemap: false
+sitemap: true
 math: true
 typora-root-url: ..
 description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 19x speedups over naive vLLM."
