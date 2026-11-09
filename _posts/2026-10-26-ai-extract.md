@@ -8,7 +8,7 @@ unlisted: true
 sitemap: false
 math: true
 typora-root-url: ..
-description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 3x speedups over vLLM."
+description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 19x speedups over naive vLLM."
 image:
   path: /assets/blog/ai-extract/social-preview.png
   width: 1200
