@@ -1,16 +1,17 @@
 ---
 layout: default
-title: Get Involved
-description: "Want to do research with the Full Stack Data Lab? Use Quail, our open-source AI-SQL engine, to analyze a dataset, and send us a video walking through what you found."
+title: Non-Traditional Applicants
+description: "How non-traditional applicants (in industry, outside CS, or in high school) can get involved with the Full Stack Data Lab: use Quail, our open-source AI-SQL engine, to analyze a dataset, and send us a video walking through what you found."
 permalink: /get-involved/
 ---
 <article class="content-narrow prose" markdown="1">
 
-<div class="post-header"><h1>Get involved</h1></div>
+<div class="post-header"><h1>Non-traditional applicants</h1></div>
 
-Interested in working with our group? We hear from many people in
-industry, in fields outside CS, and in high school, and you don't need a CS
-degree or research experience to get started.
+Interested in working with our group, but coming from a non-traditional
+background, e.g., industry, a field outside CS, or high school? You don't
+need a CS degree or research experience to get started. (If you're a CMU
+student or a prospective PhD student, reach out to us directly instead.)
 
 Here's a taste of the kinds of problems we work on. One of the systems we
 are building is [Quail]({{ '/blog/introducing-quail/' | relative_url }}),
