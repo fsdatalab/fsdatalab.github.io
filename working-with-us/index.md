@@ -1,16 +1,16 @@
 ---
 layout: default
-title: Non-Traditional Backgrounds
+title: "Working With Us (If You Have a Non-Traditional Background)"
 description: "How people from non-traditional backgrounds (in industry, outside CS, or in high school) can get involved with the Full Stack Data Lab: use Quail, our open-source AI-SQL engine, to analyze a dataset, and send us a video walking through what you found."
-permalink: /non-traditional/
+permalink: /working-with-us/
 ---
 <article class="content-narrow prose" markdown="1">
 
-<div class="post-header"><h1>Non-traditional backgrounds</h1></div>
+<div class="post-header"><h1>Working with us (if you have a non-traditional background)</h1></div>
 
-Interested in working with our group, but coming from a non-traditional
-background, e.g., industry, a field outside CS, or high school? You don't
-need a CS degree or research experience. (If you're a CMU
+This page is for people in industry, in fields outside CS, or in high
+school who want to work with our group. You don't need a CS degree or
+research experience. (If you're a CMU
 student or a prospective PhD student, reach out to us directly instead.)
 
 Here's a taste of the kinds of problems we work on. One of the systems we
