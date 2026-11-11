@@ -11,8 +11,8 @@ permalink: /working-with-us/
 Interested in working with our group, but coming from a non-traditional
 background, e.g., industry, a field outside CS, or high school? You don't
 need a CS degree or research experience. If you're a CMU
-student, reach out to us directly instead. Or, if you are a prospective PhD
-student or postdoc, apply to [CMU CSD](https://csd.cmu.edu/academics/doctoral/admissions).
+student or prospective postdoc, reach out to us directly instead. Or, if you
+are a prospective PhD student, apply to [CMU CSD](https://csd.cmu.edu/academics/doctoral/admissions).
 
 Here's a taste of the kinds of problems we work on. One of the systems we
 are building is [Quail]({{ '/blog/introducing-quail/' | relative_url }}),
