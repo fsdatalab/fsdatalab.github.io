@@ -21,6 +21,10 @@ defaults:
     values:
       sitemap: false
 
+# Search Console ownership check; jekyll-seo-tag writes the meta tag.
+webmaster_verifications:
+  google: mJgeyiDr8gFrqRtKupluGxveJ11c9uVsxoZkF-Cp--4
+
 # Structured data on the home page (_includes/structured-data.html).
 lab_founders:
   - shreya-shankar
