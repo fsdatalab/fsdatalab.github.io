@@ -8,8 +8,10 @@ permalink: /get-involved/
 
 <div class="post-header"><h1>Get involved</h1></div>
 
-Want to do research with us? Use [Quail](https://github.com/fsdatalab/quail)
-to analyze a dataset, then email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
+Interested in working with our group? You don't need a CS degree or
+research experience. We hear from many people in industry, in fields
+outside CS, and in high school. To get started, use
+[Quail](https://github.com/fsdatalab/quail) to analyze a dataset, then email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
 a short video of you explaining your analysis (feel free to make a
 dashboard), a link to your code, and your CV.
 
