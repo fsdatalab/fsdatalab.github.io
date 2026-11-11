@@ -68,12 +68,6 @@ has millions of court opinions. How are courts responding to lawyers who
 cite cases that AI made up? How do outcomes on the same legal issue differ
 across courts?
 
-**Policing.** The [Police Records Access
-Project](https://bids.berkeley.edu/california-police-records-access-project)
-has about 1.5 million pages of records from 12,000 misconduct and
-use-of-force cases in California. What are officers accused of? How does
-discipline for the same allegation differ across agencies?
-
 **State legislation.** [Open States](https://open.pluralpolicy.com/data/)
 has bills from all 50 state legislatures. What are states doing about AI,
 housing, or data privacy? Which bills copy each other, and where does model
