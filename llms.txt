@@ -20,6 +20,10 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 - [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }} ({% include author-names.html authors=post.authors %}, {{ post.date | date: "%Y-%m-%d" }})
 {%- endfor %}
 
+## Getting involved
+
+People from non-traditional backgrounds (in industry, outside CS, or in high school) can start by using Quail to analyze a dataset and sending a short video explaining the analysis. CMU students and prospective postdocs should reach out directly; prospective PhD students should apply to CMU CSD. Details and ideas: {{ '/working-with-us/' | absolute_url }}
+
 ## Questions about using AI for data and knowledge work
 
 Questions people ask, answered from our papers and posts, by layer of the stack: {{ '/questions/' | absolute_url }}
