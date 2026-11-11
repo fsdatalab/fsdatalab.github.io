@@ -8,9 +8,9 @@ permalink: /working-with-us/
 
 <div class="post-header"><h1>Working with us (if you have a non-traditional background)</h1></div>
 
-This page is for people in industry, in fields outside CS, or in high
-school who want to work with our group. You don't need a CS degree or
-research experience. (If you're a CMU
+Interested in working with our group, but coming from a non-traditional
+background, e.g., industry, a field outside CS, or high school? You don't
+need a CS degree or research experience. (If you're a CMU
 student or a prospective PhD student, reach out to us directly instead.)
 
 Here's a taste of the kinds of problems we work on. One of the systems we
