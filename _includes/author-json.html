@@ -1,0 +1,4 @@
+[{%- for key in include.authors -%}
+{%- assign a = site.data.authors[key] -%}
+{"@type":"Person","name":{{ a.name | jsonify }}{% if a.id %},"@id":{{ a.id | jsonify }}{% endif %}{% if a.url %},"url":{{ a.url | jsonify }}{% endif %}}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}]

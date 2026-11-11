@@ -1,0 +1,21 @@
+# Keys are referenced from a post's `authors:` list. The post header shows
+# each `name`; `url` links the author in structured data. `id` must match the
+# `@id` of the Person block on that author's own site.
+shreya-shankar:
+  name: Shreya Shankar
+  url: https://www.sh-reya.com/
+  id: https://www.sh-reya.com/#person
+charles-frye:
+  name: Charles Frye
+fergus-finn:
+  name: Fergus Finn
+arnav-dhariya:
+  name: Arnav Dhariya
+  url: https://arnavdhariya.github.io/
+joseph-barrow:
+  name: Joseph Barrow
+meryem-arik:
+  name: Meryem Arik
+aditya-parameswaran:
+  name: Aditya G. Parameswaran
+  url: https://people.eecs.berkeley.edu/~adityagp/

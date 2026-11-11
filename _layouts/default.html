@@ -7,7 +7,17 @@
   <link rel="icon" type="image/png" sizes="200x200" href="{{ '/assets/logo.png' | relative_url }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ '/assets/favicon-32.png' | relative_url }}">
   <link rel="apple-touch-icon" sizes="180x180" href="{{ '/assets/apple-touch-icon.png' | relative_url }}">
-  {% seo %}
+  {%- comment -%}
+    jekyll-seo-tag lists only a post's first author in its JSON-LD, so its
+    JSON-LD is dropped here and structured-data.html writes its own.
+  {%- endcomment -%}
+  {%- capture seo_tags %}{% seo %}{% endcapture -%}
+  {{ seo_tags | split: '<script type="application/ld+json">' | first }}
+  {% include structured-data.html %}
+  {%- if page.layout == "post" %}
+  {% include citation-meta.html %}
+  {%- endif %}
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | absolute_url }}">
   {% if page.math %}
   <script>
     window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };

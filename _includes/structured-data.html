@@ -1,0 +1,56 @@
+{%- assign org_id = "/#organization" | absolute_url -%}
+{%- assign site_id = "/#website" | absolute_url -%}
+{%- assign page_url = page.url | absolute_url -%}
+<script type="application/ld+json">
+{%- if page.layout == "post" %}
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ page.title | jsonify }},
+  {%- if page.description %}
+  "description": {{ page.description | jsonify }},
+  {%- endif %}
+  "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+  "dateModified": {{ page.last_modified_at | default: page.date | date_to_xmlschema | jsonify }},
+  "url": {{ page_url | jsonify }},
+  "mainEntityOfPage": {{ page_url | jsonify }},
+  {%- if page.image.path %}
+  "image": {{ page.image.path | absolute_url | jsonify }},
+  {%- endif %}
+  "author": {% include author-json.html authors=page.authors %},
+  "publisher": {"@id": {{ org_id | jsonify }}},
+  "isPartOf": {"@id": {{ site_id | jsonify }}}
+}
+{%- elsif page.url == "/" %}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ResearchOrganization",
+      "@id": {{ org_id | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "url": {{ "/" | absolute_url | jsonify }},
+      "description": {{ site.description | jsonify }},
+      "logo": {{ "/assets/logo.png" | absolute_url | jsonify }},
+      "founder": {% include author-json.html authors=site.lab_founders %},
+      "sameAs": {{ site.lab_profiles | jsonify }}
+    },
+    {
+      "@type": "WebSite",
+      "@id": {{ site_id | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "url": {{ "/" | absolute_url | jsonify }},
+      "publisher": {"@id": {{ org_id | jsonify }}}
+    }
+  ]
+}
+{%- else %}
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": {{ page.title | default: site.title | jsonify }},
+  "url": {{ page_url | jsonify }},
+  "isPartOf": {"@id": {{ site_id | jsonify }}}
+}
+{%- endif %}
+</script>

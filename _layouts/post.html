@@ -7,7 +7,7 @@ layout: default
     <h1>{{ page.title }}</h1>
     <div class="post-meta">
       <div>{{ page.date | date: "%b %-d, %Y" }}</div>
-      {% if page.author %}<div class="post-authors">{{ page.author }}</div>{% endif %}
+      {% if page.authors %}<div class="post-authors">{% include author-names.html authors=page.authors %}</div>{% endif %}
     </div>
   </div>
   {{ content }}

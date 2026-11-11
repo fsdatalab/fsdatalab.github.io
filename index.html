@@ -31,7 +31,7 @@ title: Home
     <div class="post-title">{{ post.title }}</div>
     <div class="post-meta">
       <div>{{ post.date | date: "%b %-d, %Y" }}</div>
-      {% if post.author %}<div>{{ post.author }}</div>{% endif %}
+      {% if post.authors %}<div>{% include author-names.html authors=post.authors %}</div>{% endif %}
     </div>
   </a>
   {% endfor %}
