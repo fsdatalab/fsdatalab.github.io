@@ -18,7 +18,7 @@ image:
   alt: "Quail throughput compared with stock vLLM across five AI-SQL datasets."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> AI functions in SQL, and fast LLM-powered classifiers in general, are having their day in the sun. But they typically rely on costly, closed LLM APIs. We’re building <a href="https://github.com/fsdatalab/quail">Quail</a>, the <strong>QU</strong>ery-<strong>A</strong>ware <strong>I</strong>nference <strong>L</strong>ayer, to jointly optimize query planning and model inference for open-weight models. Across 29 <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> queries, Quail is 1.84x faster on average than well-tuned vLLM baselines &mdash; up to 14x! <a href="https://github.com/fsdatalab/quail">Star us on GitHub</a>, and try it out in our <a href="https://fsdatalab--quail-playground-page.modal.run/">live demo</a>!</aside>
+<aside class="tldr"><strong>TL;DR:</strong> <a href="https://github.com/fsdatalab/quail">Quail</a>, the <strong>QU</strong>ery-<strong>A</strong>ware <strong>I</strong>nference <strong>L</strong>ayer, is an open-source inference engine for AI functions in SQL. It jointly optimizes query planning and model inference for open-weight models, instead of relying on costly, closed LLM APIs. Across 29 <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> queries, Quail is 1.84x faster on average than well-tuned vLLM baselines, and up to 14x faster. <a href="https://github.com/fsdatalab/quail">Star us on GitHub</a>, and try it out in our <a href="https://fsdatalab--quail-playground-page.modal.run/">live demo</a>!</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>

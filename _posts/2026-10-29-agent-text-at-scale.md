@@ -14,6 +14,8 @@ image:
   alt: "Five Principles for Generating Readable AI Text in Bulk: the five principles, next to a sketch of a list of inconsistent text rows and the same list with every row in one pattern."
 ---
 
+<aside class="tldr"><strong>TL;DR:</strong> Feeds of AI-generated text, like agent session titles or dashboard summaries, are hard to read in bulk. We give five principles, with real examples and fixes, for making them easy to scan.</aside>
+
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
 <ol>
