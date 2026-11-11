@@ -2,7 +2,8 @@
 layout: post
 title: "Five Principles for Generating Readable AI Text in Bulk"
 date: 2026-10-29
-author: "Shreya Shankar"
+authors:
+  - shreya-shankar
 permalink: /blog/agent-text-at-scale/
 typora-root-url: ..
 description: "Five principles for making large amounts of AI-generated text, e.g., in dashboards or websites, easy for humans to read, with real examples and fixes."
@@ -12,6 +13,8 @@ image:
   height: 630
   alt: "Five Principles for Generating Readable AI Text in Bulk: the five principles, next to a sketch of a list of inconsistent text rows and the same list with every row in one pattern."
 ---
+
+<aside class="tldr"><strong>TL;DR:</strong> Feeds of AI-generated text, like agent session titles or dashboard summaries, are hard to read in bulk. We give five principles, with real examples and fixes, for making them easy to scan.</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -30,7 +33,7 @@ image:
 </ol>
 </nav>
 
-# The Problem
+## The Problem
 
 Thanks to modern AI, we humans find ourselves reading AI-generated text at an unprecedented scale! Many of our daily driver products show feeds of such text, e.g., in Claude Code or Codex, there is a sidebar with AI-generated titles of our past agent sessions; on an iPhone, Apple Intelligence now groups and summarizes "stacks" of notifications. People also generate many temporary dashboards and web pages with AI, and share them broadly.
 
@@ -38,9 +41,9 @@ Unfortunately, such feeds of AI-generated texts are quite difficult for humans t
 
 In this blog post, informed by our recent experience working with AI to generate text dashboards (and consume lots of AI-generated text in dashboards), we present a checklist of 5 principles for effective feeds of AI-generated text.
 
-# Checklist
+## Checklist
 
-## 1. Match How Human Readers Parse Sentences
+### 1. Match How Human Readers Parse Sentences
 
 Interestingly, humans parse text quite predictably and simply, and we have known this for quite some time. In 1970, Thomas Bever, a psycholinguist who studies how people understand sentences, found that English readers use the "NVN" strategy: they take the first noun as the subject, the next verb as its action, and the next noun as its object.<sup><a href="#note-1">1</a></sup> For example, in "The agent fixed the login bug," readers take "agent" as the subject, "fixed" as the action, and "bug" as the object.
 
@@ -60,7 +63,7 @@ All sessions have the same subject, the agent, so by the procedure above, each t
   <figcaption>Figure 1. Seven session titles from the author's Claude sidebar, stylized (left), and the same titles rewritten to start with a verb in the continuous form (right).</figcaption>
 </figure>
 
-## 2. Put the Most Important Words First
+### 2. Put the Most Important Words First
 
 Jakob Nielsen, a very famous usability researcher who studies how people read websites, used eye tracking to find that readers scan web pages in an "F" shape: they read the start of each line and skip most of the rest<sup><a href="#note-3">3</a></sup> --- and, readers of a list often see only the first two words of each item.<sup><a href="#note-4">4</a></sup> As such, we should:
 
@@ -74,7 +77,7 @@ Jakob Nielsen, a very famous usability researcher who studies how people read we
   <figcaption>Figure 2. Order emails in an inbox, stylized. When the status is last (left), the first words are the same in every email. When the status is first, as in Amazon order emails (right), the first word tells the emails apart.</figcaption>
 </figure>
 
-## 3. Use the Same Structure and the Same Vocabulary
+### 3. Use the Same Structure and the Same Vocabulary
 
 In another interesting psycholinguistic study from the 1980s, Lyn Frazier and her colleagues measured how fast people read sentences with two clauses joined by "and." Readers read the second clause faster when it had the same structure as the first clause, e.g., when both clauses were active or both were passive.<sup><a href="#note-5">5</a></sup> One can directly apply this idea to a list of texts: each item is faster to read when it has the same structure as the items before it.<sup><a href="#note-6">6</a></sup>
 
@@ -97,7 +100,7 @@ In contrast, Perplexity's Discover feed nicely follows this checklist item #3 (a
   <figcaption>Figure 4. Four stories from the Perplexity Discover feed on October 28, 2026, stylized. Every headline has the same structure.</figcaption>
 </figure>
 
-## 4. Use Variation Only to Show a Meaningful Difference
+### 4. Use Variation Only to Show a Meaningful Difference
 
 In 1986, Jock Mackinlay, a visualization researcher (and pioneer of modern data visualization), wrote a paper on how to design charts automatically.<sup><a href="#note-10">10</a></sup> One of its main ideas is *expressiveness*: a chart should express all of the facts in the data, and only the facts in the data. E.g., if one bar in a bar chart is red, readers will assume that the color means something --- so make sure any variation in bars represents some meaningful variable.<sup><a href="#note-11">11</a></sup> Now, although this research is about charts of structured (i.e., tabular) data, it is not so far-fetched to apply it to unstructured text: if one item in a list differs from the others, e.g., in its length, its structure, or its words, readers will assume that the difference means something.
 
@@ -131,17 +134,17 @@ On the right, we rewrote every card so that each one has the same components: a 
 
 <script src="{{ '/assets/js/theme-dashboard.js' | relative_url }}" defer></script>
 
-## 5. Align the Connotation of Verbs with the Purpose of the Dashboard
+### 5. Align the Connotation of Verbs with the Purpose of the Dashboard
 
 Many dashboards exist to surface one kind of information, e.g., what customers dislike, or what customers like and what is going well. The verbs in a dashboard should make its purpose obvious. For example, a dashboard of customer complaints should use clearly negative verbs, like "complain," and a dashboard of praise should use clearly positive verbs, like "love." Readers skim dashboards with very little attention, so a verb with a strong connotation helps readers grasp each item quickly.<sup><a href="#note-13">13</a></sup>
 
 **Example.** In [Figure 5](#figure-5), Claude's version starts the chess card with "Chess is a popular new draw," even though most of the card lists complaints. So readers cannot tell at a glance whether the theme is good or bad news. In our version, each card starts with a verb that has an obvious sentiment, e.g., "Users love" for praise and "Users complain" for problems, so readers can tell from the verb alone whether a theme is praise or a complaint.
 
-# Takeaways
+## Takeaways
 
 In this post, we discussed five principles for making lots of AI-generated text easy to read. While we only discussed simple dashboard-like examples, we believe these principles apply to _any_ artifact or product that AI generates, e.g., websites. So please, feed this checklist into your coding agents, or make a skill out of it, so your AI-generated texts are easy for humans to read. Page by page, let's move towards a world free of slop.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> Thomas G. Bever. The Cognitive Basis for Linguistic Structures. In J. R. Hayes, editor, *Cognition and the Development of Language*, pages 279–362. Wiley, New York, 1970. Bever describes the strategy as reading a noun, a verb, and a noun as the actor, the action, and the object of the action.
 

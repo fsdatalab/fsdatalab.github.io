@@ -1,0 +1,1062 @@
+[
+ {
+  "key": "human-behavior",
+  "name": "Human behavior",
+  "items": [
+   {
+    "id": "where-do-i-start-with-evals-for-my-llm",
+    "q": "Where do I start with evals for my LLM app, and which metrics should I use?",
+    "a": "Start by reading many real outputs and writing down what goes wrong; pick metrics from those failures. In Data Flywheels for LLM Applications, we recommend code checks for simple heuristics, LLM judges for subjective criteria, and binary true/false metrics, because they are easier to align and to label consistently. The FAQ entry \"What's a minimum viable evaluation setup?\" is a short starting point.",
+    "sources": [
+     {
+      "title": "Data Flywheels for LLM Applications",
+      "url": "https://www.sh-reya.com/blog/ai-engineering-flywheel/"
+     },
+     {
+      "title": "AI Evals: Everything You Need to Know (Hamel Husain and Shreya Shankar)",
+      "url": "https://hamel.dev/blog/posts/evals-faq/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/AI_Agents/comments/1t6ap3j/every_week_this_we_see_some_version_of_how_do_i/",
+     "https://news.ycombinator.com/item?id=40920731",
+     "https://www.reddit.com/r/LocalLLaMA/comments/1sho0ah/how_are_people_actually_debugging_bad_outputs_in/"
+    ]
+   },
+   {
+    "id": "can-i-trust-an-llm-as-a-judge-how",
+    "q": "Can I trust an LLM-as-a-judge? How do I know it agrees with human reviewers?",
+    "a": "Only after you check it against your own labels on a sample of real outputs. Our EvalGen paper describes a tool for this: you grade a subset of outputs, and it uses your grades to pick the candidate judge prompts and code checks that best match them. Our user study found that alignment is subjective and iterative, so keep checking as outputs change. The FAQ entry \"How do I know if I can trust my automated eval?\" gives a workflow.",
+    "sources": [
+     {
+      "title": "Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences (UIST 2024)",
+      "url": "https://arxiv.org/abs/2404.12272"
+     },
+     {
+      "title": "AI Evals: Everything You Need to Know (Hamel Husain and Shreya Shankar)",
+      "url": "https://hamel.dev/blog/posts/evals-faq/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LLMDevs/comments/1uacjzp/can_you_actually_trust_llmasjudge/",
+     "https://www.reddit.com/r/LLMDevs/comments/1tocdg1/my_llmasjudge_had_cohens_kappa_of_047_promptfoo/",
+     "https://www.reddit.com/r/AI_Agents/comments/1sx9vn1/how_are_people_actually_trusting_llm_eval_scores/"
+    ]
+   },
+   {
+    "id": "should-i-write-my-eval-criteria-or-rubric-before",
+    "q": "Should I write my eval criteria or rubric before I look at model outputs?",
+    "a": "Draft some, but expect to revise them once you read outputs. In our EvalGen study, we named this criteria drift: people need criteria to grade outputs, but grading outputs changes the criteria they want, and some criteria depended on the specific outputs people saw. In Data Flywheels for LLM Applications, we argue you cannot find good criteria by theorizing about failure modes alone.",
+    "sources": [
+     {
+      "title": "Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences (UIST 2024)",
+      "url": "https://arxiv.org/abs/2404.12272"
+     },
+     {
+      "title": "Data Flywheels for LLM Applications",
+      "url": "https://www.sh-reya.com/blog/ai-engineering-flywheel/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LLMDevs/comments/1r7bve3/evaluationfirst_vs_observabilityfirst_how_are_you/",
+     "https://www.reddit.com/r/LLMDevs/comments/1tocdg1/my_llmasjudge_had_cohens_kappa_of_047_promptfoo/"
+    ]
+   },
+   {
+    "id": "should-my-llm-judge-give-a-pass-fail-or",
+    "q": "Should my LLM judge give a pass/fail or a 1 to 5 score?",
+    "a": "We recommend pass/fail as the default. As we explain in Data Flywheels for LLM Applications, binary metrics are easier to align with your judgment, because you only need to agree on what counts as true or false, and easier to label consistently over time. The FAQ entry \"Why do you recommend binary (pass/fail) evaluations instead of 1-5 ratings?\" goes further.",
+    "sources": [
+     {
+      "title": "Data Flywheels for LLM Applications",
+      "url": "https://www.sh-reya.com/blog/ai-engineering-flywheel/"
+     },
+     {
+      "title": "AI Evals: Everything You Need to Know (Hamel Husain and Shreya Shankar)",
+      "url": "https://hamel.dev/blog/posts/evals-faq/"
+     }
+    ],
+    "asked": []
+   },
+   {
+    "id": "how-do-i-make-llm-as-a-judge-evaluations",
+    "q": "How do I make LLM-as-a-judge evaluations reliable?",
+    "a": "We recommend pairwise choices instead of 1-to-5 scores, and checking the judge against human labels. In What We've Learned From a Year of Building with LLMs, we recommend running each comparison twice with the order swapped, allowing ties, asking for reasoning first, and matching response lengths. In one example, reviewing the judge's critiques with stakeholders raised its agreement with humans from 68% to 94% over three rounds.",
+    "sources": [
+     {
+      "title": "What We've Learned From a Year of Building with LLMs (O'Reilly Radar)",
+      "url": "https://applied-llms.org"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/LocalLLM/comments/1t81626/llmasjudge_scoring_is_noisier_than_i_expected/",
+     "https://news.ycombinator.com/item?id=40920731"
+    ]
+   },
+   {
+    "id": "can-i-use-chatgpt-or-claude-to-do-qualitative",
+    "q": "Can I use ChatGPT or Claude to do qualitative coding or thematic analysis?",
+    "a": "They can speed up the mechanical parts, but in our tests they did not do the analysis well. In Exploring Agent-Assisted Qualitative Analysis, we ran six agent setups for grounded theory on 451 tweets. The agents mostly paraphrased tweets instead of analyzing them, coded at most 68% of the tweets, and overfit to feedback or forgot it.",
+    "sources": [
+     {
+      "title": "Exploring Agent-Assisted Qualitative Analysis",
+      "url": "https://www.sh-reya.com/blog/ai-qual-analysis/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/dataanalysis/comments/1si16i3/i_built_a_free_gpt_for_qualitative_data_analysis/"
+    ]
+   },
+   {
+    "id": "why-does-llm-writing-feel-bad-and-how-do",
+    "q": "Why does LLM writing feel bad, and how do I write with an LLM without that?",
+    "a": "The problems are mostly empty summary sentences, flat rhythm, low information density, and vagueness, not em dashes. Writing in the Age of LLMs lists these patterns and the habits people wrongly flag, such as intentional repetition and parallel structure. We recommend telling the model the story first, writing the rough paragraph yourself, and using the model for scoped rewrites.",
+    "sources": [
+     {
+      "title": "Writing in the Age of LLMs",
+      "url": "https://www.sh-reya.com/blog/ai-writing/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/ArtificialInteligence/comments/1ukor4p/the_running_list_of_aiwriting_tells_i_edit_out_of/",
+     "https://www.reddit.com/r/ChatGPTPro/comments/1qv56d0/another_trick_to_make_ai_writing_sound_more_human/"
+    ]
+   },
+   {
+    "id": "what-is-mlops-work-actually-like-day-to-day",
+    "q": "What is MLOps work actually like day to day?",
+    "a": "Mostly data work, evaluation, deployment, and responding to drops in production, more than modeling. In Operationalizing Machine Learning, we interviewed 18 ML engineers across areas such as chatbots, autonomous vehicles, and finance; three things governed success: velocity, validation, and versioning. A follow-up blog post describes Task MLEs, who keep specific pipelines running, and Platform MLEs, who automate shared work.",
+    "sources": [
+     {
+      "title": "Operationalizing Machine Learning: An Interview Study (CSCW 2024)",
+      "url": "https://arxiv.org/abs/2209.09125"
+     },
+     {
+      "title": "Thoughts on ML Engineering After a Year of my PhD",
+      "url": "https://www.sh-reya.com/blog/phd-year-one/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/MachineLearning/comments/1qzflno/d_what_does_your_daily_work_look_like/",
+     "https://www.reddit.com/r/learnmachinelearning/comments/1qgod93/what_is_it_really_like_to_work_as_an_mlai_engineer/",
+     "https://news.ycombinator.com/item?id=35634925"
+    ]
+   },
+   {
+    "id": "should-i-spend-more-time-on-the-model-or",
+    "q": "Should I spend more time on the model or on the data?",
+    "a": "Usually the data. In Reflecting on a Year of Making Machine Learning Actually Useful, the biggest gains as a startup ML engineer came from adding features or redefining the train and validation splits, not from new model types. About 90% of the work was independent of the modeling library, and a shallow decision tree on the predictions helped find bugs.",
+    "sources": [
+     {
+      "title": "Reflecting on a Year of Making Machine Learning Actually Useful",
+      "url": "https://www.sh-reya.com/blog/making-ml-work/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/learnmachinelearning/comments/1qgod93/what_is_it_really_like_to_work_as_an_mlai_engineer/"
+    ]
+   },
+   {
+    "id": "should-i-retrain-my-model-on-a-fixed-schedule",
+    "q": "Should I retrain my model on a fixed schedule or only when drift is detected?",
+    "a": "For most small models, we recommend frequent scheduled retraining, which is cheap and fixes natural drift, and spending alerting effort on sudden breaks from data or engineering bugs. Thoughts on ML Engineering After a Year of my PhD describes Task MLEs at small companies who retrain hourly, daily, or weekly, and whose model performance recovers when they do. Retraining many xgboost or scikit-learn models costs a few dollars at most.",
+    "sources": [
+     {
+      "title": "Thoughts on ML Engineering After a Year of my PhD",
+      "url": "https://www.sh-reya.com/blog/phd-year-one/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/mlops/comments/1t7y4j1/how_do_you_actually_catch_when_your_production/"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "interfaces",
+  "name": "Interfaces",
+  "items": [
+   {
+    "id": "how-do-i-make-ai-generated-summaries-in-a",
+    "q": "How do I make AI-generated summaries in a dashboard or table easy to skim?",
+    "a": "We recommend giving every item the same structure and the same words for the same things, and putting the words that set an item apart first. Our post Five Principles for Generating Readable AI Text in Bulk draws on reading research for five rules, such as starting each item with its subject or verb and using variation only to mark a real difference. It shows fixes for a Notion AI summary column and a theme dashboard Claude generated.",
+    "sources": [
+     {
+      "title": "Five Principles for Generating Readable AI Text in Bulk",
+      "url": "https://fsdatalab.github.io/blog/agent-text-at-scale/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/automation/comments/1tvzeis/ai_summaries_became_way_more_useful_once_my/",
+     "https://www.reddit.com/r/AIAssisted/comments/1rsl7o1/5_things_i_changed_about_how_i_read_aigenerated/",
+     "https://community.atlassian.com/forums/Program-Management-Professionals/Are-AI-generated-project-updates-improving-clarity-or-just/td-p/3235365"
+    ]
+   },
+   {
+    "id": "how-do-i-get-an-llm-to-write-consistent",
+    "q": "How do I get an LLM to write consistent one-line titles or summaries for many items?",
+    "a": "We recommend fixing one pattern and stating it in the prompt: who the subject is, which tense, and which words go first. In Five Principles for Generating Readable AI Text in Bulk, we rewrite seven agent session titles from a Claude sidebar so each starts with a verb in the continuous form, such as \"Measuring vLLM performance,\" because readers take the first noun and verb as subject and action.",
+    "sources": [
+     {
+      "title": "Five Principles for Generating Readable AI Text in Bulk",
+      "url": "https://fsdatalab.github.io/blog/agent-text-at-scale/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/automation/comments/1tvzeis/ai_summaries_became_way_more_useful_once_my/"
+    ]
+   },
+   {
+    "id": "is-there-a-better-way-to-iterate-on-prompts",
+    "q": "Is there a better way to iterate on prompts when an LLM pipeline runs over many documents?",
+    "a": "We recommend looking at outputs across many documents, noting what goes wrong, and turning those notes into prompt changes; a single example hides most failures. Our DocWrangler IDE supports this: you annotate documents and outputs in place, and an LLM turns your notes into revised prompts or suggests splitting an operation that is too hard. In our study and public deployment, users often turned open-ended operations into classifiers so they were easier to check.",
+    "sources": [
+     {
+      "title": "Steering Semantic Data Processing with DocWrangler (UIST 2025)",
+      "url": "https://arxiv.org/abs/2504.14764"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/PromptEngineering/comments/1jmdm2x/software_to_support_querying_multiple_models_and/",
+     "https://www.reddit.com/r/ArtificialInteligence/comments/1s41acd/autoresearch_promptfoo_autoprompter_open_source/"
+    ]
+   },
+   {
+    "id": "why-is-it-so-hard-to-find-a-good",
+    "q": "Why is it so hard to find a good dataset for my project?",
+    "a": "Keyword search sees only titles and tags, and you often can't tell whether a dataset fits your task until you inspect its rows and columns. In our survey of 89 data professionals, finding an initial dataset was still unsolved. We built DataScout to help: it suggests query rewrites, searches dataset contents, and shows relevance indicators for your task.",
+    "sources": [
+     {
+      "title": "It Took Longer Than I Was Expecting: Why Is Dataset Search Still So Hard? (HILDA 2024 (Workshop on Human-in-the-Loop Data Analytics))",
+      "url": "https://dl.acm.org/doi/10.1145/3665939.3665959"
+     },
+     {
+      "title": "Rethinking Dataset Discovery with DataScout (UIST 2025)",
+      "url": "https://arxiv.org/abs/2507.18971"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/MachineLearning/comments/1tdybl4/looking_for_a_real_world_dataset_or_website_where/",
+     "https://www.reddit.com/r/learndatascience/comments/1rap006/where_do_you_find_real_messy_datasets_for_data/",
+     "https://news.ycombinator.com/item?id=30934876"
+    ]
+   },
+   {
+    "id": "my-rag-answers-are-wrong-how-do-i-tell",
+    "q": "My RAG answers are wrong. How do I tell whether retrieval or generation is the problem?",
+    "a": "We recommend testing the pieces separately; for example, give the model known-good context and see whether the answer improves. In RAG Without the Lag (CHI 2026 Best Paper), we studied how 12 engineers debug RAG pipelines and built RAGGY, which pairs composable RAG building blocks with an interface for fast, interactive debugging. We found the settings that matter most often need hours of preprocessing after each change, which slows debugging.",
+    "sources": [
+     {
+      "title": "RAG Without the Lag: Interactive Debugging for Retrieval-Augmented Generation Pipelines (CHI 2026)",
+      "url": "https://arxiv.org/abs/2504.13587"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/Rag/comments/1s2c1ci/rag_question_retrieval_looks_correct_but_answers/",
+     "https://www.reddit.com/r/LangChain/comments/1skx1d6/how_is_everyone_debugging_retrieval_quality_in/",
+     "https://stackoverflow.com/questions/78881336/best-approach-to-evaluate-a-graph-rag-pipeline-using-metrics"
+    ]
+   },
+   {
+    "id": "how-do-i-find-which-cells-in-a-messy",
+    "q": "How do I find which cells in a messy Jupyter notebook actually produced this plot or model, so I can clean it up?",
+    "a": "Use a program slicer, which traces the code a result depends on. Static slicers such as Gather read the code without running it, so they keep extra cells. Our nbslicer tracks dependencies while cells run; on 374 real notebook sessions, its slices were on average 66% smaller than a static slicer's and still correct, and they ran 1.34x faster.",
+    "sources": [
+     {
+      "title": "Bolt-on, Compact, and Rapid Program Slicing for Notebooks (VLDB 2023)",
+      "url": "https://smacke.net/papers/nbslicer.pdf"
+     }
+    ],
+    "asked": [
+     "https://devblogs.microsoft.com/python/gather-a-new-way-to-clean-notebooks",
+     "https://discourse.jupyter.org/t/extract-specific-cells-from-students-notebooks/7951"
+    ]
+   },
+   {
+    "id": "when-i-change-an-earlier-jupyter-cell-how-do",
+    "q": "When I change an earlier Jupyter cell, how do I know which later cells to rerun?",
+    "a": "Compute a forward slice: the cells that read anything the changed cell wrote. Reactive kernels such as ipyflow, and notebooks such as marimo, do this for you. In nbslicer, we compute forward slices from dependencies seen at run time; on 374 real notebook sessions they were on average 54% smaller than a static slicer's, so fewer cells need to rerun.",
+    "sources": [
+     {
+      "title": "Bolt-on, Compact, and Rapid Program Slicing for Notebooks (VLDB 2023)",
+      "url": "https://smacke.net/papers/nbslicer.pdf"
+     }
+    ],
+    "asked": [
+     "https://stackoverflow.com/questions/67622132/a-way-to-instruct-python-in-jupyter-to-run-selected-previous-cells",
+     "https://stackoverflow.com/questions/37190931/indicator-for-the-modified-code-in-cell-at-jupyter-notebooks"
+    ]
+   },
+   {
+    "id": "how-do-i-let-an-ai-agent-edit-a",
+    "q": "How do I let an AI agent edit a document while I keep typing, without it overwriting my changes?",
+    "a": "Check each agent edit against the current text before applying it, and reject edits based on text the user has since changed. In our DocWriter post, the agent's edit tool names the exact text it replaces. If that text is gone or appears more than once, the tool returns an error, and the agent rereads the document and retries or drops the edit. The user's own keystrokes always apply right away.",
+    "sources": [
+     {
+      "title": "Don't Make Me Wait! Enabling Concurrency in Human-Agent Collaboration",
+      "url": "https://fsdatalab.github.io/blog/introducing-docwriter/"
+     }
+    ],
+    "asked": [
+     "https://github.com/microsoft/vscode/issues/279589",
+     "https://github.com/zed-industries/zed/issues/39738",
+     "https://www.moment.dev/blog/collab-with-ai-is-hard"
+    ],
+    "requires": "/blog/introducing-docwriter/"
+   },
+   {
+    "id": "can-i-just-make-the-ai-agent-another-crdt",
+    "q": "Can I just make the AI agent another CRDT peer, such as with Yjs, in my collaborative editor?",
+    "a": "You can, but a CRDT merges characters, not intent, and agents edit from a read that may be a minute old. In our DocWriter post, an agent rewrote a sentence the user had just changed, and the CRDT left the user's words stranded next to the agent's new sentence. DocWriter instead borrows dependency checks and tentative writes from Bayou: agent edits land as suggestions that only the user can accept.",
+    "sources": [
+     {
+      "title": "Don't Make Me Wait! Enabling Concurrency in Human-Agent Collaboration",
+      "url": "https://fsdatalab.github.io/blog/introducing-docwriter/"
+     }
+    ],
+    "asked": [
+     "https://dev.to/norfolkd/when-an-ai-agent-joins-your-yjs-room-three-assumptions-break-50h8",
+     "https://www.sim.ai/blog/agent-as-yjs-peer"
+    ],
+    "requires": "/blog/introducing-docwriter/"
+   },
+   {
+    "id": "is-there-an-ai-writing-tool-that-suggests-edits",
+    "q": "Is there an AI writing tool that suggests edits as I write, instead of making me chat with it?",
+    "a": "Yes; some editors run the agent in the background and show its edits as suggestions. In our DocWriter post, we describe an open-source editor that calls Claude Code or Codex when you pause typing for about 3 seconds. Each agent edit appears as a suggestion with the agent's reason in a comment thread. You accept, reject, or reply, and the agent revises.",
+    "sources": [
+     {
+      "title": "Don't Make Me Wait! Enabling Concurrency in Human-Agent Collaboration",
+      "url": "https://fsdatalab.github.io/blog/introducing-docwriter/"
+     }
+    ],
+    "asked": [
+     "https://news.ycombinator.com/item?id=46235462",
+     "https://news.ycombinator.com/item?id=44173353"
+    ],
+    "requires": "/blog/introducing-docwriter/"
+   }
+  ]
+ },
+ {
+  "key": "database-systems",
+  "name": "Database systems",
+  "items": [
+   {
+    "id": "why-are-ai-functions-in-sql-snowflake-cortex-bigquery",
+    "q": "Why are AI functions in SQL (Snowflake Cortex, BigQuery AI, Databricks ai_query) so slow and expensive on big tables?",
+    "a": "Each AI function calls the model once per row, and a naive join calls it once per pair of rows, so one query can make millions of calls. Quail, our open-source engine, runs AI-SQL on open models and plans the query and the inference together. Across 29 QUAIL-B queries on one H100, it was 1.84x faster on average than well-tuned vLLM baselines.",
+    "sources": [
+     {
+      "title": "Building an Ultra-High Throughput AI-SQL Engine",
+      "url": "https://fsdatalab.github.io/blog/introducing-quail/"
+     },
+     {
+      "title": "What Is AI-SQL?",
+      "url": "https://fsdatalab.github.io/ai-sql/"
+     }
+    ],
+    "asked": [
+     "https://community.databricks.com/t5/generative-ai/ai-query-parallel-calls/td-p/146809"
+    ]
+   },
+   {
+    "id": "how-do-i-extract-information-accurately-from-thousands-of",
+    "q": "How do I extract information accurately from thousands of long documents with an LLM?",
+    "a": "Use DocETL, our open-source system for LLM-powered document processing: you declare the pipeline, and LLM agents rewrite it, for example by breaking up the document or the task, and check candidate plans. On four document analysis tasks, DocETL found plans 25 to 80% more accurate than well-engineered baselines. Whatever tool you use, test the pipeline on a labeled sample.",
+    "sources": [
+     {
+      "title": "DocETL",
+      "url": "https://www.docetl.org/"
+     },
+     {
+      "title": "DocETL: Agentic Query Rewriting and Evaluation for Complex Document Processing (VLDB 2025)",
+      "url": "https://arxiv.org/abs/2410.12189"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LLMDevs/comments/1u4z3dd/high_volume_pdf_extraction_gemini_flash_claude_or/",
+     "https://www.reddit.com/r/LocalLLaMA/comments/1ste8hc/llm_for_data_extraction/",
+     "https://community.openai.com/t/trouble-extracting-all-information-from-long-context-document/739300"
+    ]
+   },
+   {
+    "id": "my-llm-misses-items-when-i-ask-it-to",
+    "q": "My LLM misses items when I ask it to find every instance of something in a long document. Should I split the prompt or the document?",
+    "a": "Usually split: models miss instances in long inputs even when the input fits in the context window. DocETL, our open-source system, rewrites pipelines to decompose the document or the operation; our DocETL paper uses this exact case, finding every force majeure or indemnification clause in long contracts. In MOAR, our later optimizer for DocETL, one example rewrite turns one compound filter into two simpler filters.",
+    "sources": [
+     {
+      "title": "DocETL: Agentic Query Rewriting and Evaluation for Complex Document Processing (VLDB 2025)",
+      "url": "https://arxiv.org/abs/2410.12189"
+     },
+     {
+      "title": "Multi-Objective Agentic Rewrites for Unstructured Data Processing (VLDB 2026)",
+      "url": "https://arxiv.org/abs/2512.02289"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/Bard/comments/1pv5phb/document_extraction_accuracy_and_recall_tips/",
+     "https://www.reddit.com/r/Bard/comments/1t1xl5m/how_to_stop_llms_being_lazy_on_api/",
+     "https://community.openai.com/t/trouble-extracting-all-information-from-long-context-document/739300"
+    ]
+   },
+   {
+    "id": "should-i-ask-an-llm-to-extract-dozens-of",
+    "q": "Should I ask an LLM to extract dozens of fields from a long document in one prompt, or split it up?",
+    "a": "For many unrelated fields over long documents, split the work: one long prompt with every field tends to miss some of them. In LLM-Powered Proactive Data Systems (IEEE Data Engineering Bulletin 2025), we argue the system should do this rewriting itself: break \"extract fields f1 to fn\" into one focused prompt per field, send the LLM only the relevant part of a long document, and leave arithmetic such as averages to SQL.",
+    "sources": [
+     {
+      "title": "LLM-Powered Proactive Data Systems (IEEE Data Engineering Bulletin 2025)",
+      "url": "https://arxiv.org/abs/2502.13016"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/PromptEngineering/comments/1jllcvf/extracting_thousands_of_knowledge_points_from_pdf/"
+    ]
+   },
+   {
+    "id": "how-do-i-optimize-a-multi-step-llm-pipeline",
+    "q": "How do I optimize a multi-step LLM pipeline for both accuracy and cost, not just one prompt at a time?",
+    "a": "Use MOAR, our optimizer for DocETL: it searches over whole-pipeline rewrites with over 30 rewrite rules and a multi-armed bandit, because operators interact and tuning each alone can give a worse plan. Across six workloads, MOAR reached 27% higher accuracy than the next-best optimizer, and matched that optimizer's best accuracy at 55% of its cost.",
+    "sources": [
+     {
+      "title": "Multi-Objective Agentic Rewrites for Unstructured Data Processing (VLDB 2026)",
+      "url": "https://arxiv.org/abs/2512.02289"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LangChain/comments/1rtqraf/how_are_you_handling_llm_costs_in_production/",
+     "https://www.reddit.com/r/mlops/comments/1rcp0ad/broke_down_our_32k_llm_bill_68_was_preventable/"
+    ]
+   },
+   {
+    "id": "can-i-use-a-cheaper-llm-for-most-rows",
+    "q": "Can I use a cheaper LLM for most rows without losing accuracy?",
+    "a": "Use BARGAIN, our method for LLM-powered data processing with guarantees: a cheap model handles a row when it can be trusted, and BARGAIN decides when that is with adaptive sampling and statistical estimates, with guarantees on accuracy, precision, or recall. Across 8 datasets, BARGAIN reduced cost by up to 86% more than prior methods.",
+    "sources": [
+     {
+      "title": "Cut Costs, Not Accuracy: LLM-Powered Data Processing with Guarantees (SIGMOD 2026)",
+      "url": "https://arxiv.org/abs/2509.02896"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/AI_Agents/comments/1rtvqkn/how_do_large_ai_apps_manage_llm_costs_at_scale/",
+     "https://www.reddit.com/r/LangChain/comments/1rtqraf/how_are_you_handling_llm_costs_in_production/"
+    ],
+    "how": "A model cascade sends each row to a cheap model first and keeps its answer only when the model's confidence is above a threshold; the other rows go to the expensive model. The hard part is the threshold: set it too low and accuracy drops, too high and you save little. BARGAIN checks the cheap model on an adaptively chosen sample of rows and uses statistical estimates to pick the threshold that saves the most while still meeting the accuracy, precision, or recall target you set."
+   },
+   {
+    "id": "is-there-something-better-than-a-model-cascade-for",
+    "q": "Is there something better than a model cascade for LLM classification over documents?",
+    "a": "Task cascades, from our SIGMOD 2026 paper, vary more than the model: an LLM agent proposes simpler or decomposed tasks and the relevant parts of each document, and we assemble them into a cascade, optionally with an accuracy guarantee. At a 90% target accuracy over eight tasks, task cascades cut cost by 36% on average compared with model cascades.",
+    "sources": [
+     {
+      "title": "Task Cascades for Efficient Unstructured Data Processing (SIGMOD 2026)",
+      "url": "https://arxiv.org/abs/2601.05536"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/mlops/comments/1rcp0ad/broke_down_our_32k_llm_bill_68_was_preventable/",
+     "https://news.ycombinator.com/item?id=38968751"
+    ],
+    "how": "A model cascade varies only the model. A task cascade can also vary the task: a cheap model might answer an easier related question, or read only the part of the document that matters, and settle most rows that way. An LLM agent proposes these simpler tasks and document parts, and the cascade tries them from cheapest to most expensive, sending only the rows that remain uncertain to the full task."
+   },
+   {
+    "id": "how-do-i-match-records-across-two-tables-with",
+    "q": "How do I match records across two tables with an LLM without paying for every pair?",
+    "a": "Use Featurized-Decomposition Join, our method for semantic joins: an LLM extracts features from each record and combines them into logical rules that drop non-matching pairs with cheap comparisons, with statistical guarantees on result quality. Embedding similarity, the usual filter, often fails to predict matches. FDJ cut cost up to 10x compared with prior methods at the same guarantees.",
+    "sources": [
+     {
+      "title": "Featurized-Decomposition Join: Low-Cost Semantic Joins with Guarantees (VLDB 2026)",
+      "url": "https://arxiv.org/abs/2512.05399"
+     }
+    ],
+    "asked": [
+     "https://datascience.stackexchange.com/questions/137980/best-approach-for-matching-the-same-product-across-20-large-retail-catalogs",
+     "https://news.ycombinator.com/item?id=38968751"
+    ],
+    "how": "A semantic join asks an LLM whether each pair of records matches, so cost grows with the number of pairs. FDJ first has an LLM extract features from each record, such as a product's brand or size. It combines the features into rules, such as \"brands must be equal\", that rule out most non-matching pairs with cheap comparisons, and sends only the remaining pairs to the LLM. It chooses the rules so the result still meets your quality target with high probability."
+   },
+   {
+    "id": "in-what-order-should-i-run-several-llm-filters",
+    "q": "In what order should I run several LLM filters on the same data?",
+    "a": "Run first the filters that reject the most rows for the least cost, so later filters see fewer rows. In How to Cost Your AI-Powered Filters, we rank each later filter by its cost per row divided by the fraction it rejects, following Hellerstein and Stonebraker, and also try each filter first. For three filters over 5,000 IMDB reviews, the chosen order scored 6.87 s compared with 7.30 s for the worst candidate.",
+    "sources": [
+     {
+      "title": "How to Cost Your AI-Powered Filters",
+      "url": "https://fsdatalab.github.io/blog/ai-filter-cost-estimates/"
+     }
+    ],
+    "asked": [
+     "https://community.databricks.com/t5/generative-ai/ai-query-parallel-calls/td-p/146809"
+    ]
+   },
+   {
+    "id": "why-is-my-llm-classifier-inaccurate-when-i-label",
+    "q": "Why is my LLM classifier inaccurate when I label records one at a time, even with a good prompt?",
+    "a": "Often the right label depends on the rest of the dataset, and a model that sees one row can't know that. For example, a ticket can be urgent next to minor issues and routine next to security bugs. In HoldUp, labeling rows one at a time averaged under 70% accuracy on 10 classification datasets. HoldUp clusters related records with the LLM and labels the clusters jointly, reaching 80% on average and up to 33% higher.",
+    "sources": [
+     {
+      "title": "Semantic Data Processing with Holistic Data Understanding (Preprint)",
+      "url": "https://arxiv.org/abs/2604.02655"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/MachineLearning/comments/1q5e8k3/d_llms_for_classification_task/",
+     "https://community.openai.com/t/ensuring-gpt-consistently-follows-a-defined-scoring-system-tips-and-best-practices/454333"
+    ]
+   },
+   {
+    "id": "should-i-put-many-records-in-one-prompt-so",
+    "q": "Should I put many records in one prompt so the LLM sees context when classifying?",
+    "a": "It can save cost, but it didn't improve accuracy in our tests, because long inputs hurt LLM quality. In HoldUp, batching records into one prompt averaged 43% classification accuracy, compared with 66% one row at a time, and asking the LLM to write a rubric from a sample reached 59%. HoldUp instead gives the LLM small random samples many times, and reached 80%.",
+    "sources": [
+     {
+      "title": "Semantic Data Processing with Holistic Data Understanding (Preprint)",
+      "url": "https://arxiv.org/abs/2604.02655"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/MachineLearning/comments/1q5e8k3/d_llms_for_classification_task/",
+     "https://arxiv.org/abs/2604.03684"
+    ]
+   },
+   {
+    "id": "how-do-i-get-consistent-1-10-scores-from",
+    "q": "How do I get consistent 1-10 scores from an LLM across many items?",
+    "a": "Scoring each item alone on an absolute scale drifts; comparing items gives steadier results. In HoldUp, we group similar records, ask the LLM which group should score higher, and sort the groups with an integer linear program. On 5 scoring datasets, row-by-row scoring averaged 48% accuracy and HoldUp 64%.",
+    "sources": [
+     {
+      "title": "Semantic Data Processing with Holistic Data Understanding (Preprint)",
+      "url": "https://arxiv.org/abs/2604.02655"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/LocalLLM/comments/1t81626/llmasjudge_scoring_is_noisier_than_i_expected/",
+     "https://community.openai.com/t/ensuring-gpt-consistently-follows-a-defined-scoring-system-tips-and-best-practices/454333"
+    ]
+   },
+   {
+    "id": "how-do-i-run-sql-queries-over-thousands-of",
+    "q": "How do I run SQL queries over thousands of similar PDFs, such as reports or forms that follow one template?",
+    "a": "We recommend defining a table over the documents and extracting only the fields a query needs, using the shared template to find them. Our ZenDB system (ICDE 2025) detects the common section structure of templatized documents, such as civic agenda reports, as a tree for each document. You then query the collection with SQL, and ZenDB sends the LLM only the sections that matter.",
+    "sources": [
+     {
+      "title": "Querying Templatized Document Collections with Large Language Models (ICDE 2025)",
+      "url": "https://www.computer.org/csdl/proceedings-article/icde/2025/360300c422/26FZAUkb1ra"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/Rag/comments/1sg1luf/is_rag_what_i_should_be_using/",
+     "https://bittide.aicompass.dev/article/92d4bf13-ea82-4a4c-be5d-99e353093d28"
+    ]
+   },
+   {
+    "id": "why-does-rag-fail-on-how-many-or-aggregate",
+    "q": "Why does RAG fail on \"how many\" or aggregate questions across a whole document collection?",
+    "a": "Retrieval returns a few chunks, but a count needs a value from every document. ZenDB answers SQL queries, including aggregations, by locating the right section in each document through its template. On three real document collections, it beat RAG baselines by up to 61% in precision and 80% in recall, at slightly higher cost.",
+    "sources": [
+     {
+      "title": "Querying Templatized Document Collections with Large Language Models (ICDE 2025)",
+      "url": "https://www.computer.org/csdl/proceedings-article/icde/2025/360300c422/26FZAUkb1ra"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/LLMDevs/comments/1u108nr/why_topk_retrieval_structurally_cant_answer/",
+     "https://reddit.com/r/AI_Agents/comments/1sefvp5/is_this_a_dumb_idea/",
+     "https://community.openai.com/t/rag-is-failing-when-the-number-of-documents-increase/578498"
+    ]
+   },
+   {
+    "id": "how-do-i-deduplicate-records-with-an-llm-without",
+    "q": "How do I deduplicate records with an LLM without missing too many true matches?",
+    "a": "Asking an LLM about each pair alone tends to give high precision and low recall; using the other answers to fix mistakes helps. In Revisiting Prompt Engineering via Declarative Crowdsourcing (CIDR 2024), gpt-3.5-turbo matched citation pairs with 0.952 precision but 0.503 recall. Marking two records as duplicates when the LLM linked them through other records raised F1 by over 6%.",
+    "sources": [
+     {
+      "title": "Revisiting Prompt Engineering via Declarative Crowdsourcing (CIDR 2024)",
+      "url": "https://www.cidrdb.org/cidr2024/papers/p67-parameswaran.pdf"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/LangChain/comments/1sdeyw8/using_ai_to_untangle_10000_property_titles_in/",
+     "https://reddit.com/r/Rag/comments/1te3fb0/graphrag_entity_deduplication/"
+    ]
+   },
+   {
+    "id": "how-do-i-add-a-summary-of-each-user",
+    "q": "How do I add a summary of each user's history and feedback to my prompts without slowing down responses?",
+    "a": "We recommend updating the summary in the background and letting requests read the latest finished version, even if it is slightly stale. Our Motion system (SIGMOD 2024 demo) treats a prompt's parts as views that are updated as new feedback arrives, under a weak consistency model. In our shopping demo, a fresh GPT-4 summary could take over thirty seconds, while Motion returned recommendations in 1.5 seconds.",
+    "sources": [
+     {
+      "title": "Building Reactive Large Language Model Pipelines with Motion (SIGMOD 2024 (Demo))",
+      "url": "https://dl.acm.org/doi/10.1145/3626246.3654734"
+     }
+    ],
+    "asked": [
+     "https://guide.mem0.ai/faq/we-are-getting-killed-in-response-latency-because-of-how-much-context-we-load-per-request-which-plat-1977a6",
+     "https://dev.to/mrbolo/how-we-built-chat-memory-that-actually-works-lessons-from-shipping-to-100k-users-24cd"
+    ]
+   },
+   {
+    "id": "can-llm-agents-reliably-answer-business-questions-over-real",
+    "q": "Can LLM agents reliably answer business questions over real company databases, not just text-to-SQL benchmarks?",
+    "a": "Not yet, once the data is spread across systems and messy. Our DAB benchmark has 104 questions over 17 datasets in PostgreSQL, MongoDB, SQLite, and DuckDB, based on a study of six enterprises building data agents. The best agent, GPT-5.5 in Codex, answered 57% correctly on the first try, and 70% within five tries.",
+    "sources": [
+     {
+      "title": "Can AI Agents Answer Your Data Questions? A Benchmark for Data Agents (Preprint)",
+      "url": "https://arxiv.org/abs/2603.20576"
+     }
+    ],
+    "asked": [
+     "https://news.ycombinator.com/item?id=43015167",
+     "https://reddit.com/r/LLMDevs/comments/1tticiz/data_accuracy_in_natural_language_to_sql_systems/",
+     "https://reddit.com/r/learnmachinelearning/comments/1shx8ag/help_curious_if_anyone_here_has_tackled/"
+    ]
+   },
+   {
+    "id": "why-do-text-to-sql-and-data-agents-return",
+    "q": "Why do text-to-SQL and data agents return wrong answers? Is it picking the wrong table?",
+    "a": "Usually not; agents mostly find the right data and then compute the wrong thing. In DAB, we labeled failed agent runs: wrong implementations, such as a regex that matched part of an ISBN instead of a year, caused 57% of wrong answers. Wrong plans caused 31%, and picking the wrong data only 11%.",
+    "sources": [
+     {
+      "title": "Can AI Agents Answer Your Data Questions? A Benchmark for Data Agents (Preprint)",
+      "url": "https://arxiv.org/abs/2603.20576"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/LLMDevs/comments/1tticiz/data_accuracy_in_natural_language_to_sql_systems/",
+     "https://news.ycombinator.com/item?id=43015167"
+    ]
+   },
+   {
+    "id": "should-an-agent-use-regex-or-an-llm-to",
+    "q": "Should an agent use regex or an LLM to pull values like dates out of free-text columns?",
+    "a": "Regex works for a few fixed formats and breaks on varied natural language. In DAB, all three agents we tested defaulted to regex for text extraction. On the patents dataset, dates appear as \"dated 5th March 2019\" and \"March the 18th, 2019\"; no agent's regex covered them, and every agent scored 0%. A regex for MALE also matched inside FEMALE.",
+    "sources": [
+     {
+      "title": "Can AI Agents Answer Your Data Questions? A Benchmark for Data Agents (Preprint)",
+      "url": "https://arxiv.org/abs/2603.20576"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/OpenAI/comments/1r88f0g/we_need_to_talk_about_using_opus_46_for_tasks/"
+    ]
+   },
+   {
+    "id": "do-ai-agents-need-a-different-kind-of-database",
+    "q": "Do AI agents need a different kind of database than human analysts do?",
+    "a": "Likely yes, because agents query far more often and far more speculatively than people. In Supporting Our AI Overlords (CIDR 2026), we call this agentic speculation: many exploratory, often redundant requests on the way to an answer. We argue for databases that accept \"probes\" with natural-language goals, share work across them, answer approximately when that is enough, and steer agents with hints.",
+    "sources": [
+     {
+      "title": "Supporting Our AI Overlords: Redesigning Data Systems to be Agent-First (CIDR 2026)",
+      "url": "https://arxiv.org/abs/2509.00997"
+     }
+    ],
+    "asked": [
+     "https://news.ycombinator.com/item?id=47678048",
+     "https://news.ycombinator.com/item?id=48748977",
+     "https://news.ycombinator.com/item?id=45310123"
+    ]
+   },
+   {
+    "id": "why-does-my-llm-agent-run-so-many-sql",
+    "q": "Why does my LLM agent run so many SQL queries for one question, and how do I cut them down?",
+    "a": "Agents explore schemas and try partial queries before the final one, and more attempts do raise accuracy. In Supporting Our AI Overlords (CIDR 2026), more attempts raised success on the BIRD text-to-SQL benchmark by 14% to 70%, but across 50 attempts per task, distinct sub-plans were often under 10-20% of the total, so much of the work repeats. We recommend giving the agent grounding hints, such as which column holds the needed data; that cut queries by more than 20%.",
+    "sources": [
+     {
+      "title": "Supporting Our AI Overlords: Redesigning Data Systems to be Agent-First (CIDR 2026)",
+      "url": "https://arxiv.org/abs/2509.00997"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/learnmachinelearning/comments/1shx8ag/help_curious_if_anyone_here_has_tackled/",
+     "https://news.ycombinator.com/item?id=48399793"
+    ]
+   },
+   {
+    "id": "how-do-i-write-assertions-or-guardrails-that-catch",
+    "q": "How do I write assertions or guardrails that catch bad LLM outputs in production?",
+    "a": "Start from the mistakes you already fixed: each instruction you added to your prompt to stop a mistake is a candidate check. Our SPADE system does this automatically: it mines a pipeline's history of prompt edits to write candidate assertion functions, then picks a small set that meets coverage and accuracy targets. Across nine real pipelines, SPADE needed 14% fewer assertions and had 21% fewer false failures than simpler baselines. It is offered in LangSmith.",
+    "sources": [
+     {
+      "title": "SPADE: Synthesizing Data Quality Assertions for Large Language Model Pipelines (VLDB 2024)",
+      "url": "https://arxiv.org/abs/2401.03038"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LLMDevs/comments/1sq1xox/deterministic_vs_probabilistic_guardrails_for/",
+     "https://www.reddit.com/r/LLMDevs/comments/1szuqv7/how_are_people_making_llm_outputs_reliable_enough/",
+     "https://www.reddit.com/r/LLMDevs/comments/1rwgwok/how_are_you_validating_llm_behavior_before/"
+    ]
+   },
+   {
+    "id": "can-an-llm-generate-the-test-criteria-or-assertions",
+    "q": "Can an LLM generate the test criteria or assertions for my prompt?",
+    "a": "It can propose them, but review the list, since picking the right checks for a task is hard. Our PromptEvals dataset has 2,087 production pipeline prompts with 12,623 assertion criteria, collected from developers using our open-source tools. Open models we fine-tuned on it beat GPT-4o at generating relevant assertions by 20.93% on average.",
+    "sources": [
+     {
+      "title": "PromptEvals: A Dataset of Assertions and Guardrails for Custom Production Large Language Model Pipelines (NAACL 2025)",
+      "url": "https://arxiv.org/abs/2504.14738"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/AI_Agents/comments/1rp0c04/learnings_from_building_guardrails_for_ai_systems/",
+     "https://www.reddit.com/r/LLMDevs/comments/1rwgwok/how_are_you_validating_llm_behavior_before/"
+    ]
+   },
+   {
+    "id": "how-do-i-catch-bad-data-before-it-gets",
+    "q": "How do I catch bad data before it gets into a retraining run without drowning in false alerts?",
+    "a": "We recommend validating each new batch or partition against recent history and tuning the checks for precision, since per-feature thresholds catch most problems but alert too often. Our GATE system summarizes each data partition with quality metrics and flags corrupted partitions before retraining. At a large tech company, GATE gave a 2.1x average precision gain over prior work.",
+    "sources": [
+     {
+      "title": "Automatic and Precise Data Validation for Machine Learning (CIKM 2023)",
+      "url": "https://dl.acm.org/doi/10.1145/3583780.3614786"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/mlops/comments/1ta021b/how_are_you_guys_catching_upstream_schema_drift/",
+     "https://www.reddit.com/r/mlops/comments/1t7y4j1/how_do_you_actually_catch_when_your_production/"
+    ]
+   },
+   {
+    "id": "how-do-i-monitor-an-ml-model-in-production",
+    "q": "How do I monitor an ML model in production when labels arrive late or not at all?",
+    "a": "Track inputs and predictions right away, and compute accuracy-style metrics as labels arrive, knowing each window is incomplete until then. In our position paper Rethinking Streaming Machine Learning Evaluation, we argue that tracking accuracy alone on unbounded, time-ordered data misses problems, partly because labels arrive late, and we recommend additional metrics. The Modern ML Monitoring Mess series works through why.",
+    "sources": [
+     {
+      "title": "Rethinking Streaming Machine Learning Evaluation (ICLR 2022: Workshop on ML Evaluation Standards)",
+      "url": "https://arxiv.org/abs/2205.11473"
+     },
+     {
+      "title": "The Modern ML Monitoring Mess: Rethinking Streaming Evaluation (1/4)",
+      "url": "https://www.sh-reya.com/blog/rethinking-ml-monitoring-1/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/MLQuestions/comments/1s65sjp/best_way_to_monitor_online_ml_models_in_production/",
+     "https://stackoverflow.com/questions/79337323/azure-machine-learning-monitoring-mapping-ground-truth-data-for-model-performa",
+     "https://www.reddit.com/r/mlops/comments/1t7y4j1/how_do_you_actually_catch_when_your_production/"
+    ]
+   },
+   {
+    "id": "my-model-s-accuracy-on-a-rolling-window-dropped",
+    "q": "My model's accuracy on a rolling window dropped. Is the model actually getting worse?",
+    "a": "Not necessarily: a windowed metric can move even when the model's predictive power hasn't changed. The Modern ML Monitoring Mess (part 1) gives three causes: class ratios differ across windows, windows hold different numbers of examples (fewer requests on a Sunday than a Monday), and labels arrive late, so recent predictions lack labels. We recommend checking these before triggering a retrain.",
+    "sources": [
+     {
+      "title": "The Modern ML Monitoring Mess: Rethinking Streaming Evaluation (1/4)",
+      "url": "https://www.sh-reya.com/blog/rethinking-ml-monitoring-1/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/mlops/comments/1t7y4j1/how_do_you_actually_catch_when_your_production/",
+     "https://www.reddit.com/r/MLQuestions/comments/1s65sjp/best_way_to_monitor_online_ml_models_in_production/"
+    ]
+   },
+   {
+    "id": "can-i-use-prometheus-and-grafana-to-monitor-ml",
+    "q": "Can I use Prometheus and Grafana to monitor ML model accuracy?",
+    "a": "They work for latency, errors, and input statistics, but poorly for metrics like accuracy that join predictions with later labels. In The Modern ML Monitoring Mess (part 3), we tried to monitor cumulative accuracy for a toy taxi-tip model with Prometheus. It needed high-cardinality joins and convoluted PromQL, results depended on the scrape interval, and accuracy couldn't be computed over sliding windows.",
+    "sources": [
+     {
+      "title": "The Modern ML Monitoring Mess: Failure Modes in Extending Prometheus (3/4)",
+      "url": "https://www.sh-reya.com/blog/rethinking-ml-monitoring-3/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/sre/comments/1skf9ck/ml_on_top_of_prometheusthanos_anyone_actually/"
+    ]
+   },
+   {
+    "id": "should-i-fine-tune-a-model-or-use-rag",
+    "q": "Should I fine-tune a model or use RAG to give an LLM my company's knowledge?",
+    "a": "We recommend starting with RAG for new knowledge, and fine-tuning only after you have shown that prompting and retrieval fall short. In What We've Learned From a Year of Building with LLMs, we cite studies where RAG beat fine-tuning on both known and new facts. Retrieval indexes are also cheaper to update, easy to purge of bad documents, and can be split so each customer sees only its own data.",
+    "sources": [
+     {
+      "title": "What We've Learned From a Year of Building with LLMs (O'Reilly Radar)",
+      "url": "https://applied-llms.org"
+     }
+    ],
+    "asked": [
+     "https://reddit.com/r/Rag/comments/1sdyqdp/rag_vs_finetuning_for_business_ai_when_does_each/",
+     "https://news.ycombinator.com/item?id=40687491"
+    ]
+   },
+   {
+    "id": "do-long-context-models-make-rag-obsolete",
+    "q": "Do long-context models make RAG obsolete?",
+    "a": "No. Even with a 10M-token window you still have to choose what goes in it. In What We've Learned From a Year of Building with LLMs (O'Reilly Radar), we note there was little evidence that models reason well over very long inputs beyond needle-in-a-haystack tests. Irrelevant context can distract the model, and inference time grows with context length, so reading everything for every question costs more.",
+    "sources": [
+     {
+      "title": "What We've Learned From a Year of Building with LLMs (O'Reilly Radar)",
+      "url": "https://applied-llms.org"
+     }
+    ],
+    "asked": [
+     "https://news.ycombinator.com/item?id=47668359",
+     "https://reddit.com/r/Rag/comments/1sdyqdp/rag_vs_finetuning_for_business_ai_when_does_each/"
+    ]
+   },
+   {
+    "id": "how-should-i-evaluate-a-rag-system-in-production",
+    "q": "How should I evaluate a RAG system in production?",
+    "a": "We recommend evaluating retrieval and generation separately, using failures you find in real traces; the evals FAQ entry \"How should I approach evaluating my RAG system?\" covers this. For pipelines with several LLM steps, Data Flywheels for LLM Applications recommends placing validators at each step and computing per-step accuracy, so you can see where errors compound.",
+    "sources": [
+     {
+      "title": "AI Evals: Everything You Need to Know (Hamel Husain and Shreya Shankar)",
+      "url": "https://hamel.dev/blog/posts/evals-faq/"
+     },
+     {
+      "title": "Data Flywheels for LLM Applications",
+      "url": "https://www.sh-reya.com/blog/ai-engineering-flywheel/"
+     }
+    ],
+    "asked": [
+     "https://datascience.stackexchange.com/questions/134522/in-production-how-do-you-evaluate-the-quality-of-the-response-generated-by-a-ra",
+     "https://stackoverflow.com/questions/79488543/what-to-include-in-context-precision-recall-for-rag-llm-evaluation",
+     "https://news.ycombinator.com/item?id=43588464"
+    ]
+   }
+  ]
+ },
+ {
+  "key": "inference",
+  "name": "Inference",
+  "items": [
+   {
+    "id": "what-is-the-fastest-cheapest-way-to-run-an",
+    "q": "What is the fastest, cheapest way to run an LLM over every row of a large dataset?",
+    "a": "Use Quail, our open-source engine for AI functions in SQL: it runs an open model as an offline batch job, keeps the GPU full, and plans the query and the inference together to reuse work across rows. Two AI filters over all 100,000 IMDB reviews cost $0.37 on one H100 at Modal's price, including model startup. The same workload at GPT-5 nano prices would cost about $1.75.",
+    "sources": [
+     {
+      "title": "Building an Ultra-High Throughput AI-SQL Engine",
+      "url": "https://fsdatalab.github.io/blog/introducing-quail/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LocalLLaMA/comments/1ohgf9t/batch_inference_locally_on_4080/",
+     "https://discuss.ray.io/t/offline-inference-vllm-map-batches-vs-build-llm-processor/23369"
+    ]
+   },
+   {
+    "id": "my-vllm-batch-job-has-thousands-of-requests-but",
+    "q": "My vLLM batch job has thousands of requests but the GPU is still underused. Why?",
+    "a": "Often the CPU is the bottleneck: scheduling and tracking millions of short requests leaves gaps between GPU kernels. Recomputing evicted KV adds more work. On our BIO-4 query, stock vLLM took 6.84 hours, 27.55x our speed-of-light estimate, and computed 40% more tokens than needed. Quail, which plans KV reuse from the query and fills each forward pass, took 29.26 minutes.",
+    "sources": [
+     {
+      "title": "Building an Ultra-High Throughput AI-SQL Engine",
+      "url": "https://fsdatalab.github.io/blog/introducing-quail/"
+     }
+    ],
+    "asked": [
+     "https://stackoverflow.com/questions/79480061/how-to-increase-the-generation-throughput-of-qwen-0-5b-of-vllm",
+     "https://discuss.vllm.ai/t/suggestion-to-improve-inferencing-speed/2080"
+    ],
+    "how": "Before each forward pass, the CPU decides which requests run and prepares their inputs. With millions of short requests, that CPU work can take longer than the GPU's, so the GPU sits idle between passes; a profiler trace shows these as gaps. A second cost is what we call KV regret: the engine discards KV it needs again later and recomputes it. Quail reduces both by planning its batches from the query."
+   },
+   {
+    "id": "when-does-speculative-decoding-actually-help-and-does-it",
+    "q": "When does speculative decoding actually help, and does it still help at large batch sizes?",
+    "a": "Speculative decoding helps when decoding is memory-bound and the drafts are cheap and usually right; at large batches the extra verify tokens cost real compute, so the draft length matters. In our AI.EXTRACT work in Quail, we draft by copying tokens from the document and pick a draft length for each request as the query runs. The best fixed length was 4 on some queries and 32 on others, and a wrong fixed length cost up to 20%.",
+    "sources": [
+     {
+      "title": "Copy That? Faster AI-Powered Extraction by Drafting from the Document",
+      "url": "https://fsdatalab.github.io/blog/ai-extract/"
+     }
+    ],
+    "asked": [
+     "https://www.reddit.com/r/LocalLLaMA/comments/1gzm93o/speculative_decoding_just_landed_in_llamacpps/",
+     "https://github.com/vllm-project/vllm/issues/49548",
+     "https://github.com/vllm-project/vllm/issues/65312"
+    ],
+    "how": "An LLM normally writes one token per forward pass, and each pass reads all the model weights and the document's KV from GPU memory, so decoding is limited by memory reads, not arithmetic. Speculative decoding guesses the next few tokens, called the draft, and checks them all in one forward pass; if the model agrees, you get several tokens for the cost of one. Long drafts pay off when they're usually right; when they're often wrong, the extra checked tokens are wasted work. Quail learns, as the query runs, how often drafts are accepted and how long answers are, and picks a draft length for each request."
+   },
+   {
+    "id": "is-prompt-lookup-n-gram-speculative-decoding-worth-it",
+    "q": "Is prompt lookup (n-gram) speculative decoding worth it for extraction or other tasks that copy from the input?",
+    "a": "It works best when the output copies the input, as in extraction, and helps little for freely written text. In Quail's AI.EXTRACT, every answer is a substring of the document, so we copy the draft from the first match in the document and learn, per field, how often drafts are accepted and how long answers run. Quail was 1.8x faster on average than vLLM with n-gram speculation and sorted prompts, and 4.7x faster than naive vLLM.",
+    "sources": [
+     {
+      "title": "Copy That? Faster AI-Powered Extraction by Drafting from the Document",
+      "url": "https://fsdatalab.github.io/blog/ai-extract/"
+     }
+    ],
+    "asked": [
+     "https://github.com/hybridindie/rec/issues/10",
+     "https://github.com/jundot/omlx/issues/2673"
+    ],
+    "how": "Prompt lookup decoding drafts tokens by finding the text written so far in the prompt and guessing that what followed it there comes next. In extraction, every answer is copied from the document, so these guesses are usually right. Quail also constrains decoding so the answer must stay a substring of the document, and it sets the draft length for each request from what it has learned about that field."
+   },
+   {
+    "id": "how-do-i-reuse-the-kv-cache-when-i",
+    "q": "How do I reuse the KV cache when I ask many questions about the same long document?",
+    "a": "Quail handles this for you: it plans KV reuse from the query and keeps a document's KV only while a later operator will read it. On AGENT-5, which runs three classifications over the same traces, 64% of the tokens vLLM computed were recomputations. With a general engine such as vLLM, put the document first and the question last, send a document's questions together, and turn on prefix caching; an LRU cache can still evict the document before the next question arrives.",
+    "sources": [
+     {
+      "title": "To Classify, Try a Trie Tree",
+      "url": "https://fsdatalab.github.io/blog/ai-classification/"
+     },
+     {
+      "title": "Building an Ultra-High Throughput AI-SQL Engine",
+      "url": "https://fsdatalab.github.io/blog/introducing-quail/"
+     }
+    ],
+    "asked": [
+     "https://github.com/vllm-project/vllm/issues/23083",
+     "https://news.ycombinator.com/item?id=41350076"
+    ],
+    "how": "When an LLM reads a document, it stores intermediate results for every token, called the KV cache, so it doesn't redo that work when it writes the answer. If you ask a second question about the same document, the engine can reuse that KV instead of reading the document again, but only if it's still in GPU memory. Quail knows from the query which operators will read each document, so it keeps the KV exactly until the last one runs."
+   },
+   {
+    "id": "does-the-order-of-my-requests-matter-for-vllm",
+    "q": "Does the order of my requests matter for vLLM prefix caching in an offline batch job?",
+    "a": "Yes. Quail plans KV reuse from the query, so you don't order requests by hand. In our AI.EXTRACT experiments, naive vLLM sent each document's questions in random order and took 2,079 s on CUAD-16, which asks 41 questions of each contract. If you use vLLM directly, sort the requests so a document's questions sit together; in the same experiments, that removed most of the waste.",
+    "sources": [
+     {
+      "title": "Copy That? Faster AI-Powered Extraction by Drafting from the Document",
+      "url": "https://fsdatalab.github.io/blog/ai-extract/"
+     },
+     {
+      "title": "Building an Ultra-High Throughput AI-SQL Engine",
+      "url": "https://fsdatalab.github.io/blog/introducing-quail/"
+     }
+    ],
+    "asked": [
+     "https://discuss.vllm.ai/t/suggestion-to-improve-inferencing-speed/2080",
+     "https://github.com/vllm-project/vllm/issues/23083"
+    ],
+    "how": "Prefix caching keeps the KV of recently seen prompt prefixes in GPU memory, so a later request with the same prefix, such as the same document, can skip recomputing it. Memory is limited, so the cache evicts entries, usually the least recently used. If a document's questions are spread across the batch, its KV is often evicted before the next question arrives and must be computed again. Quail plans KV reuse from the query, so it knows which requests share a document."
+   },
+   {
+    "id": "how-do-i-force-an-llm-to-answer-with",
+    "q": "How do I force an LLM to answer with only one of my class labels?",
+    "a": "Write the query with Quail's AI.CLASSIFY, which restricts the model to your labels: it builds a trie of the label tokens and runs the model only where labels branch apart. With 10 support-ticket labels, that averages 1.5 decode requests per document, and on 12 classification queries Quail was 1.8x faster per query than vLLM generating and parsing the label. Without Quail, you can use structured or constrained decoding in vLLM or an LLM API to limit the output to your labels.",
+    "sources": [
+     {
+      "title": "To Classify, Try a Trie Tree",
+      "url": "https://fsdatalab.github.io/blog/ai-classification/"
+     }
+    ],
+    "asked": [
+     "https://github.com/vllm-project/vllm/issues/288",
+     "https://discuss.vllm.ai/t/extract-class-log-probabilities-from-llm-classifier-using-async-vllm-and-aws-lmi-containers/543"
+    ],
+    "how": "A trie, or prefix tree, stores each label as a path of tokens; labels that start with the same words share the start of their path. Quail only asks the model to choose where paths branch apart. For example, with the labels \"shipping delay\", \"shipping damage\", and \"shipping address change\", once the model picks \"shipping\" and then \"address\", the word \"change\" is already determined, so Quail skips that decode step. Constrained decoding in vLLM or an API also limits output to valid labels, but it typically still decodes every token."
+   },
+   {
+    "id": "how-do-i-get-a-probability-for-each-label",
+    "q": "How do I get a probability for each label from an LLM classifier, when labels are more than one token?",
+    "a": "Quail's AI.CLASSIFY can return a probability for every label. Its trie_tree method scores each label only up to the word where it branches away from the other labels, then normalizes over all labels, so long labels aren't penalized. Quail also has a method that puts a letter before each label, so each label is one token, and it picks the cheaper method for your model and labels.",
+    "sources": [
+     {
+      "title": "To Classify, Try a Trie Tree",
+      "url": "https://fsdatalab.github.io/blog/ai-classification/"
+     }
+    ],
+    "asked": [
+     "https://discuss.vllm.ai/t/can-i-get-log-prob-with-classify/1632",
+     "https://github.com/sgl-project/sglang/issues/523",
+     "https://community.openai.com/t/classification-with-generative-models/600277"
+    ],
+    "how": "A label like \"refund request\" spans several tokens, and the model gives a probability for each one. Multiplying all of them gives longer labels lower scores even when the model favors them. trie_tree scores each label only up to the point where it splits from the other labels, since later tokens add no information, then divides by the sum over all labels so the probabilities add up to 1."
+   },
+   {
+    "id": "how-can-i-estimate-how-long-llm-inference-over",
+    "q": "How can I estimate how long LLM inference over a dataset will take on a given GPU?",
+    "a": "Our post How to Cost Your AI-Powered Filters works through a roofline estimate: count the FLOPs and the bytes moved, then divide by the GPU's peak compute and memory bandwidth. For Qwen3-4B on an H100, one true/false filter over 5,000 IMDB reviews comes out to 6.64 seconds, and a forward pass needs only about 296 tokens to become compute-bound. Quail uses these estimates in its cost model.",
+    "sources": [
+     {
+      "title": "How to Cost Your AI-Powered Filters",
+      "url": "https://fsdatalab.github.io/blog/ai-filter-cost-estimates/"
+     }
+    ],
+    "asked": [
+     "https://stackoverflow.com/questions/78691343/mixtral-8x7b-am-i-running-it-wrong",
+     "https://news.ycombinator.com/item?id=47136904"
+    ],
+    "how": "Every step of a forward pass does arithmetic and moves bytes between GPU memory and the compute units. The roofline model estimates a step's time as the slower of the two: arithmetic divided by peak compute, or bytes divided by memory bandwidth. A step is compute-bound when the arithmetic is slower and memory-bound otherwise. Processing more tokens per forward pass reuses the same weights for more work, which is why about 296 tokens per pass is enough to pass the H100's FP8 ridge point."
+   },
+   {
+    "id": "how-do-i-speed-up-vllm-offline-generation-when",
+    "q": "How do I speed up vLLM offline generation when I run several prompts over each long document, such as summaries and field lists?",
+    "a": "Keep each document's prompts next to each other so prefix caching reuses its KV, and share the document's KV reads across those prompts in attention. In our AI.MAP post, sorting alone cut wasted tokens 24-81x compared with random order. Quail, which also schedules by learned output lengths and reads each document's KV once per batch, reached 2.0-6.2x the throughput of naive vLLM with Qwen3 4B on one H100.",
+    "sources": [
+     {
+      "title": "Why Summarizing a Dataset with an LLM Is Slow, and How We Made It 6x Faster",
+      "url": "https://fsdatalab.github.io/blog/ai-map/"
+     }
+    ],
+    "asked": [
+     "https://github.com/vllm-project/vllm/issues/23083",
+     "https://discuss.vllm.ai/t/suggestion-to-improve-inferencing-speed/2080"
+    ],
+    "requires": "/blog/ai-map/"
+   },
+   {
+    "id": "vllm-keeps-warning-that-requests-are-preempted-for-lack",
+    "q": "vLLM keeps warning that requests are preempted for lack of KV cache space. Does it matter for a batch job?",
+    "a": "Preemption happens when outputs grow past the free KV and vLLM must recompute evicted requests later; for a batch job it costs less than it looks. In our AI.MAP post, Quail reserved KV for each request's expected output length and evicted nothing, while reserving only for prompts caused 103-884 evictions per query. Removing them made queries at most 1.09x faster.",
+    "sources": [
+     {
+      "title": "Why Summarizing a Dataset with an LLM Is Slow, and How We Made It 6x Faster",
+      "url": "https://fsdatalab.github.io/blog/ai-map/"
+     }
+    ],
+    "asked": [
+     "https://discuss.vllm.ai/t/vllm-latency-ttft-spike-on-load-tesing/1396",
+     "https://docs.vllm.ai/en/v0.11.0/configuration/optimization.html"
+    ],
+    "requires": "/blog/ai-map/"
+   },
+   {
+    "id": "how-do-i-set-max-tokens-or-estimate-output",
+    "q": "How do I set max_tokens or estimate output length when generating summaries over a whole dataset?",
+    "a": "Learn it from the outputs as the job runs, per instruction. In our AI.MAP post, Quail fits a survival curve of output length for each instruction and prompt-length bucket. Lengths varied widely: on one contract query, 77% of \"definitions\" outputs ended within 800 tokens, while 12% of \"plain terms\" outputs hit the 1,024-token limit.",
+    "sources": [
+     {
+      "title": "Why Summarizing a Dataset with an LLM Is Slow, and How We Made It 6x Faster",
+      "url": "https://fsdatalab.github.io/blog/ai-map/"
+     }
+    ],
+    "asked": [],
+    "requires": "/blog/ai-map/"
+   }
+  ]
+ },
+ {
+  "key": "models",
+  "name": "Models",
+  "items": [
+   {
+    "id": "do-adversarial-examples-that-fool-neural-networks-also-fool",
+    "q": "Do adversarial examples that fool neural networks also fool humans?",
+    "a": "Under some conditions, yes. In Adversarial Examples that Fool both Computer Vision and Time-Limited Humans (NIPS 2018), we made image perturbations that transfer across an ensemble of 10 ImageNet models, each with a layer that mimics the retina. We showed the images to 38 people for about 70 ms. The perturbations pushed their answers toward the targeted wrong class more often than chance.",
+    "sources": [
+     {
+      "title": "Adversarial examples that fool both computer vision and time-limited humans (NIPS 2018)",
+      "url": "https://arxiv.org/abs/1802.08195"
+     }
+    ],
+    "asked": [
+     "https://news.ycombinator.com/item?id=16443605",
+     "https://ai.stackexchange.com/questions/28515/why-adversarial-images-are-not-the-mainstream-for-captchas"
+    ]
+   },
+   {
+    "id": "are-imagenet-and-open-images-geographically-biased-and-does",
+    "q": "Are ImageNet and Open Images geographically biased, and does it affect model accuracy outside the US and Europe?",
+    "a": "Yes. In No Classification without Representation (NIPS 2017 workshop on ML for the developing world), we geolocated images in both datasets. About 45% of the ImageNet sample and over 32% of the Open Images sample came from the US, while China and India together held about 3%. Models trained on them scored bridegroom photos from Ethiopia and Pakistan less consistently than ones from the US and Australia.",
+    "sources": [
+     {
+      "title": "No classification without representation: Assessing geodiversity issues in open data sets for the developing world (NIPS 2017: Workshop on Machine Learning for the Developing World)",
+      "url": "https://arxiv.org/abs/1711.08536"
+     }
+    ],
+    "asked": [
+     "https://arxiv.org/abs/2301.02560"
+    ]
+   }
+  ]
+ }
+]

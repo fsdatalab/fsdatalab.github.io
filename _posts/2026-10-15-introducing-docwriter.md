@@ -2,7 +2,9 @@
 layout: post
 title: "Don't Make Me Wait! Enabling Concurrency in Human-Agent Collaboration"
 date: 2026-10-15
-author: "Shreya Shankar, Aditya G. Parameswaran"
+authors:
+  - shreya-shankar
+  - aditya-parameswaran
 permalink: /blog/introducing-docwriter/
 unlisted: true
 sitemap: false
@@ -39,7 +41,7 @@ image:
 </ol>
 </nav>
 
-# 1. Introduction
+## 1. Introduction
 
 Interest in human-agent collaboration has grown very quickly. But most of this work is about coding and other long tasks, where the human gives one instruction and then steps away while the agent works.
 
@@ -56,7 +58,7 @@ In the rest of this article, we dive into the concurrency challenges we faced in
 - How DocWriter handles concurrent edits, plus other implementation details ([Section 4](#4-how-docwriter-handles-concurrent-edits)).
 - Open questions that we are thinking about ([Section 5](#5-open-questions)).
 
-# 2. New Challenges That Agents Bring
+## 2. New Challenges That Agents Bring
 
 In DocWriter, a user writes in a normal text editor, and an agent, e.g., Claude Code or Codex, edits the same document at the same time. The agent has three kinds of tools: it can read the document, edit the text, and write or reply to comments.
 
@@ -78,7 +80,7 @@ A minute later, the agent edits lines 1 to 3. But the agent read line 2 before t
 
 So how should DocWriter handle the agent's edits? We first discuss why an agent should be treated differently from a human writer in concurrency control ([Section 2.1](#21-how-agents-differ-from-human-writers)). Then, we walk through a few naive concurrency control ideas and their problems ([Section 2.2](#22-some-naive-designs)).
 
-## 2.1 How Agents Differ from Human Writers
+### 2.1 How Agents Differ from Human Writers
 
 Real-time collaborative editors, such as Google Docs, let multiple writers edit the same document simultaneously. Each writer maintains a local copy. When a writer types, the change appears immediately, without waiting for approval from a server or other writers. The editor then sends the edit to the other copies. If two writers edit concurrently, their copies may temporarily differ. The editor uses concurrency control to make the copies consistent again, typically through one of two methods:
 
@@ -105,7 +107,7 @@ Wow, what a challenging set of constraints to design around! To summarize, concu
 3. **Let the agent act on its own.** The agent should be able to make large edits without asking for permission at every step.
 4. **Give the user the final say.** The user decides which agent edits stay in the document, without feeling overwhelmed.
 
-## 2.2 Some Naive Designs
+### 2.2 Some Naive Designs
 
 We considered several ways to handle concurrent user and agent edits. Each meets some of our four requirements, but none meets all of them.
 
@@ -117,7 +119,7 @@ We considered several ways to handle concurrent user and agent edits. Each meets
 
 Moreover, even the edits that are still valid should wait for the user's approval, instead of going straight into the document.
 
-# 3. Taking Inspiration from...You Guessed It: Databases
+## 3. Taking Inspiration from...You Guessed It: Databases
 
 We reached into our arsenal of database techniques and found a surprisingly good fit for disconnected transactions: Bayou, a storage system from Xerox PARC (1995).<sup><a href="#note-4">4</a></sup> Bayou was built for laptops that are mostly offline. Each laptop keeps its own copy of shared data, users write to their copy while disconnected, and the copies sync when laptops reconnect. So an offline write is based on an old read, just like the agent's disconnected transaction.
 
@@ -161,11 +163,11 @@ So how does a tentative write become final? Laptops sync whenever they connect, 
 
 In the next section, we show how DocWriter adapts these two components.
 
-# 4. How DocWriter Handles Concurrent Edits
+## 4. How DocWriter Handles Concurrent Edits
 
 To handle the agent's disconnected transactions, DocWriter takes inspiration from two ideas in Bayou: dependency checks and tentative writes. But, we had to make two simple yet key adaptations. First, rather than define a merge procedure ahead of time, we let the agent write the merge on the fly, after the agent's dependency check fails ([Section 4.1](#41-the-agent-merges-on-the-flywithout-bothering-the-user)). Second, the user should have the final say over what enters the document, so the user, not the agent, commits each tentative edit ([Section 4.2](#42-the-user-commits-agent-editswith-interface-assistance)). Because the user must commit every agent edit, the interface must make committing many edits easy. We briefly describe each adaptation in turn.
 
-## 4.1 The Agent Merges on the Fly...Without Bothering the User
+### 4.1 The Agent Merges on the Fly...Without Bothering the User
 
 How does the agent propose edits to the document? The agent calls a tool, `edit_doc`, with the text to replace (`old`) and the new text (`new`). Before DocWriter executes the `edit_doc` call, DocWriter runs a dependency check: the text to replace must still be in the document, unchanged, and appear only once. This simple check worked well for us. Here is pseudocode for `edit_doc`, including the check:
 
@@ -192,7 +194,7 @@ While implementing, we had to overcome one small obstacle. We observed that the 
 
 Overall, the dependency check keeps agent edits from overwriting user changes (Requirement 2), and merging on the fly lets the agent keep working without the user (Requirement 3).
 
-## 4.2 The User Commits Agent Edits...With Interface Assistance
+### 4.2 The User Commits Agent Edits...With Interface Assistance
 
 What happens to an agent edit that passes the dependency check? The edit enters the document as a tentative edit, or *suggestion*. Only the user can commit a suggestion, by accepting the suggestion, or remove a suggestion, by rejecting the suggestion. Only agent edits are tentative. The user's keystrokes commit immediately, so the user never waits for the agent (Requirement 1).
 
@@ -259,7 +261,7 @@ document.querySelectorAll("figure.stepper").forEach(function (fig) {
 
 With these helpers, the user has the final say over what enters the document, without feeling overwhelmed (Requirement 4).
 
-## 4.3 Other Implementation Details
+### 4.3 Other Implementation Details
 
 **Client and server.** DocWriter runs locally, on the user's machine. The `docwriter` command starts a server, a Node.js process written in [TypeScript](https://www.typescriptlang.org/) with [SvelteKit](https://svelte.dev/docs/kit), and opens the editor in the browser. We built the editor with [Tiptap](https://tiptap.dev/), on [ProseMirror](https://prosemirror.net/). The server runs the agent, holds the live documents, and syncs each document with the client over WebSockets ([Hocuspocus](https://tiptap.dev/docs/hocuspocus/introduction)).
 
@@ -271,7 +273,7 @@ With these helpers, the user has the final say over what enters the document, wi
 
 **Agent harness.** DocWriter gives the agent its tools as an [MCP](https://modelcontextprotocol.io/) server, and runs the agent through each provider's SDK, e.g., the [Claude Agent SDK](https://docs.claude.com/en/docs/agent-sdk/overview), the [Codex SDK](https://developers.openai.com/codex/sdk), and the Cursor SDK. So, the user can use an existing subscription.
 
-# 5. Open Questions
+## 5. Open Questions
 
 We are excited to release DocWriter into the world! But we are far from done! Here are some questions that we have been thinking about. The first two questions follow directly from the design in this article. The other questions are more about the people who write with agents.
 
@@ -290,7 +292,7 @@ We are excited to release DocWriter into the world! But we are far from done! He
 As agents take on more of our work, these questions become increasingly important to tackle, lest people rely on agents so much that they lose the ability to think and communicate on their own.<sup><a href="#note-11">11</a></sup> On the flip side, however, the AI revolution presents an opportunity to help people think _more_ clearly, if we manage to design the right interfaces and systems for human-agent collaboration.
 
 
-# 6. Conclusion
+## 6. Conclusion
 
 Agents can now handle long tasks, so people will give agents more and more of their work. But for writing, and other work where people clarify their own thinking as they participate, people should not just delegate. People should stay involved and shape the work with their own taste, together with their agents. Such collaboration needs new interfaces and mechanisms for humans and agents to work asynchronously, and excitingly, these may look quite different from the ones we built for human-human collaboration.
 
@@ -298,11 +300,11 @@ In this article, we discussed how we might design such mechanisms for a concurre
 
 Looking forward, there is so much to explore in co-designing interfaces and systems for effective human-agent collaboration. In the meantime, [try DocWriter](https://github.com/docwriter-org/docwriter), and [sign up for our upcoming user study](TODO) (TODO create link)!
 
-# Acknowledgements
+## Acknowledgements
 
 We thank the [Laude Institute](https://www.laude.org/) for supporting DocWriter through a Slingshots grant.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> E.g., Weixin Liang, Yaohui Zhang, Zhengxuan Wu, et al. "Mapping the Increasing Use of LLMs in Scientific Papers." arXiv:2404.01268, 2024 ([link](https://arxiv.org/abs/2404.01268)). In computer science papers, the authors estimate that as much as 17.5% of the content was modified by LLMs by early 2024.
 
@@ -326,7 +328,7 @@ We thank the [Laude Institute](https://www.laude.org/) for supporting DocWriter 
 
 <span id="note-11"><strong>11.</strong></span> Hao-Ping Lee, Advait Sarkar, Lev Tankelevitch, et al. "The Impact of Generative AI on Critical Thinking: Self-Reported Reductions in Cognitive Effort and Confidence Effects From a Survey of Knowledge Workers." CHI 2025 ([doi](https://doi.org/10.1145/3706598.3713778)).
 
-# Cite this article
+## Cite this article
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>

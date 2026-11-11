@@ -10,7 +10,7 @@ title: Blog
   {% for post in listed_posts %}
   <a href="{{ post.url | relative_url }}" class="post-item">
     <div class="post-title">{{ post.title }}</div>
-    <div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}{% if post.author %} | {{ post.author }}{% endif %}</div>
+    <div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}{% if post.authors %} | {% include author-names.html authors=post.authors %}{% endif %}</div>
   </a>
   {% endfor %}
   {% else %}

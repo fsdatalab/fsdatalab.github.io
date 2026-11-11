@@ -1,10 +1,11 @@
 <nav class="nav">
   <a href="{{ '/' | relative_url }}" class="nav-brand">
     <img src="{{ '/assets/logo.png' | relative_url }}" alt="Full Stack Data Lab" width="26" height="26">
-    <span>Full Stack Data</span>
+    <span>Full Stack Data Lab</span>
   </a>
   <ul class="nav-links">
     <li><a href="{{ '/blog/' | relative_url }}" {% if page.url contains '/blog' or page.layout == 'post' %}class="active"{% endif %}>Blog</a></li>
+    <li><a href="{{ '/questions/' | relative_url }}" {% if page.url contains '/questions' %}class="active"{% endif %}>Questions</a></li>
     <li><a href="{{ '/people/' | relative_url }}" {% if page.url contains '/people' %}class="active"{% endif %}>People</a></li>
     <li><a href="https://github.com/fsdatalab" target="_blank" rel="noopener noreferrer">GitHub</a></li>
   </ul>

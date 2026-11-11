@@ -2,8 +2,11 @@
 layout: post
 title: "Copy That? Faster AI-Powered Extraction by Drafting from the Document"
 date: 2026-11-09
-author: "Shreya Shankar, Charles Frye"
+authors:
+  - shreya-shankar
+  - charles-frye
 permalink: /blog/ai-extract/
+tags: [ai-sql]
 sitemap: true
 math: true
 typora-root-url: ..
@@ -40,7 +43,7 @@ image:
 </ol>
 </nav>
 
-# 1. Introduction
+## 1. Introduction
 
 Extraction is one of the most common AI operations over data: given a document and a question, return the part of the document that answers it. For example, we might want to, from contracts, extract the governing law; from clinical notes, extract drug doses; from agent traces, extract signs of reward hacking (e.g., commands that peek at the grader code).
 
@@ -53,7 +56,7 @@ We’ll cover:
 - [How Quail adapts to each query and document as the query runs](#4-key-idea-adaptive-and-per-request-draft-lengths).
 - [Results on QUAIL-B compared with vLLM](#5-experiments-on-quail-b).
 
-# 2. AI.EXTRACT in Quail
+## 2. AI.EXTRACT in Quail
 
 `AI.EXTRACT` is a SQL function that takes in a document and a set of questions, and returns a struct with the answers, one field for each question. Each answer is a substring of the document. If the document does not answer a question, the field is `NULL`. `AI.EXTRACT` can also return the start and end of each answer (i.e., the span) in the document.
 
@@ -68,7 +71,7 @@ SELECT m.id,
 FROM messages m;
 ```
 
-# 3. Extracting with an Off-the-Shelf LLM
+## 3. Extracting with an Off-the-Shelf LLM
 
 Suppose that we want to run `AI.EXTRACT` with an off-the-shelf LLM (i.e., any autoregressive LLM, not a model trained specifically for extraction). The simplest way is to send the LLM one request for each document and field, and get one answer for each request, as in Figure 2.
 
@@ -92,7 +95,7 @@ Contemporary speculative decoding methods like DFlash<sup><a href="#note-7">7</a
 
 So, how should Quail set $$\gamma$$?
 
-# 4. Key Idea: Adaptive Draft Lengths for Each Request
+## 4. Key Idea: Adaptive Draft Lengths for Each Request
 {: #4-key-idea-adaptive-and-per-request-draft-lengths }
 
 Quail chooses a draft length for each request and updates its choice as the query runs. We first model the cost of a draft, then show how Quail learns the model's inputs during execution. Finally, we compare the approach with prior work. Table 1 lists the symbols.
@@ -116,7 +119,7 @@ Quail chooses a draft length for each request and updates its choice as the quer
 </div>
 </details>
 
-## 4.1 The Cost of a Draft
+### 4.1 The Cost of a Draft
 
 At each step, the target model checks a draft of $$\gamma$$ tokens. A longer draft may produce more output tokens, but takes longer to check. Quail chooses the $$\gamma$$ that minimizes expected time per output token:
 
@@ -148,7 +151,7 @@ $$
 
 Quail computes $$m$$ and estimates $$\rho$$ for each document and step. It must learn $$\alpha(m)$$ and the answer-length probabilities for each query.
 
-## 4.2 Learning the Draft Length During Execution
+### 4.2 Learning the Draft Length During Execution
 {: #42-learning-the-length-gamma-during-execution }
 
 A query processes many documents, so Quail learns from decoding steps and completed requests. It keeps two histograms for each extracted field:
@@ -172,7 +175,7 @@ Figure 5 shows one reason the choices change: as answers finish, Quail's estimat
 <figcaption>Figure 5. Estimated <em>P</em>(<em>N</em> &gt; <em>i</em>) for CUAD-1 and CUAD-3 before any answers finish and after 8, 32, and 128 answers, compared with the final curve.</figcaption>
 </figure>
 
-## 4.3 Reflecting on Prior Work
+### 4.3 Reflecting on Prior Work
 
 Perhaps the best-known recent method that chooses a draft length for each request is DeepSeek's DSpark,<sup><a href="#note-8">8</a></sup> whose scheduler is confidence-aware and hardware-aware. DSpark trains a small neural network to estimate how likely each draft token is to be accepted. The scheduler then compares these estimates with the engine's measured throughput at the current load. DSpark calibrates its estimates offline, before deployment. Interestingly, in Quail we can learn these estimates online (with simple histograms rather than a neural network), _separately_ for each query, as the query runs!
 
@@ -182,7 +185,7 @@ SuffixDecoding, by Oliaro et al.,<sup><a href="#note-17">17</a></sup> both copie
 
 When the answer so far has many matches, Quail may draft no tokens and decode one at a time. Instead, Quail could copy the continuation after each match and have the target model check them in one pass. Sequoia, by Chen et al.,<sup><a href="#note-18">18</a></sup> uses dynamic programming to choose which tokens to draft within a budget, then tunes the draft's size and depth for the GPU. Quail could incorporate $$\alpha(m)$$ into a similar cost model for choosing a draft tree. We leave this to future work.
 
-# 5. Experiments on QUAIL-B
+## 5. Experiments on QUAIL-B
 
 **Setup.** All systems run Qwen3-4B (FP8) on one H100 with the same prompts. We test Quail with adaptive draft lengths and fixed lengths $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. Quail limits each extracted answer to 64 tokens. We compare Quail with two vLLM baselines:<sup><a href="#note-19">19</a></sup>
 
@@ -227,18 +230,18 @@ Where does the shortfall from the SoL come from? One source is [host overhead](h
 
 Another important source is rejected draft tokens. To reach the SoL as defined above, Quail would need to predict all output tokens from the first token, perfectly and instantly, on every query. Of course, if we could do that, we would just run that system instead of the target model! We suspect that rejected draft tokens account for a large part of the remaining shortfall, but we have not measured this yet. If that is right, improving drafting methods strikes us as a better target for research than chasing host overhead, which costs only a few percentage points.
 
-# 6. Conclusion and Future Work
+## 6. Conclusion and Future Work
 
 In this article, we walked through how Quail executes `AI.EXTRACT`, a SQL function that extracts the answers to questions from documents. We use speculative decoding to accelerate `AI.EXTRACT`, with drafts copied from the document, and a draft length that adapts to the document and to the answer lengths that Quail learns while the query runs. On extraction tasks over agent traces, SEC filings, and legal contracts, Quail is up to 3.0x faster than tuned vLLM, and up to 19x faster than naive vLLM.
 
 Looking forward, it would be great if we didn't have to decode answers token by token at all. Perhaps one can train a "System One"-like model, in the spirit of TypeSafe's [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)<sup><a href="#note-27">27</a></sup> and Cloudflare's [Clairic](https://blog.cloudflare.com/clairic-extraction-model),<sup><a href="#note-28">28</a></sup> that points to the start and the end of each answer in the document in one forward pass. If this kind of research is interesting to you, reach out! In the meantime, try out [Quail](https://github.com/fsdatalab/quail), and if you like what we're building, give it a star on GitHub!
 
-# Acknowledgements
+## Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in
 this research.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> Modal. [What does it mean to be memory-bound?](https://modal.com/gpu-glossary/perf/memory-bound) *GPU Glossary*.
 
@@ -296,7 +299,7 @@ this research.
 
 <span id="note-28"><strong>28.</strong></span> Alex Reneau, Michelle Chen, and Kevin Flansburg. [Introducing Clairic, a New System One Class of Extraction Models](https://blog.cloudflare.com/clairic-extraction-model). *Cloudflare Blog*, October 2026.
 
-# Cite this article
+## Cite this article
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>

@@ -1,5 +1,6 @@
 title: Full Stack Data Lab
-description: A CS research lab at Carnegie Mellon University led by Shreya Shankar.
+tagline: Bringing AI to Data Analysis and BI
+description: "A CS research lab led by Shreya Shankar, moving to Carnegie Mellon University in 2027. We build open-source data systems so AI can power data analysis: DocETL, Quail, and DocWriter."
 url: https://fsdatalab.github.io
 baseurl: ""
 image: /assets/og-image.png
@@ -7,10 +8,24 @@ future: true
 
 defaults:
   - scope:
+      path: ""
+    values:
+      image: /assets/og-image.png
+  - scope:
       path: "_posts"
       type: posts
     values:
       layout: post
+  - scope:
+      path: "assets"
+    values:
+      sitemap: false
+
+# Structured data on the home page (_includes/structured-data.html).
+lab_founders:
+  - shreya-shankar
+lab_profiles:
+  - https://github.com/fsdatalab
 
 markdown: kramdown
 kramdown:

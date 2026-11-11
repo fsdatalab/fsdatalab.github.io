@@ -2,8 +2,11 @@
 layout: post
 title: "How to Cost Your AI-Powered Filters"
 date: 2026-10-01
-author: "Arnav Dhariya, Shreya Shankar"
+authors:
+  - arnav-dhariya
+  - shreya-shankar
 permalink: /blog/ai-filter-cost-estimates/
+tags: [ai-sql]
 math: true
 typora-root-url: ..
 description: "How fast could your AI-powered filters run? We do the math for an H100 and show how filter order changes the answer."
@@ -56,7 +59,7 @@ image:
 </ol>
 </nav>
 
-# 1. Introduction
+## 1. Introduction
 
 We recently released [Quail](https://fsdatalab.github.io/blog/introducing-quail/)<sup><a href="#note-1">1</a></sup>, an execution engine for AI-SQL, which extends SQL with functions that call LLMs. To choose between query plans, Quail needs to estimate how long each AI operation will take. But estimating AI operation latency is not straightforward! In this article, we discuss: **How can we estimate the latency of an AI-SQL query on a given LLM and GPU?**
 
@@ -69,11 +72,11 @@ In this article, we'll walk through how to derive a SoL estimate for AI-SQL quer
 - How to cost a conjunction of filters and choose a filter order ([Section 4](#4-cost-model-for-a-conjunction-of-filters)).
 - An example using Qwen3-4B-fp8 on an H100, with an interactive playground to explore different filter orders ([Sections 5](#5-example-imdb-query) and [6](#6-filter-playground)).
 
-# 2. Background
+## 2. Background
 
 Here, we first define AI-powered filters. We then describe the hardware and model choices used in our examples (H100 GPU and Qwen3-4B), giving an overview of the parts of a transformer forward pass that affect cost. Finally, we introduce the roofline model we use to estimate SoL latency.
 
-## 2.1 AI-powered filters
+### 2.1 AI-powered filters
 
 We define AI-powered filters and introduce the single-filter query and the conjunction of filters used throughout the article.
 
@@ -89,7 +92,7 @@ We define AI-powered filters and introduce the single-filter query and the conju
 
 The preamble and filter instruction add tokens to each request, so their lengths affect the cost.
 
-## 2.2 GPU Execution
+### 2.2 GPU Execution
 
 Our examples assume an NVIDIA H100 SXM GPU. Its Hopper architecture introduced FP8 Tensor Cores as part of a design aimed at accelerating transformer models.<sup><a href="#note-3">3</a></sup> *FP8* is an eight-bit floating-point number format.
 
@@ -116,7 +119,7 @@ Our cost model tracks two hardware costs: arithmetic and HBM traffic. For arithm
 <p class="table-caption">Table 1. H100 SXM hardware constants.</p>
 </div>
 
-## 2.3 Transformer Forward Pass
+### 2.3 Transformer Forward Pass
 
 A *forward pass* processes input tokens through the model's layers. Each filter processes its input and predicts one token, true or false. Within each layer, *projections* transform token vectors through matrix multiplication, *attention* combines information from the current and earlier tokens, and a *multilayer perceptron (MLP)* applies further transformations to each token independently. Our cost model counts the arithmetic and memory traffic of each component within every layer. We use Qwen3-4B FP8<sup><a href="#note-5">5</a></sup> in our examples.<sup><a href="#note-6">6</a></sup> The loaded model occupies about 4.5 GB in HBM.
 
@@ -161,7 +164,7 @@ The resulting hidden states pass to the next transformer layer, which repeats th
 
 The parameter count $$P$$ includes only projection and MLP weights. The embedding table contains $$\text{vocab}\times d_{\text{model}}$$ values, where $$\text{vocab}$$ is the number of distinct tokens the model can read or output and $$d_{\text{model}}$$ is the hidden-state width.
 
-## 2.4 Roofline Model & Speed of Light
+### 2.4 Roofline Model & Speed of Light
 
 For each component of a forward pass, we need to estimate the time spent on arithmetic and memory transfers. The *compute time* is the number of FLOPs divided by the GPU's arithmetic throughput. The *memory transfer time* is the number of bytes read from or written to HBM divided by the HBM bandwidth.
 
@@ -208,11 +211,11 @@ Here, $$I^*$$ is the FP8 ridge point used for projections and the MLP, and $$I^*
 
 In [Section 3.5](#35-total-cost), we will calculate how many tokens we need to process before arithmetic, rather than memory transfers, determines each component's latency.
 
-# 3. Cost Model for One Filter
+## 3. Cost Model for One Filter
 
 We estimate one filter's latency by counting the arithmetic and memory traffic for projections, attention, and the MLP. We apply the roofline equation to each component and add the resulting latencies. Using one filter from our example query, we will calculate the cost of processing a batch of documents and predicting true or false for each document.
 
-## 3.1 Workload and Notation
+### 3.1 Workload and Notation
 
 First, we will introduce notation for evaluating one filter on a batch of documents. A *request* is the input sent to the model for one document: the preamble, document, and filter instruction, in that order. We will describe the length of each request, the total number of tokens in the batch, and the number of forward passes needed to process them.
 
@@ -243,7 +246,7 @@ $$
 
 Here, $$d_{\text{mlp}}$$ is the MLP intermediate width from [Table 2](#table-2). Each token's combined gate and up vectors occupy $$2d_{\text{mlp}}$$ elements, so Quail's 32-bit indexing limit of $$2^{31}-1$$ elements determines $$C$$. In [Section 4.1](#41-kv-reuse-and-hbm-capacity), when we discuss multiple filters, the batch size will be further limited by the HBM available to retain documents' KV caches.
 
-## 3.2 Projection Cost
+### 3.2 Projection Cost
 
 Here we derive the FLOPs for Q, K, V, and output projections, their HBM traffic across forward passes, and the projection roofline cost.
 
@@ -273,7 +276,7 @@ $$
 
 Here, $$P_{\text{proj}}$$ is the number of projection parameters across all layers. $$F_{\text{proj}}$$ is the total number of projection FLOPs. For each token, we multiply each weight by an input value and add the product to the output sum, counting two FLOPs per weight. $$b_w$$ is the number of bytes per weight, which is 1 for FP8. $$B_{\text{proj}}$$ is the number of projection weight bytes read from HBM across all $$K$$ forward passes. $$T_{\text{proj}}$$ is the projection latency, which is the larger of compute time and memory transfer time.
 
-## 3.3 Attention Cost
+### 3.3 Attention Cost
 
 We now count attention's arithmetic and memory traffic and use the roofline equation to estimate its latency.
 
@@ -325,7 +328,7 @@ $$
 
 Here, $$T_{\text{attn}}$$ is the attention latency, which is the larger of compute time and memory transfer time.
 
-## 3.4 MLP Cost
+### 3.4 MLP Cost
 
 We still need to derive the FLOPs for the gate, up, and down MLP projections, their HBM traffic, and the MLP roofline cost.
 
@@ -368,7 +371,7 @@ $$
 
 Here, $$T_{\text{mlp}}$$ is the MLP latency, which is the larger of compute time and memory transfer time.
 
-## 3.5 Total Cost
+### 3.5 Total Cost
 
 A forward pass runs the projections, attention, and the MLP in sequence, so the three component times add:
 
@@ -418,7 +421,7 @@ $$
 
 With our model and hardware specs, projections and MLPs dominate the estimated latency for requests shorter than about 12,300 tokens. Above that length, attention dominates.
 
-## 3.6 Cost of One IMDB Filter
+### 3.6 Cost of One IMDB Filter
 
 We can finally estimate the SoL latency of applying $$F_1$$, the filter that asks whether a review mentions a positive aspect of the movie, to 5,000 IMDB reviews! This is the first filter in [Figure 1](#figure-1). We use the H100 specs, along with the following batch and prompt values:
 
@@ -585,11 +588,11 @@ $$
 
 The estimated SoL latency is 6.64 seconds for all 5,000 reviews, not for one review! So fast!
 
-# 4. Cost Model for a Conjunction of Filters
+## 4. Cost Model for a Conjunction of Filters
 
 Now let's estimate the cost of applying several filters to the same documents. We can skip later filters for a document that fails, and reuse the document's KV vectors if it passes. First, we will find a batch size that lets us keep the KV vectors in HBM. Then we will compare filter orders using their per-document costs. Finally, we will derive the SoL estimate for the selected order.
 
-## 4.1 KV Reuse and HBM Capacity
+### 4.1 KV Reuse and HBM Capacity
 
 Taking a closer look at [Figure 1](#figure-1), every filter prompt for a given document contains the same preamble and document. Only the filter instruction changes. We call the shared preamble and document the *prefix*. Its average length, $$p$$, is
 
@@ -631,7 +634,7 @@ $$
 
 We therefore split the 5,000 reviews into five batches. Because the bound uses the mean document length, it is an estimate rather than a guarantee for every batch.
 
-## 4.2 Cost of a Fixed Filter Order
+### 4.2 Cost of a Fixed Filter Order
 
 Suppose a query applies $$m$$ filters to $$N$$ documents. We write the filter order as $$\pi$$, a list of filters. For example, $$\pi=(F_2,F_1,F_3)$$ means we evaluate $$F_2$$ first, then $$F_1$$, then $$F_3$$. The symbol $$\pi_j$$ denotes the filter in position $$j$$, so in this example $$\pi_1=F_2$$, $$\pi_2=F_1$$, and $$\pi_3=F_3$$.
 
@@ -692,7 +695,7 @@ S(\pi) = N\,\text{scan}_{\pi_1}
        + \sum_{j=2}^{m} N_j\,\text{ask}_{\pi_j}.
 $$
 
-## 4.3 Choosing the Filter Order
+### 4.3 Choosing the Filter Order
 
 We now choose the order with the lowest ordering score. Our ordering rule follows Joseph Hellerstein and Michael Stonebraker's work on ordering expensive predicates.<sup><a href="#note-19">19</a></sup> For filters after the first position, we rank each filter by its ask cost per document rejected:
 
@@ -805,13 +808,13 @@ T_{\text{query}}
 \end{aligned}
 $$
 
-# 5. Example: IMDB Query
+## 5. Example: IMDB Query
 
 Here we walk through our cost model for the example query over $$N=5{,}000$$ IMDB reviews<sup><a href="#note-21">21</a></sup> using Qwen3-4B on an H100. We first calculate the ordering score $$S(\pi)$$ for each candidate from Algorithm 1. We then calculate the SoL latency $$T_{\text{query}}$$ for the selected order, $$F_2 \to F_1 \to F_3$$.
 
 The weights use FP8, while attention and KV use BF16. The cached prefix contains $$p = 2 + 298.8466 = 300.8466$$ tokens per review.
 
-## 5.1 Filter Ordering
+### 5.1 Filter Ordering
 
 [Table 5](#table-5) lists the three filters. We assume we know each filter's selectivity, the fraction of reviews that pass it.
 
@@ -945,7 +948,7 @@ We use unrounded scan and ask costs when calculating the scores. Table 6 compare
 
 We select $$F_2 \to F_1 \to F_3$$, which has the lowest ordering score, $$S(\pi)=6.8665$$ s.
 
-## 5.2 SoL Estimate for the Ordered Conjunction
+### 5.2 SoL Estimate for the Ordered Conjunction
 
 We now calculate $$T_{\text{query}}$$ for the same order, $$\pi=(F_2,F_1,F_3)$$, using the query-wide roofline equation from [Section 4.3](#43-choosing-the-filter-order). Unlike $$S(\pi)$$, we first total the token, attention, and KV counts across filters rather than adding the filters' latency estimates.
 
@@ -1019,19 +1022,19 @@ For $$\pi=(F_2,F_1,F_3)$$, we used $$S(\pi)=6.8665$$ s to choose the order and o
 
 Phew! We made it! The SoL estimate is about 6.86 seconds for all 5,000 reviews. Of course, actual runtime may be much longer. Sustaining NVIDIA's peak arithmetic throughput and memory bandwidth, with enough overlap across filters, may not be achievable for this query. But the estimate gives us a lower bound to compare against as we improve execution.
 
-# 6. Filter Playground
+## 6. Filter Playground
 
 To help illustrate how filter ordering affects query cost, we've built an interactive playground! You can change the filter order, selectivities, and instruction lengths to see how they affect the query's SoL estimate. The playground uses Qwen3-4B-fp8 on an H100, starting with the IMDB example from [Section 5](#5-example-imdb-query). Drag filters to reorder them, or apply the ordering rule from [Section 4.3](#43-choosing-the-filter-order). For up to six filters, you can compare the rule's order with every possible order.
 
 The estimates assume peak hardware rates and reuse of each document's cached prefix across filters. We use the average document length for every document.
 
 <div class="pg" id="filter-chain-playground" data-filter-chain-calculator>
-  <noscript>The playground needs JavaScript. The worked example in Section 5 gives the same numbers for the IMDB query.</noscript>
+  <noscript>The playground needs JavaScript. It starts with the three IMDB filters from Section 5, where the ordering rule picks F2 → F1 → F3 with an estimated 6.87 s, compared with 7.30 s for the slowest candidate order (Table 6).</noscript>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js" defer></script>
 <script src="{{ '/assets/js/filter-chain-calculator.js' | relative_url }}" defer></script>
 
-# 7. Conclusion
+## 7. Conclusion
 
 In this article, we walked through costing one AI-powered filter and then a conjunction of filters. Wow, there were a lot of steps involved! We had to account for arithmetic, memory traffic, KV reuse, and filter ordering. Even for a filter that returns just true or false, there's a lot to account for!
 
@@ -1039,12 +1042,12 @@ And this is just the tip of the iceberg. We need to extend these calculations to
 
 Overall, we think there's a lot of cool work in this space for the database community to take on! Model and hardware choices now affect how we cost operators, choose query plans, and schedule execution. We hope this article gives you a useful starting point if you're building an AI-powered query engine or trying to understand how much faster your system could be.
 
-# Acknowledgements
+## Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in
 this research.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, and Meryem Arik. 2026. Building an Ultra-High Throughput AI-SQL Engine. [https://fsdatalab.github.io/blog/introducing-quail/](https://fsdatalab.github.io/blog/introducing-quail/)
 
@@ -1094,7 +1097,7 @@ this research.
 
 <span id="note-23"><strong>23.</strong></span> See [NVIDIA's Blackwell architecture overview](https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/).
 
-# Cite this article
+## Cite this article
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>
