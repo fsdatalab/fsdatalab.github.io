@@ -32,8 +32,10 @@ A good project does at least one of these:
 
 ## Ideas
 
-Here are some domains with large public datasets, and questions people
-would learn from.
+These are just some ideas for inspiration. If you have your own data or
+questions, explore those! Pick something you're interested in, or a domain
+you already know well. Each idea below has a large public dataset and a few
+questions people would learn from.
 
 **Federal rulemaking.** [Regulations.gov](https://www.regulations.gov/) has
 public comments on proposed rules, sometimes hundreds of thousands per rule.
@@ -87,7 +89,5 @@ has millions of real conversations with chatbots, and Nebius has [80,036
 coding agent trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories).
 What do people actually use chatbots for, and where do chatbots fail them?
 Why do coding agents fail?
-
-Or bring your own data and question.
 
 </article>
