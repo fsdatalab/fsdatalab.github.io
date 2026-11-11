@@ -1029,7 +1029,7 @@ To help illustrate how filter ordering affects query cost, we've built an intera
 The estimates assume peak hardware rates and reuse of each document's cached prefix across filters. We use the average document length for every document.
 
 <div class="pg" id="filter-chain-playground" data-filter-chain-calculator>
-  <noscript>The playground needs JavaScript. The worked example in Section 5 gives the same numbers for the IMDB query.</noscript>
+  <noscript>The playground needs JavaScript. It starts with the three IMDB filters from Section 5, where the ordering rule picks F2 → F1 → F3 with an estimated 6.87 s, compared with 7.30 s for the slowest candidate order (Table 6).</noscript>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js" defer></script>
 <script src="{{ '/assets/js/filter-chain-calculator.js' | relative_url }}" defer></script>

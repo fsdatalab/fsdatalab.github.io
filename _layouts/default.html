@@ -17,7 +17,7 @@
   {%- if page.layout == "post" %}
   {% include citation-meta.html %}
   {%- endif %}
-  {%- if page.unlisted %}
+  {%- if page.unlisted or page.noindex %}
   <meta name="robots" content="noindex">
   {%- endif %}
   <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | absolute_url }}">
