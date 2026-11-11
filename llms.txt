@@ -20,16 +20,16 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 - [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }} ({% include author-names.html authors=post.authors %}, {{ post.date | date: "%Y-%m-%d" }})
 {%- endfor %}
 
-## FAQ
+## Questions about using AI for data and knowledge work
 
-Questions people ask, answered from our papers and posts: {{ '/faq/' | absolute_url }}
-{% for section in site.data.faq %}
+Questions people ask, answered from our papers and posts, by layer of the stack: {{ '/questions/' | absolute_url }}
+{% for section in site.data.questions %}
 ### {{ section.name }}
 {% for item in section.items -%}
 {%- if item.requires -%}
 {%- assign required = listed_posts | where: "url", item.requires -%}
 {%- if required.size == 0 %}{% continue %}{% endif -%}
 {%- endif %}
-- [{{ item.q }}]({{ '/faq/' | absolute_url }}#{{ item.id }})
+- [{{ item.q }}]({{ '/questions/' | absolute_url }}#{{ item.id }})
 {%- endfor %}
 {% endfor %}

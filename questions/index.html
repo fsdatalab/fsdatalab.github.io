@@ -1,41 +1,41 @@
 ---
 layout: default
-title: LLM Data Processing and AI Evals FAQ
-description: "Answers to common questions about running LLMs over data, AI-SQL, AI evals, data agents, and ML in production, each citing the paper or post it comes from."
-permalink: /faq/
+title: Questions About Using AI for Data and Knowledge Work
+description: "Answers to questions people ask about using AI for data analysis and knowledge work, from human behavior to inference, each citing the paper or post it comes from."
+permalink: /questions/
 ---
 {%- comment -%}
   An entry with `requires` appears only once the post at that URL is listed.
   The same rule applies to the FAQPage JSON-LD in structured-data.html.
 {%- endcomment -%}
 {%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
-<article class="content-narrow prose faq">
-  <div class="post-header"><h1>Frequently asked questions</h1></div>
-  <p>Answers to questions people ask about running LLMs over data, AI evals, and ML in production. Each answer describes how one of our papers or posts approached the problem and links to it.</p>
+<article class="content-narrow prose questions">
+  <div class="post-header"><h1>Questions about using AI for data and knowledge work</h1></div>
+  <p>Answers to questions people ask about using AI for data analysis and knowledge work, grouped by layer of the stack, from human behavior down to inference. Each answer describes how one of our papers or posts approached the problem and links to it.</p>
 
-  <nav class="post-toc" aria-label="Sections">
-    <strong>Sections</strong>
+  <nav class="post-toc" aria-label="Layers">
+    <strong>Layers</strong>
     <ol>
-      {%- for section in site.data.faq %}
+      {%- for section in site.data.questions %}
       <li><a href="#{{ section.key }}">{{ section.name }}</a></li>
       {%- endfor %}
     </ol>
   </nav>
 
-  {%- for section in site.data.faq %}
+  {%- for section in site.data.questions %}
   <h2 id="{{ section.key }}">{{ section.name }}</h2>
   {%- for item in section.items %}
   {%- if item.requires %}
     {%- assign required = listed_posts | where: "url", item.requires -%}
     {%- if required.size == 0 %}{% continue %}{% endif -%}
   {%- endif %}
-  <section class="faq-item">
+  <section class="question-item">
     <h3 id="{{ item.id }}"><a href="#{{ item.id }}">{{ item.q | escape }}</a></h3>
     <p>{{ item.a | escape }}</p>
     {%- if item.how %}
     <p><strong>How it works.</strong> {{ item.how | escape }}</p>
     {%- endif %}
-    <p class="faq-sources">Sources:
+    <p class="question-sources">Sources:
       {%- for source in item.sources %}
       <a href="{{ source.url }}">{{ source.title | escape }}</a>{% unless forloop.last %};{% endunless %}
       {%- endfor %}

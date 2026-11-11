@@ -44,7 +44,7 @@ faster on average than well-tuned vLLM baselines.
 {%- endfor %}
 </div>
 
-For common questions about AI-SQL and batch LLM inference, see the [FAQ]({{ '/faq/#ai-sql-inference' | relative_url }}).
+For common questions about AI-SQL and LLM inference, see our [questions page]({{ '/questions/#database-systems' | relative_url }}).
 
 ## Code
 
