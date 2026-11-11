@@ -44,6 +44,37 @@
     }
   ]
 }
+{%- elsif page.url == "/faq/" %}
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "url": {{ page_url | jsonify }},
+  "isPartOf": {"@id": {{ site_id | jsonify }}},
+  "mainEntity": [
+    {%- assign first = true %}
+    {%- for section in site.data.faq %}
+    {%- for item in section.items %}
+    {%- if item.requires %}
+      {%- assign required = listed_posts | where: "url", item.requires %}
+      {%- if required.size == 0 %}{% continue %}{% endif %}
+    {%- endif %}
+    {%- capture answer %}{{ item.a }}{% if item.how %} {{ item.how }}{% endif %}{% endcapture %}
+    {% unless first %},{% endunless %}{
+      "@type": "Question",
+      "name": {{ item.q | jsonify }},
+      "url": {{ page_url | append: "#" | append: item.id | jsonify }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ answer | jsonify }},
+        "citation": [{% for source in item.sources %}{"@type": "CreativeWork", "name": {{ source.title | jsonify }}, "url": {{ source.url | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
+      }
+    }
+    {%- assign first = false %}
+    {%- endfor %}
+    {%- endfor %}
+  ]
+}
 {%- else %}
 {
   "@context": "https://schema.org",

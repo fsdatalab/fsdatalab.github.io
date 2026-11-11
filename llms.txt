@@ -19,3 +19,17 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 {% for post in listed_posts %}
 - [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }} ({% include author-names.html authors=post.authors %}, {{ post.date | date: "%Y-%m-%d" }})
 {%- endfor %}
+
+## FAQ
+
+Questions people ask, answered from our papers and posts: {{ '/faq/' | absolute_url }}
+{% for section in site.data.faq %}
+### {{ section.name }}
+{% for item in section.items -%}
+{%- if item.requires -%}
+{%- assign required = listed_posts | where: "url", item.requires -%}
+{%- if required.size == 0 %}{% continue %}{% endif -%}
+{%- endif %}
+- [{{ item.q }}]({{ '/faq/' | absolute_url }}#{{ item.id }})
+{%- endfor %}
+{% endfor %}

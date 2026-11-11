@@ -44,6 +44,8 @@ faster on average than well-tuned vLLM baselines.
 {%- endfor %}
 </div>
 
+For common questions about AI-SQL and batch LLM inference, see the [FAQ]({{ '/faq/#ai-sql-inference' | relative_url }}).
+
 ## Code
 
 - [Quail](https://github.com/fsdatalab/quail): the engine.

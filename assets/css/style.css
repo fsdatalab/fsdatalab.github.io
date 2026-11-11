@@ -1263,3 +1263,9 @@ a:hover { opacity: 0.75; }
 .prose .td-card.is-active { border-color: var(--red); box-shadow: 0 0 0 1px var(--red); }
 .prose .td-bar.is-active { background: #fff1f2; }
 .prose .td-bar.is-active .td-fill { background: var(--red); }
+
+/* ── FAQ ─────────────────────────────────────────── */
+.faq h3 a { color: inherit; text-decoration: none; }
+.faq h3 a:hover { color: var(--red); }
+.faq-item { margin-bottom: 1.75rem; }
+.prose .faq-sources { font-size: 0.875rem; color: var(--muted); }
