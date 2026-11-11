@@ -1,28 +1,30 @@
 ---
 layout: default
-title: Non-Traditional Applicants
-description: "How non-traditional applicants (in industry, outside CS, or in high school) can get involved with the Full Stack Data Lab: use Quail, our open-source AI-SQL engine, to analyze a dataset, and send us a video walking through what you found."
-permalink: /get-involved/
+title: Non-Traditional Backgrounds
+description: "How people from non-traditional backgrounds (in industry, outside CS, or in high school) can get involved with the Full Stack Data Lab: use Quail, our open-source AI-SQL engine, to analyze a dataset, and send us a video walking through what you found."
+permalink: /non-traditional/
 ---
 <article class="content-narrow prose" markdown="1">
 
-<div class="post-header"><h1>Non-traditional applicants</h1></div>
+<div class="post-header"><h1>Non-traditional backgrounds</h1></div>
 
 Interested in working with our group, but coming from a non-traditional
 background, e.g., industry, a field outside CS, or high school? You don't
-need a CS degree or research experience to get started. (If you're a CMU
+need a CS degree or research experience. (If you're a CMU
 student or a prospective PhD student, reach out to us directly instead.)
 
 Here's a taste of the kinds of problems we work on. One of the systems we
 are building is [Quail]({{ '/blog/introducing-quail/' | relative_url }}),
 a SQL query engine with AI functions: you write prompts inside a SQL query,
-and Quail runs them over your data with open-source LLMs. Pick a dataset and
-analyze it with Quail. The [open-source repo](https://github.com/fsdatalab/quail)
+and Quail runs them over your data with open-source LLMs.
+
+To get started, try Quail yourself: pick a dataset (see the [ideas
+below](#ideas)) and analyze it with Quail. The [open-source repo](https://github.com/fsdatalab/quail)
 has documentation, and you can run Quail on [Modal](https://modal.com/pricing),
 whose free plan includes $30 of compute per month (see the [Modal
 quickstart](https://github.com/fsdatalab/quail/blob/d8d31f14f9d5c40d6cf683a74ba860788ce0d500/demos/quickstart_modal.py)).
 
-If you had fun, email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
+Then, email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
 a short video (under 10 minutes) of you explaining your analysis, along with
 your CV. Feel free to present it with a dashboard, slides, or another visual
 tool. You don't need to share your code.

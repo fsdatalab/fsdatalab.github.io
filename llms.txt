@@ -22,7 +22,7 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 
 ## Getting involved
 
-Non-traditional applicants (in industry, outside CS, or in high school) can start by using Quail to analyze a dataset and sending a short video explaining the analysis. CMU students and prospective PhD students should reach out directly. Details and ideas: {{ '/get-involved/' | absolute_url }}
+People from non-traditional backgrounds (in industry, outside CS, or in high school) can start by using Quail to analyze a dataset and sending a short video explaining the analysis. CMU students and prospective PhD students should reach out directly. Details and ideas: {{ '/non-traditional/' | absolute_url }}
 
 ## Questions about using AI for data and knowledge work
 
