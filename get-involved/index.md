@@ -8,16 +8,23 @@ permalink: /get-involved/
 
 <div class="post-header"><h1>Get involved</h1></div>
 
-Interested in working with our group? You don't need a CS degree or
-research experience. We hear from many people in industry, in fields
-outside CS, and in high school. To get started, use
-[Quail](https://github.com/fsdatalab/quail) to analyze a dataset, then email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
-a short video of you explaining your analysis (feel free to make a
-dashboard), a link to your code, and your CV.
+Interested in working with our group? We hear from many people in
+industry, in fields outside CS, and in high school, and you don't need a CS
+degree or research experience to get started.
 
-You can run Quail on [Modal](https://modal.com/pricing), whose free plan
-includes $30 of compute per month. See the [Modal
-quickstart](https://github.com/fsdatalab/quail/blob/d8d31f14f9d5c40d6cf683a74ba860788ce0d500/demos/quickstart_modal.py).
+Here's a taste of the kinds of problems we work on. One of the systems we
+are building is [Quail]({{ '/blog/introducing-quail/' | relative_url }}),
+a SQL query engine with AI functions: you write prompts inside a SQL query,
+and Quail runs them over your data with open-source LLMs. Pick a dataset and
+analyze it with Quail. The [open-source repo](https://github.com/fsdatalab/quail)
+has documentation, and you can run Quail on [Modal](https://modal.com/pricing),
+whose free plan includes $30 of compute per month (see the [Modal
+quickstart](https://github.com/fsdatalab/quail/blob/d8d31f14f9d5c40d6cf683a74ba860788ce0d500/demos/quickstart_modal.py)).
+
+If you had fun, email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu)
+a short video (under 10 minutes) of you explaining your analysis, along with
+your CV. Feel free to present it with a dashboard, slides, or another visual
+tool. You don't need to share your code.
 
 ## What makes a project good
 
@@ -34,8 +41,7 @@ A good project does at least one of these:
 
 These are just some ideas for inspiration. If you have your own data or
 questions, explore those! Pick something you're interested in, or a domain
-you already know well. Each idea below has a large public dataset and a few
-questions people would learn from.
+you already know well.
 
 **Federal rulemaking.** [Regulations.gov](https://www.regulations.gov/) has
 public comments on proposed rules, sometimes hundreds of thousands per rule.
