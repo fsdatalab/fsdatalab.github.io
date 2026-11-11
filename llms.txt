@@ -22,7 +22,7 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 
 ## Getting involved
 
-To do research with the lab, start with a project that uses Quail to analyze a real dataset. Project ideas and setup: {{ '/get-involved/' | absolute_url }}
+To do research with the lab, use Quail to analyze a dataset and send a video explaining the analysis. Ideas: {{ '/get-involved/' | absolute_url }}
 
 ## Questions about using AI for data and knowledge work
 
