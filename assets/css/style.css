@@ -216,6 +216,12 @@ a:hover { opacity: 0.75; }
   text-decoration: none;
 }
 .post-item:hover { opacity: 1; }
+.post-description {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text);
+}
 .post-item:hover .post-title { color: var(--red); }
 .post-title {
   font-family: var(--display);

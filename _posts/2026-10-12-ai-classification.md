@@ -6,6 +6,7 @@ authors:
   - shreya-shankar
   - charles-frye
 permalink: /blog/ai-classification/
+tags: [ai-sql]
 math: true
 typora-root-url: ..
 description: "How should an AI-SQL engine classify documents with LLMs at scale? We walk through the ways Quail can do it, and how it picks the cheapest one for a given LLM."

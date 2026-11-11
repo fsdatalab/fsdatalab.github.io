@@ -6,6 +6,7 @@ authors:
   - arnav-dhariya
   - shreya-shankar
 permalink: /blog/ai-filter-cost-estimates/
+tags: [ai-sql]
 math: true
 typora-root-url: ..
 description: "How fast could your AI-powered filters run? We do the math for an H100 and show how filter order changes the answer."

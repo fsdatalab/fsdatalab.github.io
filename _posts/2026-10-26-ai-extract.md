@@ -6,6 +6,7 @@ authors:
   - shreya-shankar
   - charles-frye
 permalink: /blog/ai-extract/
+tags: [ai-sql]
 sitemap: true
 math: true
 typora-root-url: ..

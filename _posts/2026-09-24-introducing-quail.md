@@ -10,6 +10,7 @@ authors:
   - joseph-barrow
   - meryem-arik
 permalink: /blog/introducing-quail/
+tags: [ai-sql]
 description: "Quail jointly plans AI-SQL queries and model inference. Across 29 QUAIL-B queries, it is 1.84x faster on average than well-tuned vLLM baselines."
 image:
   path: /assets/blog/introducing-quail/quail-throughput-by-dataset.png
