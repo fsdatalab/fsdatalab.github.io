@@ -1,0 +1,21 @@
+---
+layout: null
+sitemap: false
+---
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
+# {{ site.title }}
+
+> {{ site.description }}
+
+Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatalab](https://github.com/fsdatalab).
+
+## Projects
+
+- [DocETL](https://docetl.org): an agentic map-reduce system for processing large unstructured datasets with LLMs.
+- [Quail](https://github.com/fsdatalab/quail): an execution engine for AI functions in SQL (and DocETL), with open source LLMs.
+- [DocWriter](https://docwriter.org): an IDE for AI-assisted writing.
+
+## Blog posts
+{% for post in listed_posts %}
+- [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }} ({% include author-names.html authors=post.authors %}, {{ post.date | date: "%Y-%m-%d" }})
+{%- endfor %}

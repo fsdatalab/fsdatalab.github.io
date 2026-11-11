@@ -7,10 +7,24 @@ future: true
 
 defaults:
   - scope:
+      path: ""
+    values:
+      image: /assets/og-image.png
+  - scope:
       path: "_posts"
       type: posts
     values:
       layout: post
+  - scope:
+      path: "assets"
+    values:
+      sitemap: false
+
+# Structured data on the home page (_includes/structured-data.html).
+lab_founders:
+  - shreya-shankar
+lab_profiles:
+  - https://github.com/fsdatalab
 
 markdown: kramdown
 kramdown:
