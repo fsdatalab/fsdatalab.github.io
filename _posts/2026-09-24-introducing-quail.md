@@ -2,7 +2,13 @@
 layout: post
 title: "Building an Ultra-High Throughput AI-SQL Engine"
 date: 2026-09-24
-author: "Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, Meryem Arik"
+authors:
+  - shreya-shankar
+  - charles-frye
+  - fergus-finn
+  - arnav-dhariya
+  - joseph-barrow
+  - meryem-arik
 permalink: /blog/introducing-quail/
 description: "Quail jointly plans AI-SQL queries and model inference. Across 29 QUAIL-B queries, it is 1.84x faster on average than well-tuned vLLM baselines."
 image:
@@ -38,7 +44,7 @@ image:
 </ol>
 </nav>
 
-# 1. AI-SQL makes unstructured data useful, but it is expensive.
+## 1. AI-SQL makes unstructured data useful, but it is expensive.
 
 Fast LLM classifiers have been taking over the internet lately.
 [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) is
@@ -85,7 +91,7 @@ possible (e.g., [BARGAIN](https://arxiv.org/abs/2509.02896)). Even after these
 optimizations, a query plan may still require hundreds of thousands or millions
 of LLM calls.
 
-# 2. Key Idea: Query plans should control LLM inference!
+## 2. Key Idea: Query plans should control LLM inference!
 
 A natural thought is to use a general-purpose inference engine such as
 vLLM to execute the query plan. However, sending millions of related
@@ -170,7 +176,7 @@ representative 3.5-second window from the first join.
 We can, and we should, reduce both sources of waste by optimizing
 inference for AI-SQL!
 
-# 3. We built Quail to run AI-SQL queries faster.
+## 3. We built Quail to run AI-SQL queries faster.
 
 We will first show you how you can get started. To skip to read about
 how Quail works, skip to [Section 3.2](#32-quail-jointly-plans-queries-and-inference).
@@ -341,7 +347,7 @@ to learn more.
 
 </details>
 
-## 3.2 Quail jointly plans queries and inference.
+### 3.2 Quail jointly plans queries and inference.
 
 This section describes Quail’s main design ideas at a high level. We are
 still actively building Quail, and we will provide the full technical
@@ -378,7 +384,7 @@ analytical query engine. One can add new query
 operators, planning rules, execution backends, models, or support for
 other hardware.
 
-### 3.2.1 Quail turns AI-SQL into a logical query plan.
+#### 3.2.1 Quail turns AI-SQL into a logical query plan.
 
 Users register data as an in-memory Arrow table or an Arrow dataset.
 Users can write queries in AI-SQL (we support both Snowflake’s and
@@ -403,7 +409,7 @@ extension interface.
 In Quail, each AI-SQL query is parsed with SQLGlot into a logical plan,
 which is then passed to the query planner.
 
-### 3.2.2 Quail plans operator order and KV reuse.
+#### 3.2.2 Quail plans operator order and KV reuse.
 
 Database query optimizers already use many rules, e.g., pushing down
 filters, reordering predicates, and choosing join order. AI-SQL adds several new
@@ -472,7 +478,7 @@ maintains the report KV cache in HBM throughout both join operations,
 allowing direct comparisons against the filtered reaction terms without
 redundant KV recomputations.
 
-### 3.2.3 Quail runs the physical query plan.
+#### 3.2.3 Quail runs the physical query plan.
 
 Overview. The execution engine has three main components:
 
@@ -532,7 +538,7 @@ partition filter documents and join anchors randomly and uniformly
 across the GPUs, run them independently, and combine the results on the
 CPU.
 
-### 3.2.4 Quail uses specialized inference programs for AI-SQL.
+#### 3.2.4 Quail uses specialized inference programs for AI-SQL.
 
 During planning, Quail chooses which documents or document pairs require
 model evaluation. During execution, each evaluation follows an
@@ -615,7 +621,7 @@ final hidden state by only the corresponding rows of the output/language
 modeling head matrix. By using the smaller matrix, Quail reduces
 computation and GPU memory use by the output head.
 
-# 4. We evaluate Quail against vLLM.
+## 4. We evaluate Quail against vLLM.
 
 At scale factor 0.1, Quail is faster than a "stock" vLLM baseline on 27
 of the 29 QUAIL-B queries. The **(geometric) mean speedup is 1.84x**, and
@@ -631,7 +637,7 @@ and finally examine [BIO-4](#43-quail-dominates-vllm-on-bio-4-1404x-faster)
 and [AGENT-1](#44-but-vllm-dominates-quail-on-agent-1-quail-takes-232x-as-long)
 in detail.
 
-## 4.1 Metrics and baselines for AI-SQL performance.
+### 4.1 Metrics and baselines for AI-SQL performance.
 
 **Metrics.** We report three metrics for each query: KV regret,
 \$/query, and input tokens/second. KV regret is repeated model work:
@@ -665,7 +671,7 @@ between consecutive filters and between consecutive joins. For fairness,
 both baselines use Gigatoken for tokenization, as Quail does, instead of
 vLLM's Hugging Face tokenizer.<sup><a href="#note-11">11</a></sup>
 
-## 4.2 Overall, Quail is 1.84x faster across QUAIL-B.
+### 4.2 Overall, Quail is 1.84x faster across QUAIL-B.
 
 [Table 1](#table-1) averages tokens/second, KV regret, and cost per query within
 each dataset at scale factor 0.1. Cost multipliers are relative to Quail.
@@ -763,7 +769,7 @@ Stock vLLM is faster than Quail only on AGENT-1 and AGENT-2. Quail does
 not yet reuse matching prefixes across rows, so it recomputes far more
 KV tokens on each query. Section 4.4 examines AGENT-1.
 
-## 4.3 Quail dominates vLLM on BIO-4: 14.04x faster!
+### 4.3 Quail dominates vLLM on BIO-4: 14.04x faster!
 
 BIO-4 contains the kind of reuse Quail currently handles well: long
 shared documents, two joins, and millions of related model calls whose
@@ -798,7 +804,7 @@ vLLM.
 Quail also recomputes less KV. It recomputes 18.0 million tokens,
 compared with 50.3 million for stock vLLM.
 
-## 4.4 But, vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.
+### 4.4 But, vLLM dominates Quail on AGENT-1: Quail takes 2.32x as long.
 
 AGENT-1 contains a different kind of reuse. It filters 1,772 cumulative
 snapshots from software agent runs. Separate rows contain overlapping
@@ -855,7 +861,7 @@ while stock vLLM incurs only 23,928.
 We plan to add automatic prefix caching to Quail, but the lookup must
 remain cheap at the request volumes that AI-SQL queries can produce.
 
-# 5. Put another way: Quail brings Jev-like speeds and intelligence to database-scale workloads.
+## 5. Put another way: Quail brings Jev-like speeds and intelligence to database-scale workloads.
 
 Quail also supports [DiffusionGemma 26B-A4B
 FP8](https://huggingface.co/RedHatAI/diffusiongemma-26B-A4B-it-FP8-dynamic),
@@ -875,7 +881,7 @@ dataset, and Quail plans and runs them together. This makes Quail a good
 fit for LLM judge workflows, trace compaction, labeling, and other
 large-scale data transformations.
 
-# 6. We are just getting started with Quail!
+## 6. We are just getting started with Quail!
 
 Some next steps are obvious. E.g., we want to support more AI-SQL
 operators, more models, and more hardware. We especially want to support
@@ -929,12 +935,12 @@ such as an LLM judge workflow in AI-SQL, Quail has an MIT license. It is
 now orders of magnitude cheaper to add intelligence to your data
 processing workflows, and we would love to see what you build :-)
 
-# Acknowledgements
+## Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in
 this research.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> The query is based on the [BioDEX
 dataset](https://aclanthology.org/2023.findings-emnlp.896/). The SQL form
@@ -1067,7 +1073,7 @@ the largest stable settings: 25,305 maximum batched tokens, 4,096
 sequences, GPU memory utilization of 0.91, and one CUDA graph for 8,192
 tokens. Larger settings ran out of GPU memory.
 
-# Cite this post
+## Cite this post
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>
