@@ -33,10 +33,10 @@ tool. You don't need to share your code.
 
 A good project does at least one of these:
 
-- Applies Quail to help people in any domain, even outside CS.
+- Applies Quail to an interesting or impactful problem.
 - Shows a kind of query people need that Quail can't run yet, and how far
   you get with what Quail can do today.
-- Makes Quail faster, cheaper, or more accurate.
+- Identifies ways to make Quail faster, cheaper, or more accurate.
 - Finds a better way to write Quail queries, or to communicate their results
   to people, e.g., an interface, a dashboard, or a story.
 
