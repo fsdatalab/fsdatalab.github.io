@@ -55,7 +55,7 @@ We have been hard at work building [Quail](https://fsdatalab.github.io/blog/intr
 
 So far, Quail has only supported transformers like Qwen3<sup><a href="#note-2">2</a></sup>, where the KV cache grows linearly with document length and quickly fills GPU memory. Many new open-weight models, like Qwen3.5, are hybrids, which replace most attention layers with Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup> layers, a type of linear attention. GDN layers keep a fixed-size state regardless of document length, which dramatically reduces memory for long documents (e.g., a 16,000-token document takes up 2.4 GB with Qwen3-4B but only 580 MB with Qwen3.5-4B). With less memory per document, Quail can keep more documents in memory.
 
-It turns out that supporting hybrids in Quail is not that straightforward, because the way Quail reuses a document's KV cache does not carry over to GDN layers: a recurrent state cannot be rewound. Instead, Quail keeps a *checkpoint*, a copy of each GDN layer's state taken at the end of a document, and restarts from it. In this post, we describe how we adapt Quail to hybrids using Qwen3.5-4B<sup><a href="#note-4">4</a></sup>. We explain GDN ([Section 2](#2-gated-deltanet-vs-attention)), add checkpoints of the GDN state to Quail's memory budget and eviction policy ([Section 3](#3-checkpoints-in-quail)), update the cost model ([Section 4](#4-updated-cost-model)), and compare with vLLM on QUAIL-B ([Section 5](#5-results)).
+It turns out that supporting hybrids in Quail is not that straightforward, because the way Quail reuses a document's KV cache does not carry over to GDN layers as a recurrent state cannot be rewound. Instead, Quail keeps a *checkpoint*, a copy of each GDN layer's state taken at the end of a document, and restarts from it. In this post, we describe how we adapt Quail to hybrids using Qwen3.5-4B<sup><a href="#note-4">4</a></sup>. We explain GDN ([Section 2](#2-gated-deltanet-vs-attention)), add checkpoints of the GDN state to Quail's memory budget and eviction policy ([Section 3](#3-checkpoints-in-quail)), update the cost model ([Section 4](#4-updated-cost-model)), and compare with vLLM on QUAIL-B ([Section 5](#5-results)).
 
 # 2. Gated DeltaNet vs. Attention
 
@@ -78,11 +78,9 @@ Hybrid architectures combine both full-attention layers and linear attention lay
 
 Instead of linear KV growth per token as in full-attention layers, GDN maintains a fixed-size recurrent state, $$S_t$$, that gets updated for every token. For any workload, regardless of size, the memory use in these layers will remain constant.
 
-As in [Figure 1](#figure-1), each token passes through the short convolution first ([Section 2.3](#23-short-convolution)) and then the gated delta rule ([Section 2.4](#24-gated-delta-rule)).
-
 ## 2.3 Short Convolution
 
-Each GDN layer applies a width-4 convolution over the concatenated $$q$$, $$k$$ and $$v$$ channels ($$16\times128\times2+32\times128=8{,}192$$ channels), which lets a token blend information from its predecessors, similar to what attention achieves. It keeps the last 3 inputs per channel, and this buffer becomes part of the checkpoint ([Section 3.1](#31-checkpoint-size)).
+Each GDN layer applies a width-4 convolution over the concatenated $$q$$, $$k$$ and $$v$$ channels ($$16\times128\times2+32\times128=8{,}192$$ channels), which lets a token blend information from its predecessors. It keeps the last 3 inputs per channel, and this buffer becomes part of the checkpoint ([Section 3.1](#31-checkpoint-size)).
 
 ## 2.4 Gated Delta Rule
 
@@ -96,7 +94,7 @@ where $$\alpha_t$$ is a decay gate that "fades" the old state at time $$t-1$$ an
 
 # 3. Checkpoints in Quail
 
-A *checkpoint* is a copy of every GDN layer's state $$S$$ and convolution buffer, taken at the end of a document's reusable prefix: the preamble and the document, before any question. When a later operator asks about that document, Quail loads the checkpoint and the attention KV and computes only the question, instead of recomputing the document. A question starts from the checkpoint and leaves it unchanged, so any number of questions can read it. Checkpointing substitutes for rewind in the GDN layers by checkpointing only where necessary.
+A *checkpoint* is a copy of every GDN layer's state $$S$$ and convolution buffer, taken at the end of a document's reusable prefix: the preamble and the document, before any question. When a later operator asks about that document, Quail loads the checkpoint and the attention KV and computes only the question, instead of recomputing the document. A question starts from the checkpoint and leaves it unchanged, so any number of questions can read it.
 
 We size Quail's memory for Qwen3.5-4B on one H100. Every number in this section follows from the shape in [Table 1](#table-1).
 
@@ -174,7 +172,7 @@ These counts assume every document has length $$\ell$$ and is retained. [Table 2
 
 <div class="table-wrap" id="table-2" markdown="1">
 
-| Tokens | KV pages | Pages/doc | Held | Ckpt % |
+| Tokens | KV pages/doc | Pages/doc | Held | Ckpt % |
 |-------:|---------:|----------:|-----:|-----------:|
 | 200 | 13 | 111.25 | 609 | 88% |
 | 1,000 | 63 | 161.25 | 420 | 61% |
@@ -204,7 +202,7 @@ $$
 
 Here $$F_j$$ and $$B_j$$ are the FLOPs and HBM bytes of one piece of the forward pass, $$\Pi_j$$ the peak arithmetic rate and $$\beta_{\text{hbm}} = 3.35$$ TB/s the HBM bandwidth, taking the H100 values from its datasheet<sup><a href="#note-9">9</a></sup>. We keep the notation of the previous post: $$n$$ tokens computed, $$A$$ attention pairs, $$W$$ and $$R$$ tokens whose KV is written and read, $$C = 116{,}508$$ the token budget of one pass (set by 32-bit kernel indexing), and $$K = \lceil n/C \rceil$$ the number of passes. For hybrids we add the split $$L_a = 8$$ attention and $$L_g = 24$$ GDN layers, and the checkpoints written and read, $$U_W$$ and $$U_R$$, each of $$B_{\text{ckpt}}$$ bytes.
 
-[Table 3](#table-3) lists the only terms that change relative to a transformer. The projection and MLP terms keep their form but the projection parameters now depend on the layer type; the attention terms keep their form but sum over $$L_a = 8$$ layers, not 32; and GDN and checkpoint movement are new. The short convolution is a small extra term, 0.029 s (0.3%) of the SoL in our example, priced at the fp32 rate.
+[Table 3](#table-3) lists the only terms that change relative to a transformer. The projection and MLP terms keep their form but the projection parameters now depend on the layer type; the attention terms keep their form but sum over $$L_a = 8$$ layers, not 32; and GDN, the short convolution and checkpoint movement are new.
 
 <div class="table-wrap" id="table-3" markdown="1">
 
@@ -213,6 +211,7 @@ Here $$F_j$$ and $$B_j$$ are the FLOPs and HBM bytes of one piece of the forward
 | $$T_{\text{attn}}$$ | only $$L_a = 8$$ layers | $$F_{\text{attn}} = 131{,}072\,A$$; $$B_{\text{attn}} = \kappa(W+R)$$, $$\kappa = 32{,}768$$ B |
 | $$T_{\text{proj}}$$, $$T_{\text{mlp}}$$ | per-layer-type projections | $$P_{\text{proj}} = L_aP_{\text{attn}} + L_gP_{\text{gdn}} = 1{,}304{,}166{,}400$$; $$P_{\text{mlp}} = 3L\,h\,d_{\text{mlp}} = 2{,}264{,}924{,}160$$; $$F = 2Pn$$, $$B = 2PK$$ |
 | $$T_{\text{gdn}}$$ | new | $$F_{\text{gdn}} = 140{,}509{,}184\,n$$ (below), no byte term |
+| $$T_{\text{conv}}$$ | new | $$F_{\text{conv}} = 2wD_cL_g\,n = 1{,}572{,}864\,n$$ at the fp32 rate, no byte term |
 | $$T_{\text{state}}$$ | new | $$B_{\text{ckpt}}(U_W + U_R)/\beta_{\text{hbm}}$$: each checkpoint written or read moves $$B_{\text{ckpt}}$$ bytes |
 
 <p class="table-caption">Table 3. Cost-model terms for Qwen3.5-4B.</p>
@@ -305,7 +304,7 @@ Without the checkpoint, stage 2 would recompute 39,562 tokens (3.2% of $$n$$), a
 
 We compare Quail with vLLM on Qwen3.5-4B (bf16). The question is whether the changes of the previous sections pay off on real queries. We run QUAIL-B at scale factor 0.1 on one H100. vLLM runs each query two ways, stock (one operator at a time) and pipelined, and we compare Quail with the faster of the two on each query. Four queries do not run on vLLM, so 46 queries are compared. Model startup is excluded from every time.
 
-vLLM is version 0.29 with prefix caching on. For the GDN layers, vLLM saves the recurrent state at block boundaries, so it can also reuse a shared prefix. We measure the recomputation of an engine by its KV regret, the share of its fresh tokens beyond the fewest the query needs with unlimited KV:
+vLLM is version 0.29.0 with prefix caching on, so requests that share a prefix reuse its KV. For the GDN layers, vLLM saves the recurrent state at block boundaries, so it can also resume from a shared prefix. We set `max_num_seqs=2047`, the most sequences its GDN kernel can launch for this model, `max_num_batched_tokens=25305` and `gpu_memory_utilization=0.852`, the same on every query. Pipelined vLLM submits an operator's requests as soon as rows reach it, instead of after the previous operator finishes. We measure the recomputation of an engine by its KV regret, the share of its fresh tokens beyond the fewest the query needs with unlimited KV:
 
 $$
 r = \frac{n_{\text{fresh}} - n_{\min}}{n_{\text{fresh}}}.
@@ -325,11 +324,15 @@ We also report agreement with the labels of a reference run of Qwen3-32B-FP8, av
 <p class="table-caption">Table 6. Quail against the faster vLLM configuration on the 46 queries vLLM can run, Qwen3.5-4B bf16. Totals sum query time; regret and agreement are means over queries.</p>
 </div>
 
-Quail is 3.2&times; faster than vLLM: the geometric mean, over the 46 queries, of the faster vLLM configuration's time divided by Quail's. The [launch post](/blog/introducing-quail/) reports the same statistic, 1.84&times;, compared with stock vLLM only. Quail's mean KV regret is 6.8% against 57.1% for vLLM. Agreement with the reference labels is the same for both engines.
+Quail is 3.2&times; faster than vLLM: the geometric mean, over the 46 queries, of the faster vLLM configuration's time divided by Quail's. Quail's mean KV regret is 6.8% against 57.1% for vLLM. Agreement with the reference labels is the same for both engines.
+
+Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT-1, a single filter over 186 traces, vLLM takes 12.93 s against 13.20 s for Quail (2.1%). Quail's model time is lower (12.52 s); the difference is the 0.68 s Quail spends planning and tokenizing before the first operator runs.
+
+**Where the speedup comes from.** Per query, the speedup is the product of two ratios: how many fewer tokens Quail computes (vLLM's fresh tokens over Quail's) and how fast it computes each one (Quail's fresh tokens per second over vLLM's). Over the 46 queries, the geometric means are 3.2&times; fewer fresh tokens and 0.98&times; the per-token rate, so the speedup comes from recomputing less. In total, Quail computes 165M fresh tokens against 1,002M for vLLM.
 
 # 6. Limitations and Follow-ups
 
-Currently, the cost model prices GDN at compute only; in practice the delta rule and convolution are memory-bound, so a byte term (taking the maximum of compute and byte time, as for the projections) is future work. Additionally, a profiling post, including what to look for in GPU profiles, will be a separate post. Other hybrids we implement, including larger Qwen3.5 and Qwen3.8 models, change $$L_a$$, $$L_g$$ and the checkpoint size (for example, a model with only convolution layers keeps just the convolution buffer per layer).
+Currently, the cost model prices GDN at compute only; in practice the delta rule and convolution are memory-bound, so a byte term (taking the maximum of compute and byte time, as for the projections) is future work. Additionally, a profiling post, including what to look for in GPU profiles, will be a separate post. Other hybrids we implement, including larger Qwen3.5 and Qwen3.8 models, change $$L_a$$, $$L_g$$ and the checkpoint size (for example, a model whose recurrent layers are short convolutions, such as LFM2, keeps just the convolution buffer per layer).
 
 # 7. Hybrid Playgrounds
 
