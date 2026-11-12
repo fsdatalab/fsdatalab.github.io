@@ -155,7 +155,7 @@ $$
 
 However, the simple approach would unfairly penalize longer labels. Each extra token multiplies the score by a number below 1, even after the label is already decided. E.g., the score of "shipping address change" would include the probability of `change`, although `change` is the only token that can follow `address`.
 
-So in `trie_tree`, we only score each label until we know which label it is. More precisely, we score the tokens up to the end of the word where the label branches away from all the other labels. Let $$d_m$$ be the position of the last token of the word in label $$m$$. Then
+So in `trie_tree`, we only score each label until we know which label it is. More precisely, we score the tokens up to the token where the label branches away from all the other labels. Let $$d_m$$ be the position of this token in label $$m$$. Then
 
 $$
 \text{score}(m) = \prod_{k=1}^{d_m} P(x_k \mid \text{prompt}, x_1, \dots, x_{k-1}).
@@ -169,11 +169,11 @@ To illustrate, here are the scores of three labels in the running example. To ke
 | --- | --- |
 | shipping address change | $$P(\texttt{shipping}) \times P(\texttt{address} \mid \texttt{shipping})$$ |
 | product defect | $$P(\texttt{product})$$ |
-| two-factor authentication issue | $$P(\texttt{two}) \times P(\texttt{-factor} \mid \texttt{two})$$ |
+| two-factor authentication issue | $$P(\texttt{two})$$ |
 
 </div>
 
-"shipping address change" branches away from the other labels at "address", because "delay" and "damage" also follow `shipping`. "product defect" branches away at "product", because no other label starts with `product`. "two-factor authentication issue" branches away at "two-factor", which is one word with two tokens, so we score both tokens.
+"shipping address change" branches away from the other labels at "address", because "delay" and "damage" also follow `shipping`. "product defect" branches away at "product", because no other label starts with `product`. And "two-factor authentication issue" branches away at `two`, because no other label starts with `two`.
 
 Next, we have to convert the scores into probabilities. The 10 scores won't add up to 1, because at every token, the LLM spreads its probability over all 151,936 tokens in its vocabulary, including tokens that aren't part of any label, like `The`. So Quail divides each score by the sum of all 10 scores:
 
@@ -191,13 +191,13 @@ $$
 
 Otherwise, the probability of `refund` would count toward both labels.
 
-Now, back to the running example. Like in `trie_decode`, we could run the LLM at every trie node that has children, which is 8 nodes. However, similarly to `trie_decode`, running the LLM at every such node is not as efficient as it could be. You might expect `trie_tree` to need only the 3 branching nodes, like `trie_decode`. But it needs one more token, `two`! Otherwise, the score of "two-factor authentication issue" would also include the probability of other text that starts with `two`, such as "two days ago". So we multiply by the probability of `-factor` after `two`. So `trie_tree` runs the LLM at 4 nodes (`ANSWER:`, `refund`, `shipping`, and `two`), all in the same request as the prompt.
+Now, back to the running example. Like in `trie_decode`, we could run the LLM at every trie node that has children, which is 8 nodes. However, similarly to `trie_decode`, running the LLM at every such node is not as efficient as it could be. The scores above only need the probabilities at the 3 branching nodes. So `trie_tree` runs the LLM at 3 nodes (`ANSWER:`, `refund`, and `shipping`), all in the same request as the prompt.
 
-**Custom attention kernel.** Lastly, consider how to execute the algorithm above on the GPU. A simple way is to send 4 requests to the LLM, each containing the same prefix (prompt and label descriptions) followed by a different trie node to compute the probability of. Sure, the KV of the prefix may be shared across the 4 requests, but each request would still read the KV of the whole prefix from GPU memory. Instead, Quail sends all 4 nodes in _one_ request to the LLM, using a custom tree attention kernel.<sup><a href="#note-3">3</a></sup> Each node attends only to the prompt and to the nodes on its own path, as shown in [Figure 4](#figure-4).
+**Custom attention kernel.** Lastly, consider how to execute the algorithm above on the GPU. A simple way is to send 3 requests to the LLM, each containing the same prefix (prompt and label descriptions) followed by a different trie node to compute the probability of. Sure, the KV of the prefix may be shared across the 3 requests, but each request would still read the KV of the whole prefix from GPU memory. Instead, Quail sends all 3 nodes in _one_ request to the LLM, using a custom tree attention kernel.<sup><a href="#note-3">3</a></sup> Each node attends only to the prompt and to the nodes on its own path, as shown in [Figure 4](#figure-4).
 
-<figure id="figure-4" style="width: min(31.6rem, calc(100vw - 3rem));">
+<figure id="figure-4" style="width: min(29.7rem, calc(100vw - 3rem));">
   <img src="{{ '/assets/blog/ai-classification/trie-tree-mask.svg' | relative_url }}" alt="The attention mask of trie_tree.">
-  <figcaption>Figure 4. The attention mask of the 4 trie nodes that <code>trie_tree</code> runs for one document. Each row is a trie node, and a green cell means that the trie node attends to the token in the column.</figcaption>
+  <figcaption>Figure 4. The attention mask of the 3 trie nodes that <code>trie_tree</code> runs for one document. Each row is a trie node, and a green cell means that the trie node attends to the token in the column.</figcaption>
 </figure>
 
 Overall, `trie_tree` always processes at least as many tokens as `trie_decode`, because it runs the LLM at the branching nodes of every label. However, `trie_tree` needs only one request per document.
@@ -264,7 +264,7 @@ The three methods only differ in $$q_{\text{tail}}$$ and $$a$$. [Table 2](#table
 | Method | $$q_{\text{tail}}$$ | $$a$$ |
 | --- | ---: | ---: |
 | `trie_decode` | 66 | 1.5 |
-| `trie_tree` | 66 | 4 |
+| `trie_tree` | 66 | 3 |
 | `letters` | 89 | 1 |
 
 <p class="table-caption">Table 2. Instruction length and expected answer positions per document in the running example.</p>
@@ -309,9 +309,9 @@ Here, $$T_{\text{proj}}$$, $$T_{\text{attn}}$$, and $$T_{\text{mlp}}$$ are the e
 
 `trie_tree` and `letters` each put all of their answer positions in the same request as the prompt, so they only differ in how many tokens they add to each document.
 
-For `trie_tree`, each answer position is one more token that goes through the whole LLM, which costs about 7.2 billion FLOPs in the projections and the MLP, just like a document token. Since some labels have more than one token, Quail also computes the full output head at each answer position, which adds about 0.78 billion FLOPs. In our running example, `trie_tree` has 4 answer positions, so it adds about 32 billion FLOPs per document ($$a = 4$$ and $$V_{\text{out}} = \text{vocab}$$).
+For `trie_tree`, each answer position is one more token that goes through the whole LLM, which costs about 7.2 billion FLOPs in the projections and the MLP, just like a document token. Since some labels have more than one token, Quail also computes the full output head at each answer position, which adds about 0.78 billion FLOPs. In our running example, `trie_tree` has 3 answer positions, so it adds about 24 billion FLOPs per document ($$a = 3$$ and $$V_{\text{out}} = \text{vocab}$$).
 
-For `letters`, the extra tokens are in the prompt instead. The letters add $$2M + 3$$ tokens to the instruction, where $$M$$ is the number of labels. Each label line gains 2 tokens for its letter, and the question gains 3 tokens for the words "the letter of". In our running example, the letters add 23 tokens, which cost about 166 billion FLOPs per document. The output head is cheap, because Quail only computes the 10 rows of the letters ($$a = 1$$ and $$V_{\text{out}} = M$$). So in our running example, the extra work of `letters` is about 5 times the extra work of `trie_tree`. However, both are small next to the document itself, which costs about 7 trillion FLOPs for a 1,000-token document.
+For `letters`, the extra tokens are in the prompt instead. The letters add $$2M + 3$$ tokens to the instruction, where $$M$$ is the number of labels. Each label line gains 2 tokens for its letter, and the question gains 3 tokens for the words "the letter of". In our running example, the letters add 23 tokens, which cost about 166 billion FLOPs per document. The output head is cheap, because Quail only computes the 10 rows of the letters ($$a = 1$$ and $$V_{\text{out}} = M$$). So in our running example, the extra work of `letters` is about 7 times the extra work of `trie_tree`. However, both are small next to the document itself, which costs about 7 trillion FLOPs for a 1,000-token document.
 
 ### 4.3 Cost of trie_decode
 
@@ -329,7 +329,7 @@ $$
 b = \frac{5 \cdot 1 + 5 \cdot 2}{10} = 1.5.
 $$
 
-In our running example, each decode step adds a single token after the prompt: `ANSWER:` in step 0, and `refund` or `shipping` in step 1. So `trie_decode` runs the LLM on 1.5 tokens per document on average, beyond the prompt. Like for `trie_tree`, each token costs about 8 billion FLOPs (7.2 billion in the projections and the MLP, plus 0.78 billion for the full output head). So `trie_decode` adds only about 12 billion FLOPs per document, compared with about 32 billion for `trie_tree`.
+In our running example, each decode step adds a single token after the prompt: `ANSWER:` in step 0, and `refund` or `shipping` in step 1. So `trie_decode` runs the LLM on 1.5 tokens per document on average, beyond the prompt. Like for `trie_tree`, each token costs about 8 billion FLOPs (7.2 billion in the projections and the MLP, plus 0.78 billion for the full output head). So `trie_decode` adds only about 12 billion FLOPs per document, compared with about 24 billion for `trie_tree`.
 
 Note that the estimate assumes optimal packing, i.e., that Quail packs many documents together so that each forward pass saturates the GPU.<sup><a href="#note-9">9</a></sup> With only a few documents, a later decode step can run in a nearly empty forward pass, and `trie_decode` costs more than the estimate.
 
@@ -337,7 +337,7 @@ Note that the estimate assumes optimal packing, i.e., that Quail packs many docu
 
 Putting it all together, the optimizer computes $$T_{\text{classify}}$$ for every method that can run, and it picks the method with the lowest estimate.
 
-In our running example, `trie_decode` wins, because it runs the LLM on the fewest extra tokens per document: 1.5, compared with 4 for `trie_tree` and 24 for `letters`. `letters` only wins when there are a few labels that share a long start, e.g., 2 labels that differ only in their last word, since both trie methods have to run the LLM on every shared token. And `trie_tree` mostly wins when the query asks for probabilities, since `trie_decode` can't run then.
+In our running example, `trie_decode` wins, because it runs the LLM on the fewest extra tokens per document: 1.5, compared with 3 for `trie_tree` and 24 for `letters`. `letters` only wins when there are a few labels that share a long start, e.g., 2 labels that differ only in their last word, since both trie methods have to run the LLM on every shared token. And `trie_tree` mostly wins when the query asks for probabilities, since `trie_decode` can't run then.
 
 Note that the differences are small, between 2% and 11% for 1,000 documents of 100 tokens, because all three methods have to prefill the preamble, the document, and the instruction, and the prefill is most of $$T_{\text{classify}}$$.
 
@@ -403,7 +403,7 @@ this research.
 
 <span id="note-4"><strong>4.</strong></span> The structured mode of DiffusionGemma in vLLM uses the same idea. It accepts only one-token choices, and it maps longer options to letters, e.g., "moderation_spam" to "A" ([vLLM PR #57250](https://github.com/vllm-project/vllm/pull/57250)).
 
-<span id="note-5"><strong>5.</strong></span> We don't know which method is the most accurate in general. On two of our [QUAIL-B](https://github.com/fsdatalab/quail-bench) queries, `trie_tree` and `trie_decode` agree with the reference labels about equally often (72.1% vs. 72.0% on BIO-5, and within 0.2 points on AGENT-5). For the purposes of the post, we assume that all three methods are about equally accurate, and we expect strong open LLMs to make all three good enough for most queries.
+<span id="note-5"><strong>5.</strong></span> We don't know which method is the most accurate in general. On two of our [QUAIL-B](https://github.com/fsdatalab/quail-bench) queries, `trie_tree` and `trie_decode` agree with the reference labels about equally often (69.0% vs. 69.1% on BIO-5, and within 0.4 points on each of the three classifications in AGENT-5). For the purposes of the post, we assume that all three methods are about equally accurate, and we expect strong open LLMs to make all three good enough for most queries.
 
 <span id="note-6"><strong>6.</strong></span> Quail estimates the savings of a page as the probability that a later operator reads the document, times the time to process the document again, divided by the number of pages of the document. See the [Quail documentation on KV retention](https://fsdatalab.github.io/quail/docs/architecture/kv#kv-retention).
 
