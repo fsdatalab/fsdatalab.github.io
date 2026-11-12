@@ -11,7 +11,7 @@ typora-root-url: ..
 description: "How Quail supports hybrid models that mix full attention with Gated DeltaNet layers: checkpoints of the recurrent state, retention and eviction, and the cost-model changes."
 ---
 
-<aside class="tldr"><strong>TL;DR:</strong> What LLMs should an AI-SQL engine support to operate at scale? Different workloads require different models, so <a href="https://github.com/fsdatalab/quail">Quail</a> must support modern architectures beyond transformers. We now support hybrid models such as <a href="https://qwen.ai/blog?id=qwen3.5">Qwen3.5-4B</a>, which mix full-attention layers with linear-attention (Gated DeltaNet) layers. By storing KV for the attention layers and a checkpoint of the recurrent state for the GDN layers, Quail keeps its reuse optimizations on these models. On QUAIL-B, we observe a 5.5&times; improvement over vLLM on Qwen3.5-4B: the same queries, a fraction of the time! You can try out our <a href="#7-hybrid-playgrounds">interactive playgrounds</a> to explore how much a checkpoint costs and how the cost model prices a hybrid query.</aside>
+<aside class="tldr"><strong>TL;DR:</strong> What LLMs should an AI-SQL engine support to operate at scale? Different workloads require different models, so <a href="https://github.com/fsdatalab/quail">Quail</a> must support modern architectures beyond transformers. We now support hybrid models such as <a href="https://qwen.ai/blog?id=qwen3.5">Qwen3.5-4B</a>, which mix full-attention layers with linear-attention (Gated DeltaNet) layers. By storing KV for the attention layers and a checkpoint of the recurrent state for the GDN layers, Quail keeps its reuse optimizations on these models. On QUAIL-B, we observe a 3.2&times; speedup over vLLM (geometric mean over queries) on Qwen3.5-4B: the same queries, a fraction of the time! You can try out our <a href="#7-hybrid-playgrounds">interactive playgrounds</a> to explore how much a checkpoint costs and how the cost model prices a hybrid query.</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
@@ -22,6 +22,7 @@ description: "How Quail supports hybrid models that mix full attention with Gate
       <li><a href="#21-attention">Attention.</a></li>
       <li><a href="#22-linear-attention-layer-gated-deltanet">Linear Attention Layer (Gated DeltaNet).</a></li>
       <li><a href="#23-short-convolution">Short Convolution.</a></li>
+      <li><a href="#24-gated-delta-rule">Gated Delta Rule.</a></li>
     </ol>
   </li>
   <li><a href="#3-checkpoints-in-quail">Checkpoints in Quail.</a>
@@ -54,7 +55,7 @@ We have been hard at work building [Quail](https://fsdatalab.github.io/blog/intr
 
 So far, Quail has only supported transformers like Qwen3<sup><a href="#note-2">2</a></sup>, where the KV cache grows linearly with document length and quickly fills GPU memory. Many new open-weight models, like Qwen3.5, are hybrids, which replace most attention layers with Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup> layers, a type of linear attention. GDN layers keep a fixed-size state regardless of document length, which dramatically reduces memory for long documents (e.g., a 16,000-token document takes up 2.4 GB with Qwen3-4B but only 580 MB with Qwen3.5-4B). With less memory per document, Quail can keep more documents in memory.
 
-It turns out that supporting hybrids in Quail is not that straightforward, because the way Quail reuses a document's KV cache does not carry over to GDN layers. In this post, we describe how we adapt Quail to hybrids using Qwen3.5-4B<sup><a href="#note-4">4</a></sup>. We explain GDN ([Section 2](#2-gated-deltanet-vs-attention)), add checkpoints of the GDN state to Quail's memory budget and eviction policy ([Section 3](#3-checkpoints-in-quail)), update the cost model ([Section 4](#4-updated-cost-model)), and compare with vLLM on QUAIL-B ([Section 5](#5-results)).
+It turns out that supporting hybrids in Quail is not that straightforward, because the way Quail reuses a document's KV cache does not carry over to GDN layers: a recurrent state cannot be rewound. Instead, Quail keeps a *checkpoint*, a copy of each GDN layer's state taken at the end of a document, and restarts from it. In this post, we describe how we adapt Quail to hybrids using Qwen3.5-4B<sup><a href="#note-4">4</a></sup>. We explain GDN ([Section 2](#2-gated-deltanet-vs-attention)), add checkpoints of the GDN state to Quail's memory budget and eviction policy ([Section 3](#3-checkpoints-in-quail)), update the cost model ([Section 4](#4-updated-cost-model)), and compare with vLLM on QUAIL-B ([Section 5](#5-results)).
 
 # 2. Gated DeltaNet vs. Attention
 
@@ -77,6 +78,14 @@ Hybrid architectures combine both full-attention layers and linear attention lay
 
 Instead of linear KV growth per token as in full-attention layers, GDN maintains a fixed-size recurrent state, $$S_t$$, that gets updated for every token. For any workload, regardless of size, the memory use in these layers will remain constant.
 
+As in [Figure 1](#figure-1), each token passes through the short convolution first ([Section 2.3](#23-short-convolution)) and then the gated delta rule ([Section 2.4](#24-gated-delta-rule)).
+
+## 2.3 Short Convolution
+
+Each GDN layer applies a width-4 convolution over the concatenated $$q$$, $$k$$ and $$v$$ channels ($$16\times128\times2+32\times128=8{,}192$$ channels), which lets a token blend information from its predecessors, similar to what attention achieves. It keeps the last 3 inputs per channel, and this buffer becomes part of the checkpoint ([Section 3.1](#31-checkpoint-size)).
+
+## 2.4 Gated Delta Rule
+
 $$S_t$$ is updated with a gated delta rule.<sup><a href="#note-6">6</a></sup> The gated delta rule writes the difference, or delta, between the true new value of a key and what the state currently returns for that key, $$S_{t-1}k_t$$. The GDN recurrence can be represented by
 
 $$
@@ -85,11 +94,9 @@ $$
 
 where $$\alpha_t$$ is a decay gate that "fades" the old state at time $$t-1$$ and $$\beta_t$$ a write strength that sets how strongly the token writes. $$S_t$$ is the state at time $$t$$ that is $$d_v \times d_k$$ in size, i.e., the dimensions of the key and value vectors. There is a state matrix for every head, thus the memory is independent of the document length. Intuitively, $$\alpha_t$$ decays the old state, and the $$\beta_t$$ term erases what $$S$$ currently stores along $$k_t$$ and writes $$v_t$$ in its place.
 
-## 2.3 Short Convolution
-
-Each GDN layer also applies a width-4 convolution over the concatenated $$q$$, $$k$$ and $$v$$ channels ($$16\times128\times2+32\times128=8{,}192$$ channels), which lets a token blend information from its predecessors, similar to what attention achieves. It keeps the last 3 inputs per channel, and this buffer becomes part of the checkpoint ([Section 3.1](#31-checkpoint-size)).
-
 # 3. Checkpoints in Quail
+
+A *checkpoint* is a copy of every GDN layer's state $$S$$ and convolution buffer, taken at the end of a document's reusable prefix: the preamble and the document, before any question. When a later operator asks about that document, Quail loads the checkpoint and the attention KV and computes only the question, instead of recomputing the document. A question starts from the checkpoint and leaves it unchanged, so any number of questions can read it. Checkpointing substitutes for rewind in the GDN layers by checkpointing only where necessary.
 
 We size Quail's memory for Qwen3.5-4B on one H100. Every number in this section follows from the shape in [Table 1](#table-1).
 
@@ -215,7 +222,7 @@ The projections and the MLP are matrix multiplications, and we price them at 857
 
 ## 4.1 The Gated Delta Rule
 
-The recurrence of [Section 2.2](#22-linear-attention-layer-gated-deltanet) updates $$S_t$$ per token, but a GPU kernel splits the sequence into chunks of $$C_g = 64$$ tokens and rewrites most of the work as matrix multiplies on tensor cores. Summing the chunk's products, per token and per value head (with $$K_d = V_d = 128$$), gives
+The recurrence of [Section 2.4](#24-gated-delta-rule) updates $$S_t$$ per token, but a GPU kernel splits the sequence into chunks of $$C_g = 64$$ tokens and rewrites most of the work as matrix multiplies on tensor cores. Summing the chunk's products, per token and per value head (with $$K_d = V_d = 128$$), gives
 
 $$
 \begin{aligned}
@@ -296,7 +303,9 @@ Without the checkpoint, stage 2 would recompute 39,562 tokens (3.2% of $$n$$), a
 
 # 5. Results
 
-We compare Quail with vLLM on Qwen3.5-4B (bf16). The question is whether the changes of the previous sections pay off on real queries. We run QUAIL-B at scale factor 0.1 on one H100. vLLM runs each query two ways, stock (one operator at a time) and pipelined, and we compare Quail with the faster of the two on each query. Six queries do not run on vLLM, so 44 queries are compared. Model startup is excluded from every time. We measure the recomputation of an engine by its KV regret, the share of its fresh tokens beyond the fewest the query needs with unlimited KV:
+We compare Quail with vLLM on Qwen3.5-4B (bf16). The question is whether the changes of the previous sections pay off on real queries. We run QUAIL-B at scale factor 0.1 on one H100. vLLM runs each query two ways, stock (one operator at a time) and pipelined, and we compare Quail with the faster of the two on each query. Four queries do not run on vLLM, so 46 queries are compared. Model startup is excluded from every time.
+
+vLLM is version 0.29 with prefix caching on. For the GDN layers, vLLM saves the recurrent state at block boundaries, so it can also reuse a shared prefix. We measure the recomputation of an engine by its KV regret, the share of its fresh tokens beyond the fewest the query needs with unlimited KV:
 
 $$
 r = \frac{n_{\text{fresh}} - n_{\min}}{n_{\text{fresh}}}.
@@ -308,16 +317,15 @@ We also report agreement with the labels of a reference run of Qwen3-32B-FP8, av
 
 | Metric | Quail | vLLM |
 |--------|------:|-----:|
-| Queries where faster | 36/44 | 8/44 |
-| Total runtime (s) | 3,007 | 16,417 |
-| Throughput (tok/s) | 1.91M | 349K |
-| KV regret (%) | 6.1 | 57.5 |
-| Agreement | .891 | .890 |
+| Queries where faster | 45/46 | 1/46 |
+| Total runtime (s) | 2,650 | 16,854 |
+| KV regret (%) | 6.8 | 57.1 |
+| Agreement | .889 | .888 |
 
-<p class="table-caption">Table 6. Quail against the faster vLLM configuration on the 44 queries vLLM can run, Qwen3.5-4B bf16. Totals sum query time; regret and agreement are means over queries.</p>
+<p class="table-caption">Table 6. Quail against the faster vLLM configuration on the 46 queries vLLM can run, Qwen3.5-4B bf16. Totals sum query time; regret and agreement are means over queries.</p>
 </div>
 
-Over the 44 queries, vLLM takes 5.5&times; as long as Quail, and Quail's mean KV regret is 6.1% against 57.5% for vLLM. Agreement with the reference labels is the same for both engines.
+Quail is 3.2&times; faster than vLLM: the geometric mean, over the 46 queries, of the faster vLLM configuration's time divided by Quail's. The [launch post](/blog/introducing-quail/) reports the same statistic, 1.84&times;, compared with stock vLLM only. Quail's mean KV regret is 6.8% against 57.1% for vLLM. Agreement with the reference labels is the same for both engines.
 
 # 6. Limitations and Follow-ups
 
