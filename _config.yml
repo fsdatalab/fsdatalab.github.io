@@ -3,14 +3,22 @@ tagline: Bringing AI to Data Analysis and BI
 description: "A CS research lab led by Shreya Shankar, moving to Carnegie Mellon University in 2027. We build open-source data systems so AI can power data analysis: DocETL, Quail, and DocWriter."
 url: https://fsdatalab.github.io
 baseurl: ""
-image: /assets/og-image.png
+image:
+  path: /assets/og-image.png
+  width: 1200
+  height: 630
+  alt: "Full Stack Data Lab, Carnegie Mellon University"
 future: true
 
 defaults:
   - scope:
       path: ""
     values:
-      image: /assets/og-image.png
+      image:
+        path: /assets/og-image.png
+        width: 1200
+        height: 630
+        alt: "Full Stack Data Lab, Carnegie Mellon University"
   - scope:
       path: "_posts"
       type: posts
