@@ -5,9 +5,9 @@ url: https://fsdatalab.github.io
 baseurl: ""
 image:
   path: /assets/og-image.png
-  width: 1200
-  height: 630
-  alt: "Full Stack Data Lab, Carnegie Mellon University"
+  width: 2400
+  height: 1260
+  alt: "Full Stack Data Lab: Redesigning data systems so AI can power data analysis. Open-source systems: DocETL, Quail, DocWriter. Carnegie Mellon University."
 future: true
 
 defaults:
@@ -16,9 +16,9 @@ defaults:
     values:
       image:
         path: /assets/og-image.png
-        width: 1200
-        height: 630
-        alt: "Full Stack Data Lab, Carnegie Mellon University"
+        width: 2400
+        height: 1260
+        alt: "Full Stack Data Lab: Redesigning data systems so AI can power data analysis. Open-source systems: DocETL, Quail, DocWriter. Carnegie Mellon University."
   - scope:
       path: "_posts"
       type: posts
