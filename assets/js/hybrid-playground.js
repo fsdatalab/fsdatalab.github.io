@@ -1,5 +1,5 @@
 /*
- * Interactive playgrounds for "Hybrid Models in Quail".
+ * Interactive playgrounds for "Supporting Hybrid Models in Quail".
  *
  * Every per-model number below was produced by running Quail itself
  * (fsdatalab/quail, commit 2a1fe4d2) for one NVIDIA H100 SXM: the cost-component
@@ -58,8 +58,8 @@
       '<div class="hp-model"><div class="hp-model-head"><span class="pg-h-small">' + (side === 'a' ? 'Model' : 'Compare with') + '</span>' +
       modelSelect('data-sel="' + side + '"', side === 'a' ? HYBRIDS : ALL, key) + '</div>' +
       '<div class="hp-fields">' +
-      numField('Pool (GB)', 'min="0.001" data-f="' + side + '.pool" value="' + dec(d.pool, 2) + '"') +
-      numField('Checkpoint (MiB)', 'min="0" data-f="' + side + '.ckpt" value="' + dec(d.ckpt, 3) + '"') +
+      numField('Pool (GB)', 'min="0.001" data-f="' + side + '.pool" value="' + d.pool + '"') +
+      numField('Checkpoint (MiB)', 'min="0" data-f="' + side + '.ckpt" value="' + d.ckpt + '"') +
       numField('KV (B/token)', 'min="1" data-f="' + side + '.kv" value="' + d.kv + '"') +
       '</div></div>'
     );
@@ -138,9 +138,9 @@
       out('blabel').textContent = bn + ' retains';
       out('a').textContent = int(sa) + ' docs';
       out('b').textContent = int(sb) + ' docs';
-      const ratio = sb > 0 ? sa / sb : Infinity;
-      out('vs').textContent = !isFinite(ratio) ? 'the other model holds none' : ratio >= 1 ? dec(ratio, 2) + '× the other model' : dec(1 / ratio, 2) + '× fewer than the other model';
-      out('vs').classList.toggle('is-gain', ratio >= 1);
+      out('vs').textContent = sb > 0 ? dec(sa / sb, 2) + '× the other model'
+        : sa > 0 ? 'the other model holds none' : 'neither model fits a document';
+      out('vs').classList.toggle('is-gain', sa > sb);
       out('bsub').textContent = int(docBytes(B, len, page) / 1e6) + ' MB per document';
       const share = (A.ckpt * MIB) / docBytes(A, len, page);
       const ckptGB = (sa * A.ckpt * MIB) / GB;
@@ -153,15 +153,15 @@
       out('akey').textContent = an;
       out('bkey').textContent = bn;
       out('plot').innerHTML = capacityPlot(A, B, len, page);
-      let cross = null;
-      for (let t = 20; t <= 200000; t = Math.ceil(t * 1.005)) if (slots(A, t, page) >= slots(B, t, page)) { cross = t; break; }
-      const up = (a, b) => slots(a, 20, page) >= slots(b, 20, page);
-      out('cross').textContent = up(A, B) ? an + ' holds at least as many documents at every length.' : cross === null ? an + ' never holds as many documents as ' + bn + '.' : an + ' holds more documents than ' + bn + ' from about ' + int(cross) + ' tokens.';
+      const difference = sa - sb;
+      out('cross').textContent = difference === 0
+        ? 'Both models hold the same number of documents at ' + int(len) + ' tokens.'
+        : (difference > 0 ? an : bn) + ' holds ' + int(Math.abs(difference)) + ' more documents at ' + int(len) + ' tokens.';
     }
     const load = (s) => {
       const d = modelDefaults(sel[s].value);
-      f[s + '.pool'].value = dec(d.pool, 2);
-      f[s + '.ckpt'].value = dec(d.ckpt, 3);
+      f[s + '.pool'].value = d.pool;
+      f[s + '.ckpt'].value = d.ckpt;
       f[s + '.kv'].value = d.kv;
     };
     range.addEventListener('input', () => { f.len.value = fromPos(Number(range.value) / 1000); render('range'); });
@@ -214,8 +214,13 @@
       let w;
       if (j === 0) {
         const r = p + f.q;
-        const n = Math.max(0, g.pre + g.N * (g.len + f.q) - g.shared);
-        w = { n, A: (g.N * r * (r + 1)) / 2, W: n, R: (g.N - 1) * g.pre + g.shared, UW: g.N, UR: g.N - 1 };
+        const reuseCount = g.N - 1;
+        const prefix = reuseCount ? g.pre + g.shared / reuseCount : 0;
+        const read = reuseCount * prefix;
+        const n = g.N * r - read;
+        // Approximate shared prefixes by their mean length among later documents.
+        const pairs = (g.N * r * (r + 1) - reuseCount * prefix * (prefix + 1)) / 2;
+        w = { n, A: pairs, W: n, R: read, UW: g.N, UR: reuseCount };
       } else {
         w = { n: docs * f.q, A: docs * (f.q * p + (f.q * (f.q + 1)) / 2), W: docs * f.q, R: docs * p, UW: 0, UR: docs };
       }
@@ -237,7 +242,7 @@
 
   const SALES = {
     N: 985, len: 1162, pre: 18, shared: 10853,
-    filters: [{ name: 'Discount offered', s: 0.1056, q: 78 }, { name: 'Customer commits', s: 0.0335, q: 83 }],
+    filters: [{ name: 'Discount offered', s: 104 / 985, q: 78 }, { name: 'Customer commits', s: 33 / 985, q: 83 }],
   };
   const CHIP = ['#C41230', '#555555', '#8B2332', '#777777', '#A6192E', '#444444', '#9B555F', '#666666'];
   const freshState = () => {
@@ -292,7 +297,9 @@
       if (!(Number.isInteger(g.N) && g.N >= 1)) return { error: 'Documents must be a whole number of at least 1.' };
       if (!(g.len >= 1)) return { error: 'Average document length must be at least 1 token.' };
       if (!(g.pre >= 0)) return { error: 'The preamble must be 0 or more tokens.' };
-      if (!(g.shared >= 0)) return { error: 'Shared prefix tokens must be 0 or more.' };
+      if (!(g.shared >= 0 && g.shared <= (g.N - 1) * g.len)) {
+        return { error: 'Shared prefix tokens cannot exceed the document tokens after the first document.' };
+      }
       const filters = [];
       for (const f of st.filters) {
         const s = num(f.s), q = num(f.q);
@@ -332,7 +339,7 @@
       const bestNote = best ? (best.e.total < rule.total - 1e-9 ? 'Fastest of all ' + int(perms.length) + ' orders: ' + best.o.map((f) => esc(f.name)).join(' → ') + ' at ' + fmtTime(best.e.total) + '.' : 'The rule\'s order is the fastest of all ' + int(perms.length) + ' orders.') : '';
       const rows = yours.terms.map((x) => {
         const t = TERMS[x.name] || [esc(x.name), ''];
-        return '<tr><td class="pg-left">' + t[0] + '</td><td class="pg-left">' + t[1] + '</td><td>' + (x.F ? fmtSci(x.F) : '—') + '</td><td>' + (x.pi ? dec(x.pi / 1e12, 1) + ' T' : '—') + '</td><td>' + (x.F ? fmtTime(x.tc) : '0') + '</td><td>' + (x.B ? dec(x.B / 1e9, 1) + ' GB' : '0') + '</td><td>' + (x.B ? fmtTime(x.tm) : '0') + '</td><td>' + fmtTime(x.T) + '</td><td class="pg-left">' + (x.tc >= x.tm ? 'compute' : 'memory') + '</td></tr>';
+        return '<tr><td class="pg-left">' + t[0] + '</td><td class="pg-left">' + t[1] + '</td><td>' + (x.F ? fmtSci(x.F) : '—') + '</td><td>' + (x.pi ? dec(x.pi / 1e12, 1) + ' TFLOP/s' : '—') + '</td><td>' + (x.F ? fmtTime(x.tc) : '0') + '</td><td>' + (x.B ? dec(x.B / 1e9, 1) + ' GB' : '0') + '</td><td>' + (x.B ? fmtTime(x.tm) : '0') + '</td><td>' + fmtTime(x.T) + '</td><td class="pg-left">' + (x.tc >= x.tm ? 'compute' : 'memory') + '</td></tr>';
       }).join('');
       const stageRows = yours.stages.map((s, j) => '<tr><td>' + (j + 1) + (j === 0 ? ' (scan)' : ' (ask)') + '</td><td class="pg-left"><span class="pg-dot-c" style="--c:' + s.f.color + '"></span>' + esc(s.f.name) + '</td><td>' + int(s.docsIn) + '</td><td>' + int(s.passed) + '</td><td>' + int(s.tokens) + '</td></tr>').join('');
       const rankRows = ranked.map((f, i) => '<tr><td>' + (i + 1) + '</td><td class="pg-left"><span class="pg-dot-c" style="--c:' + f.color + '"></span>' + esc(f.name) + '</td><td>' + dec(f.ask * 1e6, 1) + '</td><td>' + dec(f.s, 3) + '</td><td>' + (isFinite(f.rank) ? dec(f.rank * 1e6, 1) : '∞') + '</td></tr>').join('');
@@ -344,7 +351,7 @@
         (bestNote ? '<div class="pg-note">' + bestNote + '</div>' : '') +
         '<details class="pg-details"><summary>Show the math (your order)</summary>' +
         '<div class="pg-h-small pg-mt">Stages</div><div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Stage</th><th class="pg-left">Filter</th><th>Documents asked</th><th>Passed</th><th>Tokens computed</th></tr></thead><tbody>' + stageRows + '</tbody></table></div>' +
-        '<div class="pg-note">n = ' + int(w.n) + ', A = ' + int(w.A) + ', W = ' + int(w.W) + ', R = ' + int(w.R) + ', U<sub>W</sub> = ' + int(w.UW) + ', U<sub>R</sub> = ' + int(w.UR) + ', K = ' + yours.K + ' passes of ' + int(m.chunk) + ' tokens.</div>' +
+        '<div class="pg-note">n = ' + int(w.n) + ', A = ' + int(w.A) + ', W = ' + int(w.W) + ', R = ' + int(w.R) + ', U<sub>W</sub> = ' + int(w.UW) + ', U<sub>R</sub> = ' + int(w.UR) + ', K = ' + yours.K + ' passes of up to ' + int(m.chunk) + ' tokens.</div>' +
         '<div class="pg-h-small pg-mt">Roofline terms</div><div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Term</th><th class="pg-left">Prices</th><th><i>F</i></th><th><i>Π</i></th><th><i>F</i>/<i>Π</i></th><th><i>B</i></th><th><i>B</i>/<i>β</i></th><th><i>T</i><sub>j</sub></th><th class="pg-left">Bound</th></tr></thead><tbody>' + rows +
         '<tr class="pg-total"><td class="pg-left" colspan="7"><b>Total</b></td><td><b>' + fmtTime(yours.total) + '</b></td><td></td></tr></tbody></table></div>' +
         '<div class="pg-h-small pg-mt">Ranks (microseconds per document)</div><div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>ask</th><th><i>s</i></th><th>ask / (1 − <i>s</i>)</th></tr></thead><tbody>' + rankRows + '</tbody></table></div></details>';

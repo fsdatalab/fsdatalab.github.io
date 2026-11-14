@@ -69,7 +69,7 @@
   <text class="t mid" x="1165" y="192">repeat 16 → 32 heads</text>
   <rect class="card" x="1022" y="270" width="286" height="80" rx="10"/>
   <text class="t mid" x="1165" y="304">state update</text>
-  <text class="t i mid" x="1165" y="332">αS(I − βkkᵀ) + βokᵀ</text>
+  <text class="t i mid" x="1165" y="332">αS(I − βkkᵀ) + βvkᵀ</text>
   <rect class="card" x="1022" y="410" width="286" height="80" rx="10"/>
   <text class="t mid" x="1165" y="444">read out <tspan class="i">o = Sq</tspan></text>
   <text class="t mid" x="1165" y="472">32 × 128 = 4096</text>
