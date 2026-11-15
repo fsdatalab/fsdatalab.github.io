@@ -7,6 +7,11 @@ permalink: /blog/hybrid-models-in-quail/
 math: true
 typora-root-url: ..
 description: "How Quail supports hybrid models that mix full attention with Gated DeltaNet layers: checkpoints of the recurrent state, retention and eviction, and the cost-model changes."
+image:
+  path: /assets/blog/hybrid-models-in-quail/social-preview.png
+  width: 1200
+  height: 630
+  alt: "Quail reads a document once and reuses its attention KV cache and GDN checkpoint to answer two questions."
 ---
 
 <style>
