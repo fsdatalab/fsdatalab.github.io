@@ -61,54 +61,54 @@
      <g><text x="20.038125" y="0.779180" transform="translate(113.409375 297.014024)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Jev</text></g></g>
     <g id="ytick_2">
      <g id="line2d_8" />
-     <g><text x="125.883750" y="0.779180" transform="translate(7.2 267.265732)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Decision-2.0-Kai-0.6B</text></g></g>
+     <g><text x="125.883750" y="0.779180" transform="translate(7.2 88.775976)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Decision-2.0-Kai-0.6B</text></g></g>
     <g id="ytick_3">
      <g id="line2d_9" />
-     <g><text x="70.831875" y="0.779180" transform="translate(62.251875 237.517439)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3-0.6B</text></g></g>
+     <g><text x="70.831875" y="0.779180" transform="translate(62.251875 118.524268)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3-0.6B</text></g></g>
     <g id="ytick_4">
      <g id="line2d_10" />
-     <g><text x="31.833750" y="0.779180" transform="translate(101.25 207.769146)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">d1-2B</text></g></g>
+     <g><text x="31.833750" y="0.779180" transform="translate(101.25 148.272561)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">d1-2B</text></g></g>
     <g id="ytick_5">
      <g id="line2d_11" />
      <g><text x="62.227500" y="0.779180" transform="translate(70.85625 178.020854)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">LFM2-2.6B</text></g></g>
     <g id="ytick_6">
      <g id="line2d_12" />
-     <g><text x="60.720000" y="0.779180" transform="translate(72.36375 148.272561)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3-4B</text></g></g>
+     <g><text x="60.720000" y="0.779180" transform="translate(72.36375 207.769146)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3-4B</text></g></g>
     <g id="ytick_7">
      <g id="line2d_13" />
-     <g><text x="77.013750" y="0.779180" transform="translate(56.07 118.524268)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3.8-27B</text></g></g>
+     <g><text x="77.013750" y="0.779180" transform="translate(56.07 237.517439)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3.8-27B</text></g></g>
     <g id="ytick_8">
      <g id="line2d_14" />
-     <g><text x="106.526250" y="0.779180" transform="translate(26.5575 88.775976)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3.6-35B-A3B</text></g></g>
+     <g><text x="106.526250" y="0.779180" transform="translate(26.5575 267.265732)" text-anchor="end" fill="#344054" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">Qwen3.6-35B-A3B</text></g></g>
    </g>
    <g id="patch_3">
     <path d="M 139.764375 300.720978 L 299.088761 300.720978 L 299.088761 281.682071 L 139.764375 281.682071 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Jev, Sales: 55,525 / 59,685 (93.03%)</title></path>
    </g>
    <g id="patch_4">
-    <path d="M 139.764375 270.972685 L 141.503242 270.972685 L 141.503242 251.933778 L 139.764375 251.933778 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Sales: 606 / 59,685 (1.02%)</title></path>
+    <path d="M 139.764375 92.482929 L 141.503242 92.482929 L 141.503242 73.444022 L 139.764375 73.444022 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Sales: 606 / 59,685 (1.02%)</title></path>
    </g>
    <g id="patch_5">
-    <path d="M 139.764375 241.224393 L 139.764375 241.224393 L 139.764375 222.185485 L 139.764375 222.185485 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3-0.6B, Sales: 0 / 59,685 (0.00%)</title></path>
+    <path d="M 139.764375 122.231222 L 139.764375 122.231222 L 139.764375 103.192314 L 139.764375 103.192314 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3-0.6B, Sales: 0 / 59,685 (0.00%)</title></path>
    </g>
    <g id="patch_6">
-    <path d="M 139.764375 211.476100 L 281.433237 211.476100 L 281.433237 192.437193 L 139.764375 192.437193 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>d1-2B, Sales: 49,372 / 59,685 (82.72%)</title></path>
+    <path d="M 139.764375 151.979515 L 281.433237 151.979515 L 281.433237 132.940608 L 139.764375 132.940608 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>d1-2B, Sales: 49,372 / 59,685 (82.72%)</title></path>
    </g>
    <g id="patch_7">
     <path d="M 139.764375 181.727807 L 149.242060 181.727807 L 149.242060 162.688900 L 139.764375 162.688900 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>LFM2-2.6B, Sales: 3,303 / 59,685 (5.53%)</title></path>
    </g>
    <g id="patch_8">
-    <path d="M 139.764375 151.979515 L 249.100645 151.979515 L 249.100645 132.940607 L 139.764375 132.940607 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3-4B, Sales: 38,104 / 59,685 (63.84%)</title></path>
+    <path d="M 139.764375 211.476100 L 249.100645 211.476100 L 249.100645 192.437192 L 139.764375 192.437192 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3-4B, Sales: 38,104 / 59,685 (63.84%)</title></path>
    </g>
    <g id="patch_9">
-    <path d="M 139.764375 122.231222 L 283.918152 122.231222 L 283.918152 103.192315 L 139.764375 103.192315 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3.8-27B, Sales: 50,238 / 59,685 (84.17%)</title></path>
+    <path d="M 139.764375 241.224393 L 283.918152 241.224393 L 283.918152 222.185486 L 139.764375 222.185486 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3.8-27B, Sales: 50,238 / 59,685 (84.17%)</title></path>
    </g>
    <g id="patch_10">
-    <path d="M 139.764375 92.482929 L 247.594201 92.482929 L 247.594201 73.444022 L 139.764375 73.444022 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Sales: 37,579 / 59,685 (62.96%)</title></path>
+    <path d="M 139.764375 270.972685 L 247.594201 270.972685 L 247.594201 251.933778 L 139.764375 251.933778 z" clip-path="url(#p4f5838cd62)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Sales: 37,579 / 59,685 (62.96%)</title></path>
    </g>
    <g id="patch_11">
     <path d="M 139.764375 309.0505  L 331.576875 309.0505  " style="fill: none; stroke: #475467; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square" />
    </g>
-   <g><text x="0" y="1.229180" transform="translate(302.513984 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">93%</text></g><g><text x="0" y="1.229180" transform="translate(144.928465 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">1%</text></g><g><text x="0" y="1.229180" transform="translate(143.189598 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0%</text></g><g><text x="0" y="1.229180" transform="translate(284.858460 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">83%</text></g><g><text x="0" y="1.229180" transform="translate(152.667283 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">6%</text></g><g><text x="0" y="1.229180" transform="translate(252.525868 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">64%</text></g><g><text x="0" y="1.229180" transform="translate(287.343375 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">84%</text></g><g><text x="0" y="1.229180" transform="translate(251.019425 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">63%</text></g><g><text x="0" y="0.479180" transform="translate(139.764375 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Sales</text></g></g>
+   <g><text x="0" y="1.229180" transform="translate(302.513984 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">93%</text></g><g><text x="0" y="1.229180" transform="translate(144.928465 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">1%</text></g><g><text x="0" y="1.229180" transform="translate(143.189598 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0%</text></g><g><text x="0" y="1.229180" transform="translate(284.858460 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">83%</text></g><g><text x="0" y="1.229180" transform="translate(152.667283 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">6%</text></g><g><text x="0" y="1.229180" transform="translate(252.525868 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">64%</text></g><g><text x="0" y="1.229180" transform="translate(287.343375 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">84%</text></g><g><text x="0" y="1.229180" transform="translate(251.019425 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">63%</text></g><g><text x="0" y="0.479180" transform="translate(139.764375 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Sales</text></g></g>
   <g id="axes_2">
    <g id="patch_12">
     <path d="M 350.758125 309.0505  L 542.570625 309.0505  L 542.570625 65.1145  L 350.758125 65.1145  z " style="fill: #ffffff" />
@@ -163,30 +163,30 @@
     <path d="M 350.758125 300.720978 L 512.942444 300.720978 L 512.942444 281.682071 L 350.758125 281.682071 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Jev, Contract: 4,735 / 5,000 (94.70%)</title></path>
    </g>
    <g id="patch_14">
-    <path d="M 350.758125 270.972685 L 417.104699 270.972685 L 417.104699 251.933778 L 350.758125 251.933778 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Contract: 1,937 / 5,000 (38.74%)</title></path>
+    <path d="M 350.758125 92.482929 L 417.104699 92.482929 L 417.104699 73.444022 L 350.758125 73.444022 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Contract: 1,937 / 5,000 (38.74%)</title></path>
    </g>
    <g id="patch_15">
-    <path d="M 350.758125 241.224393 L 351.785692 241.224393 L 351.785692 222.185485 L 350.758125 222.185485 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3-0.6B, Contract: 30 / 5,000 (0.60%)</title></path>
+    <path d="M 350.758125 122.231222 L 351.785692 122.231222 L 351.785692 103.192314 L 350.758125 103.192314 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3-0.6B, Contract: 30 / 5,000 (0.60%)</title></path>
    </g>
    <g id="patch_16">
-    <path d="M 350.758125 211.476100 L 501.433694 211.476100 L 501.433694 192.437193 L 350.758125 192.437193 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>d1-2B, Contract: 4,399 / 5,000 (87.98%)</title></path>
+    <path d="M 350.758125 151.979515 L 501.433694 151.979515 L 501.433694 132.940608 L 350.758125 132.940608 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>d1-2B, Contract: 4,399 / 5,000 (87.98%)</title></path>
    </g>
    <g id="patch_17">
     <path d="M 350.758125 181.727807 L 407.377065 181.727807 L 407.377065 162.688900 L 350.758125 162.688900 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>LFM2-2.6B, Contract: 1,653 / 5,000 (33.06%)</title></path>
    </g>
    <g id="patch_18">
-    <path d="M 350.758125 151.979515 L 394.018694 151.979515 L 394.018694 132.940607 L 350.758125 132.940607 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3-4B, Contract: 1,263 / 5,000 (25.26%)</title></path>
+    <path d="M 350.758125 211.476100 L 394.018694 211.476100 L 394.018694 192.437192 L 350.758125 192.437192 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3-4B, Contract: 1,263 / 5,000 (25.26%)</title></path>
    </g>
    <g id="patch_19">
-    <path d="M 350.758125 122.231222 L 506.640034 122.231222 L 506.640034 103.192315 L 350.758125 103.192315 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3.8-27B, Contract: 4,551 / 5,000 (91.02%)</title></path>
+    <path d="M 350.758125 241.224393 L 506.640034 241.224393 L 506.640034 222.185486 L 350.758125 222.185486 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3.8-27B, Contract: 4,551 / 5,000 (91.02%)</title></path>
    </g>
    <g id="patch_20">
-    <path d="M 350.758125 92.482929 L 481.087869 92.482929 L 481.087869 73.444022 L 350.758125 73.444022 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Contract: 3,805 / 5,000 (76.10%)</title></path>
+    <path d="M 350.758125 270.972685 L 481.087869 270.972685 L 481.087869 251.933778 L 350.758125 251.933778 z" clip-path="url(#p1677b2203b)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Contract: 3,805 / 5,000 (76.10%)</title></path>
    </g>
    <g id="patch_21">
     <path d="M 350.758125 309.0505  L 542.570625 309.0505  " style="fill: none; stroke: #475467; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square" />
    </g>
-   <g><text x="0" y="1.229180" transform="translate(516.367667 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">95%</text></g><g><text x="0" y="1.229180" transform="translate(420.529922 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">39%</text></g><g><text x="0" y="1.229180" transform="translate(355.210915 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0.6%</text></g><g><text x="0" y="1.229180" transform="translate(504.858917 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">88%</text></g><g><text x="0" y="1.229180" transform="translate(410.802289 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">33%</text></g><g><text x="0" y="1.229180" transform="translate(397.443917 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(510.065257 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">91%</text></g><g><text x="0" y="1.229180" transform="translate(484.513093 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">76%</text></g><g><text x="0" y="0.479180" transform="translate(350.758125 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Contract</text></g></g>
+   <g><text x="0" y="1.229180" transform="translate(516.367667 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">95%</text></g><g><text x="0" y="1.229180" transform="translate(420.529922 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">39%</text></g><g><text x="0" y="1.229180" transform="translate(355.210915 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0.6%</text></g><g><text x="0" y="1.229180" transform="translate(504.858917 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">88%</text></g><g><text x="0" y="1.229180" transform="translate(410.802289 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">33%</text></g><g><text x="0" y="1.229180" transform="translate(397.443917 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(510.065257 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">91%</text></g><g><text x="0" y="1.229180" transform="translate(484.513093 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">76%</text></g><g><text x="0" y="0.479180" transform="translate(350.758125 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Contract</text></g></g>
   <g id="axes_3">
    <g id="patch_22">
     <path d="M 561.751875 309.0505  L 753.564375 309.0505  L 753.564375 65.1145  L 561.751875 65.1145  z " style="fill: #ffffff" />
@@ -241,29 +241,29 @@
     <path d="M 561.751875 300.720978 L 712.872723 300.720978 L 712.872723 281.682071 L 561.751875 281.682071 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Jev, Drug Safety: 4,412 / 5,000 (88.24%)</title></path>
    </g>
    <g id="patch_24">
-    <path d="M 561.751875 270.972685 L 604.087634 270.972685 L 604.087634 251.933778 L 561.751875 251.933778 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Drug Safety: 1,236 / 5,000 (24.72%)</title></path>
+    <path d="M 561.751875 92.482929 L 604.087634 92.482929 L 604.087634 73.444022 L 561.751875 73.444022 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Decision-2.0-Kai-0.6B, Drug Safety: 1,236 / 5,000 (24.72%)</title></path>
    </g>
    <g id="patch_25">
-    <path d="M 561.751875 241.224393 L 561.786127 241.224393 L 561.786127 222.185485 L 561.751875 222.185485 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3-0.6B, Drug Safety: 1 / 5,000 (0.02%)</title></path>
+    <path d="M 561.751875 122.231222 L 561.786127 122.231222 L 561.786127 103.192314 L 561.751875 103.192314 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3-0.6B, Drug Safety: 1 / 5,000 (0.02%)</title></path>
    </g>
    <g id="patch_26">
-    <path d="M 561.751875 211.476100 L 657.726630 211.476100 L 657.726630 192.437193 L 561.751875 192.437193 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>d1-2B, Drug Safety: 2,802 / 5,000 (56.04%)</title></path>
+    <path d="M 561.751875 151.979515 L 657.726630 151.979515 L 657.726630 132.940608 L 561.751875 132.940608 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>d1-2B, Drug Safety: 2,802 / 5,000 (56.04%)</title></path>
    </g>
    <g id="patch_27">
     <path d="M 561.751875 181.727807 L 604.635670 181.727807 L 604.635670 162.688900 L 561.751875 162.688900 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>LFM2-2.6B, Drug Safety: 1,252 / 5,000 (25.04%)</title></path>
    </g>
    <g id="patch_28">
-    <path d="M 561.751875 151.979515 L 629.571295 151.979515 L 629.571295 132.940607 L 561.751875 132.940607 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3-4B, Drug Safety: 1,980 / 5,000 (39.60%)</title></path>
+    <path d="M 561.751875 211.476100 L 629.571295 211.476100 L 629.571295 192.437192 L 561.751875 192.437192 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3-4B, Drug Safety: 1,980 / 5,000 (39.60%)</title></path>
    </g>
    <g id="patch_29">
-    <path d="M 561.751875 122.231222 L 701.329721 122.231222 L 701.329721 103.192315 L 561.751875 103.192315 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3.8-27B, Drug Safety: 4,075 / 5,000 (81.50%)</title></path>
+    <path d="M 561.751875 241.224393 L 701.329721 241.224393 L 701.329721 222.185486 L 561.751875 222.185486 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3.8-27B, Drug Safety: 4,075 / 5,000 (81.50%)</title></path>
    </g>
    <g id="patch_30">
-    <path d="M 561.751875 92.482929 L 685.402433 92.482929 L 685.402433 73.444022 L 561.751875 73.444022 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Drug Safety: 3,610 / 5,000 (72.20%)</title></path>
+    <path d="M 561.751875 270.972685 L 685.402433 270.972685 L 685.402433 251.933778 L 561.751875 251.933778 z" clip-path="url(#pca54214841)" style="fill: #98a2b3"><title>Qwen3.6-35B-A3B, Drug Safety: 3,610 / 5,000 (72.20%)</title></path>
    </g>
    <g id="patch_31">
     <path d="M 561.751875 309.0505  L 753.564375 309.0505  " style="fill: none; stroke: #475467; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square" />
    </g>
-   <g><text x="0" y="1.229180" transform="translate(716.297946 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">88%</text></g><g><text x="0" y="1.229180" transform="translate(607.512857 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(565.211350 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0.02%</text></g><g><text x="0" y="1.229180" transform="translate(661.151854 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">56%</text></g><g><text x="0" y="1.229180" transform="translate(608.060893 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(632.996518 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">40%</text></g><g><text x="0" y="1.229180" transform="translate(704.754945 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">82%</text></g><g><text x="0" y="1.229180" transform="translate(688.827656 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">72%</text></g><g><text x="0" y="0.479180" transform="translate(561.751875 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Drug Safety</text></g></g>
+   <g><text x="0" y="1.229180" transform="translate(716.297946 295.021104)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">88%</text></g><g><text x="0" y="1.229180" transform="translate(607.512857 86.783056)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(565.211350 116.531348)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">0.02%</text></g><g><text x="0" y="1.229180" transform="translate(661.151854 146.279641)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">56%</text></g><g><text x="0" y="1.229180" transform="translate(608.060893 176.027934)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">25%</text></g><g><text x="0" y="1.229180" transform="translate(632.996518 205.776226)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">40%</text></g><g><text x="0" y="1.229180" transform="translate(704.754945 235.524519)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">82%</text></g><g><text x="0" y="1.229180" transform="translate(688.827656 265.272812)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="400">72%</text></g><g><text x="0" y="0.479180" transform="translate(561.751875 57.79642)" text-anchor="start" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Drug Safety</text></g></g>
   <g><text x="161.137813" y="0.179180" transform="translate(139.764375 20.7625)" text-anchor="middle" fill="#101828" font-family="Inter, Arial, sans-serif" font-size="14.597267" font-weight="600">Same record picked when the order is swapped</text></g></g>
  </g></svg>
