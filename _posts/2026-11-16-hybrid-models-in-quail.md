@@ -369,7 +369,7 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 **Where the speedup comes from.** Per query, the speedup is the product of two ratios: how many fewer tokens Quail computes (vLLM's fresh tokens over Quail's) and how fast it computes each one (Quail's fresh tokens per second over vLLM's). Over the 46 queries, the geometric means are 3.219 for the fresh-token ratio and 0.984 for the per-token rate ratio (their product is 3.168), so the speedup comes from recomputing less. In total, Quail computes 165M fresh tokens against 1,002M for vLLM.
 
-**Limitations and follow-ups.** The cost model estimates the delta rule and short convolution from their FLOP counts alone. It accounts for checkpoint transfers separately. We plan to profile both kernels on the H100 to see how much memory traffic affects their runtime. Other hybrids have different checkpoint sizes. LFM2, for example, keeps only the convolution buffer for each recurrent layer.
+**Limitations and follow-ups.** The cost model currently estimates the delta rule and short convolution from their FLOP counts alone. We could profile each kernel’s HBM reads and writes and use the same roofline formula as in [Section 4](#4-updated-cost-model). A kernel’s estimated time would increase only if moving those bytes takes longer than its arithmetic. Checkpoint transfers already have their own term. Other hybrids have different checkpoint sizes. LFM2, for example, keeps only the convolution buffer for each recurrent layer.
 
 # 6. Hybrid Playgrounds
 
