@@ -371,8 +371,6 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 **Limitations and follow-ups.** Quail’s [roofline model](#4-updated-cost-model) already uses `max(compute time, transfer time)`. For the delta rule and short convolution, the model currently sets transfer time to zero. We could estimate transfer time for each kernel by dividing the total bytes it reads from and writes to HBM by the GPU’s memory bandwidth.
 
-LFM2’s smaller checkpoints could let Quail keep more documents in HBM and reuse them across filters.
-
 # 6. Hybrid Playgrounds
 
 ## 6.1 Checkpoint Playground
