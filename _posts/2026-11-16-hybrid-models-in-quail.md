@@ -369,9 +369,9 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 **Where the speedup comes from.** Per query, the speedup is the product of two ratios: how many fewer tokens Quail computes (vLLM's fresh tokens over Quail's) and how fast it computes each one (Quail's fresh tokens per second over vLLM's). Over the 46 queries, the geometric means are 3.219 for the fresh-token ratio and 0.984 for the per-token rate ratio (their product is 3.168), so the speedup comes from recomputing less. In total, Quail computes 165M fresh tokens against 1,002M for vLLM.
 
-**Limitations and follow-ups.** Our [roofline model](#table-3) estimates the time for the delta rule and short convolution from their FLOP counts alone. We could also estimate the time to move their inputs and outputs through GPU memory, then take the larger of the compute and transfer times, as we already do for attention.
+**Limitations and follow-ups.** Quail’s [roofline model](#4-updated-cost-model) already uses `max(compute time, transfer time)`. For the delta rule and short convolution, the model currently sets transfer time to zero. We could estimate transfer time for each kernel by dividing the total bytes it reads from and writes to HBM by the GPU’s memory bandwidth.
 
-On the caching side, LFM2 needs a smaller checkpoint than Qwen3.5-4B because each recurrent layer saves only a convolution buffer. Does the space saved let Quail keep more documents in GPU memory and avoid recomputing them for later filters?
+LFM2’s smaller checkpoints could let Quail keep more documents in HBM and reuse them across filters.
 
 # 6. Hybrid Playgrounds
 
