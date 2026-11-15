@@ -152,12 +152,12 @@ We size Quail's memory for Qwen3.5-4B on one H100. [Table 1](#table-1) gives the
 
 ## 3.1 Checkpoint Size
 
-Each GDN layer saves its state $$S$$ and its convolution buffer $$B_{\text{cv}}$$ (the last $$w-1=3$$ inputs over $$D_c = 2H_kd_k + H_vd_v = 8{,}192$$ channels). With the shapes in [Table 1](#table-1), $$S$$ is stored in fp32 (4 bytes per value) and $$B_{\text{cv}}$$ in bf16 (2 bytes per value). Writing $$|S|$$ and $$|B_{\text{cv}}|$$ for their respective sizes in bytes gives
+Each GDN layer saves its state $$S$$ and its convolution buffer $$B_{\text{cv}}$$ (the last $$w-1=3$$ inputs over $$D_c = 2H_kd_k + H_vd_v = 8{,}192$$ channels). With the shapes in [Table 1](#table-1), $$S$$ is stored in fp32 (4 bytes per value) and $$B_{\text{cv}}$$ in bf16 (2 bytes per value). Writing $$\lvert S\rvert$$ and $$\lvert B_{\text{cv}}\rvert$$ for their respective sizes in bytes gives
 
 $$
 \begin{aligned}
-|S| &= H_v\, d_v\, d_k \cdot 4 = 32\cdot128\cdot128\cdot4 = 2{,}048 \text{ KiB}, \\
-|B_{\text{cv}}| &= D_c\,(w-1)\cdot 2 = 8{,}192\cdot3\cdot2 = 48 \text{ KiB}.
+\lvert S\rvert &= H_v\, d_v\, d_k \cdot 4 = 32\cdot128\cdot128\cdot4 = 2{,}048 \text{ KiB}, \\
+\lvert B_{\text{cv}}\rvert &= D_c\,(w-1)\cdot 2 = 8{,}192\cdot3\cdot2 = 48 \text{ KiB}.
 \end{aligned}
 $$
 
@@ -165,7 +165,7 @@ Across all $$L_g = 24$$ GDN layers, the checkpoint size in bytes, $$B_{\text{ckp
 
 $$
 \begin{aligned}
-B_{\text{ckpt}} &= L_g\left(|S| + |B_{\text{cv}}|\right) = 24 \cdot 2{,}096 \text{ KiB} \\
+B_{\text{ckpt}} &= L_g\left(\lvert S\rvert + \lvert B_{\text{cv}}\rvert\right) = 24 \cdot 2{,}096 \text{ KiB} \\
 &= 49.125 \text{ MiB} = 51{,}511{,}296 \text{ B}.
 \end{aligned}
 $$
