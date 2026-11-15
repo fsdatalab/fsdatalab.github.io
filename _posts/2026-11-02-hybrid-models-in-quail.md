@@ -392,7 +392,9 @@ Start with SALES-4 on Qwen3.5-4B. Change a filter to see how it affects the esti
 
 # 7. Conclusion
 
-<aside aria-label="Comment from Shreya" style="padding: .75rem 1rem; border-radius: 6px; background: #edf3fc; color: #183b68;"><strong style="color: inherit;">Shreya:</strong> Add a conclusion?</aside>
+In this post, we walked through how Quail now supports hybrid models and what we changed to keep document reuse working under the new architecture. Quail saves a checkpoint of the GDN state for the recurrent layers and keeps the KV cache for the attention layers, and both share one pool in HBM. On QUAIL-B, Quail is 3.2&times; faster (geometric mean) than the faster of two vLLM configurations on Qwen3.5-4B.
+
+The machinery we added for hybrids also lets us integrate decision models built on top of the models we now support. We would also like to explore making checkpoints smaller in HBM, for example by replaying a short suffix of each document instead of storing the full state, as proposed in SuffixReplay.<sup><a href="#note-11">11</a></sup> If this is the kind of work that excites you, please reach out! In the meantime, try out [Quail](https://github.com/fsdatalab/quail), let us know your feedback, and if you like what we're building, give it a star on GitHub!
 
 # Acknowledgements
 
@@ -419,6 +421,8 @@ We thank [Modal](https://modal.com/) for sponsoring the compute used in this res
 <span id="note-9"><strong>9.</strong></span> The H100 SXM memory capacity, bandwidth, and Tensor Core throughput come from [NVIDIA's H100 specifications](https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306). NVIDIA reports Tensor Core throughput for structured sparse matrices; we use the dense throughput, which is half the reported sparse throughput.
 
 <span id="note-10"><strong>10.</strong></span> Joseph M. Hellerstein and Michael Stonebraker. 1993. Predicate Migration: Optimizing Queries with Expensive Predicates. In *Proceedings of the 1993 ACM SIGMOD International Conference on Management of Data*, 267&ndash;276. [doi:10.1145/170035.170078](https://doi.org/10.1145/170035.170078)
+
+<span id="note-11"><strong>11.</strong></span> Yirui Liu, Ruoling Qi, Xuaner Wu, Yuxin Jin, Jian Chen, Penghang Liu, Yafei Huang, Jiawei Shao, and Xuelong Li. 2026. Just Let Linear States Forget the Distant Past: Prefix Caching via Suffix Replay for Hybrid LLMs. [arXiv:2609.33477](https://arxiv.org/abs/2609.33477).
 
 # Cite this article
 
