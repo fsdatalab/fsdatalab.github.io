@@ -373,6 +373,8 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 # 6. Hybrid Playgrounds
 
+Here are two playgrounds for exploring how many documents fit in GPU memory and how filter order affects estimated query time.
+
 ## 6.1 Checkpoint Playground
 
 Change the document length to see how many documents each model can keep on one H100.
