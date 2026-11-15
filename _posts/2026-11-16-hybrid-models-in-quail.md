@@ -98,7 +98,7 @@ Gated DeltaNet (GDN) and attention behave in vastly different ways. Below, we de
 
 ## 2.1 Attention
 
-Attention compares each token with all earlier tokens, so the KV cache grows linearly with document length. Qwen3-4B uses grouped-query attention (GQA)<sup><a href="#note-5">5</a></sup>. Its 32 query heads share 8 KV heads. Each token therefore uses one-quarter of the KV storage it would need with a separate KV head for every query head.
+Attention compares each token with all earlier tokens, so the KV cache grows linearly with document length. Grouped-query attention (GQA)<sup><a href="#note-5">5</a></sup> uses less KV storage per token than standard multi-head attention.
 
 After an operator finishes, Quail “rewinds” the cache by discarding the keys and values for the question tokens. It keeps the entries for the preamble and document so the next operator can ask a different question without processing the document again.
 
