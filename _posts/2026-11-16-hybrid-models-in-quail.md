@@ -1,11 +1,9 @@
 ---
 layout: post
 title: "Supporting Hybrid Models in Quail"
-date: 2026-11-02
+date: 2026-11-16
 author: "Arnav Dhariya, Shreya Shankar"
 permalink: /blog/hybrid-models-in-quail/
-unlisted: true
-sitemap: false
 math: true
 typora-root-url: ..
 description: "How Quail supports hybrid models that mix full attention with Gated DeltaNet layers: checkpoints of the recurrent state, retention and eviction, and the cost-model changes."
@@ -46,7 +44,7 @@ description: "How Quail supports hybrid models that mix full attention with Gate
 }
 </style>
 
-<aside class="tldr"><strong>TL;DR:</strong> We now support hybrid models such as <a href="https://qwen.ai/blog?id=qwen3.5">Qwen3.5-4B</a>, which use less memory for long documents, letting Quail keep more documents in memory for reuse. On <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a>, we observe a 3.2&times; speedup over vLLM (geometric mean over queries) on Qwen3.5-4B.</aside>
+<aside class="tldr"><strong>TL;DR:</strong> Quail now supports hybrid models like <a href="https://qwen.ai/blog?id=qwen3.5">Qwen3.5-4B</a>. Hybrid models use less memory per long document&mdash;allowing Quail to keep more documents in high-bandwidth memory (HBM) for reuse across questions. With Qwen3.5-4B, Quail is 3.2&times; faster than vLLM on <a href="https://github.com/fsdatalab/quail-bench">QUAIL-B</a> (geometric mean across queries).</aside>
 
 <nav class="post-toc" aria-label="Table of contents">
 <strong>Contents</strong>
