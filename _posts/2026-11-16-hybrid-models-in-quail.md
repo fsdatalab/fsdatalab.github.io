@@ -279,7 +279,7 @@ $$
 To understand how the above cost model would be used to evaluate the latency of a query, we exemplify it below on the SALES-4 query from QUAIL-B. SALES-4 comes from QUAIL-B at scale factor 0.1. We use it because its two filters make the arithmetic easy to follow. [Figure 2](#figure-2) shows the discount filter $$\phi_d$$ and the commitment filter $$\phi_c$$.
 
 <figure class="figure-full figure-readable" id="figure-2">
-  <img src="/assets/blog/hybrid-models-in-quail/sales4-query.svg?v=2" alt="A database instance of two sales calls, an AI_IF conjunction query applying a discount filter and a commit filter, and the expected TRUE/FALSE output; a dash marks a filter skipped.">
+  <img src="/assets/blog/hybrid-models-in-quail/sales4-query.svg?v=3" alt="A database instance of two sales calls, an AI.IF conjunction query applying a discount filter and a commit filter, and the expected TRUE/FALSE output; a dash marks a filter skipped.">
   <figcaption>Figure 2. SALES-4 applies both filters to the sales-call transcripts. A dash marks a filter skipped because the transcript already failed an earlier one. The figure shows the filters in the order written, and Quail may reorder them.</figcaption>
 </figure>
 
@@ -369,7 +369,7 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 **Where the speedup comes from.** Per query, the speedup is the product of two ratios: how many fewer tokens Quail computes (vLLM's fresh tokens over Quail's) and how fast it computes each one (Quail's fresh tokens per second over vLLM's). Over the 46 queries, the geometric means are 3.219 for the fresh-token ratio and 0.984 for the per-token rate ratio (their product is 3.168), so the speedup comes from recomputing less. In total, Quail computes 165M fresh tokens against 1,002M for vLLM.
 
-**Limitations and follow-ups.** The cost model currently counts only compute time for GDN. In practice, the delta rule and convolution are limited by memory bandwidth. We plan to account for the time spent moving data and cover GPU profiling in a separate post. Other hybrids have different checkpoint sizes. LFM2, for example, keeps only the convolution buffer for each recurrent layer.
+**Limitations and follow-ups.** The cost model estimates the delta rule and short convolution from their FLOP counts alone. It accounts for checkpoint transfers separately. We plan to profile both kernels on the H100 to see how much memory traffic affects their runtime. Other hybrids have different checkpoint sizes. LFM2, for example, keeps only the convolution buffer for each recurrent layer.
 
 # 6. Hybrid Playgrounds
 
