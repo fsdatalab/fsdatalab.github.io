@@ -86,7 +86,7 @@ description: "How Quail supports hybrid models that mix full attention with Gate
 
 So far, [Quail](https://fsdatalab.github.io/blog/introducing-quail/)<sup><a href="#note-1">1</a></sup>, our inference engine for AI functions in SQL, has only supported transformers like Qwen3<sup><a href="#note-2">2</a></sup>, which uses grouped-query attention to reduce the size of its key-value (KV) cache. The cache still grows linearly with document length and quickly fills GPU memory. Many new open-weight models, like Qwen3.5, are hybrids, which replace most attention layers with Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup> layers, a type of linear attention.
 
-GDN layers keep a fixed-size state regardless of document length, which dramatically reduces memory for long documents (e.g., a 16,000-token document requires about 2.36 GB of cached state with Qwen3-4B and 576 MB with Qwen3.5-4B, using bf16 KV). With less memory per document, Quail can keep more documents in memory.
+GDN layers keep a fixed-size state regardless of document length, which dramatically reduces memory for long documents (e.g., a 16,000-token document requires about 2.36 GB of cached state with Qwen3-4B, but only 576 MB—or 76% less—with Qwen3.5-4B, using bf16 KV). With less memory per document, Quail can keep more documents in memory.
 
 To support hybrids, we changed what Quail saves after reading a document. Along with the KV cache, Quail now saves a *checkpoint* of the GDN layers' state so it can answer another question without processing the document again.
 
