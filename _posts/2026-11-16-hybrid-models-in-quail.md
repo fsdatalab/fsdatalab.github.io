@@ -11,7 +11,7 @@ image:
   path: /assets/blog/hybrid-models-in-quail/social-preview.png
   width: 1200
   height: 630
-  alt: "A charcoal quail with a crimson crest and a wing of layered paper feathers on an ivory background."
+  alt: "Quail reads a document once and reuses its attention KV cache and GDN checkpoint to answer two questions."
 ---
 
 <style>
