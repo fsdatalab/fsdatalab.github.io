@@ -11,7 +11,7 @@ image:
   path: /assets/blog/hybrid-models-in-quail/social-preview.png
   width: 1200
   height: 630
-  alt: "Cached state for a 16,000-token document: 2.36 GB with Qwen3-4B and 576 MB with Qwen3.5-4B."
+  alt: "A charcoal quail with a crimson crest and a wing of layered paper feathers on an ivory background."
 ---
 
 <style>
