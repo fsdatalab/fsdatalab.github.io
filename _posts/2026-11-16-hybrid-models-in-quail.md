@@ -15,14 +15,6 @@ image:
 ---
 
 <style>
-.prose > h1[id] {
-  font-size: 1.5rem;
-}
-.prose > h2[id] {
-  font-size: 1.125rem;
-  line-height: 1.3;
-  margin: 1.25rem 0 .375rem;
-}
 .prose sup:has(> a[href^="#note-"]) {
   font-size: .75em;
   top: -.45em;
@@ -87,7 +79,7 @@ image:
 </ol>
 </nav>
 
-# 1. Introduction
+## 1. Introduction
 
 So far, [Quail](https://fsdatalab.github.io/blog/introducing-quail/)<sup><a href="#note-1">1</a></sup>, our inference engine for AI functions in SQL, has only supported transformers like Qwen3<sup><a href="#note-2">2</a></sup>, which uses grouped-query attention to reduce the size of its key-value (KV) cache. The cache still grows linearly with document length and quickly fills GPU memory. Many new open-weight models, like Qwen3.5, are hybrids, which replace most attention layers with Gated DeltaNet (GDN)<sup><a href="#note-3">3</a></sup> layers, a type of linear attention.
 
@@ -97,17 +89,17 @@ To support hybrids, we changed what Quail saves after reading a document. Along 
 
 In this post, we describe how we changed Quail's memory management and cost model to account for checkpoints. With Qwen3.5-4B<sup><a href="#note-4">4</a></sup>, Quail achieved a 3.2&times; speedup over vLLM (geometric mean across the 46 [QUAIL-B](https://github.com/fsdatalab/quail-bench) queries we compared).
 
-# 2. Gated DeltaNet vs. Attention
+## 2. Gated DeltaNet vs. Attention
 
 Gated DeltaNet (GDN) and attention behave in vastly different ways. Below, we describe the differences in what they retain, and briefly give an overview of both.
 
-## 2.1 Attention
+### 2.1 Attention
 
 Attention compares each token with all earlier tokens, so the KV cache grows linearly with document length. Though grouped-query attention (GQA)<sup><a href="#note-5">5</a></sup> shrinks the KV cache compared with standard multi-head attention (as used in Llama 2 7B), it is only by a constant factor.
 
 After an operator finishes, Quail “rewinds” the cache by discarding the keys and values for the question tokens. It keeps the entries for the preamble and document so the next operator can ask a different question without processing the document again.
 
-## 2.2 Linear Attention Layer (Gated DeltaNet)
+### 2.2 Linear Attention Layer (Gated DeltaNet)
 
 Next, we turn to linear attention layers, specifically Gated DeltaNet (GDN) and its recurrence formula. We illustrate the layer for Qwen3.5-4B.
 
@@ -120,11 +112,11 @@ Hybrid architectures combine both full-attention layers and linear attention lay
 
 Instead of linear KV growth per token as in full-attention layers, GDN maintains a fixed-size recurrent state, $$S_t$$, after token $$t$$. Each head updates its state for every token, so the state size per document stays constant as the document grows.
 
-## 2.3 Short Convolution
+### 2.3 Short Convolution
 
 Each GDN layer applies a width-4 convolution over the concatenated $$q$$, $$k$$ and $$v$$ channels ($$16\times128\times2+32\times128=8{,}192$$ channels), which lets a token blend information from its predecessors. It keeps the last 3 inputs per channel, and this buffer becomes part of the checkpoint ([Section 3.1](#31-checkpoint-size)).
 
-## 2.4 Gated Delta Rule
+### 2.4 Gated Delta Rule
 
 For one head at token $$t$$, let $$k_t$$ and $$v_t$$ be the key and value vectors, with dimensions $$d_k$$ and $$d_v$$. The state $$S_t$$ is a $$d_v \times d_k$$ matrix. The decay gate $$\alpha_t$$ scales the previous state, and the write gate $$\beta_t$$ sets how strongly to correct its prediction for the current key. The gated delta rule is<sup><a href="#note-6">6</a></sup>
 
@@ -134,7 +126,7 @@ $$
 
 The term in parentheses is the difference between the current value and the value predicted by the decayed state. The last factor writes the correction along the current key.
 
-# 3. Checkpoints in Quail
+## 3. Checkpoints in Quail
 
 A *checkpoint* is a copy of every GDN layer's state $$S$$ and convolution buffer, taken at the end of a document's reusable prefix: the preamble and the document, before any question. When a later operator asks about that document, Quail loads the checkpoint and the attention KV and computes only the question, instead of recomputing the document. A question starts from the checkpoint and leaves it unchanged, so any number of questions can read it.
 
@@ -155,7 +147,7 @@ We size Quail's memory for Qwen3.5-4B on one H100. [Table 1](#table-1) gives the
 <p class="table-caption">Table 1. Qwen3.5-4B shape and description.</p>
 </div>
 
-## 3.1 Checkpoint Size
+### 3.1 Checkpoint Size
 
 Each GDN layer saves its state $$S$$ and its convolution buffer $$B_{\text{cv}}$$ (the last $$w-1=3$$ inputs over $$D_c = 2H_kd_k + H_vd_v = 8{,}192$$ channels). With the shapes in [Table 1](#table-1), $$S$$ is stored in fp32 (4 bytes per value) and $$B_{\text{cv}}$$ in bf16 (2 bytes per value). Writing $$\lvert S\rvert$$ and $$\lvert B_{\text{cv}}\rvert$$ for their respective sizes in bytes gives
 
@@ -175,7 +167,7 @@ B_{\text{ckpt}} &= L_g\left(\lvert S\rvert + \lvert B_{\text{cv}}\rvert\right) =
 \end{aligned}
 $$
 
-## 3.2 Retaining KV and Checkpoints
+### 3.2 Retaining KV and Checkpoints
 
 As we retain both KV and checkpoints in the high-bandwidth memory (HBM), we must evict a document's KV and checkpoint together. Reusing a document needs both, so the half that survived saves minimal recomputations.
 
@@ -226,7 +218,7 @@ These counts assume every document has length $$\ell$$ and is retained. [Table 2
 
 For example, with 1,000-token documents, $$n_{\text{slots}} = \lfloor 67{,}803 / 161.25 \rfloor = 420$$ checkpoint slots, which is 21.63 GB of checkpoints, and the remaining 26,538 pages leave 13.91 GB available for KV. You can try other document lengths in the [checkpoint playground](#61-checkpoint-playground).
 
-## 3.3 Eviction
+### 3.3 Eviction
 
 Our eviction policy has been to evict the lowest priority first, where the priority of a document $$d$$ of $$\ell_d$$ tokens is the work it is expected to save per page, with $$p_d$$ the probability that a later operator reads it and $$s(\ell_d)$$ the time to recompute it. For a hybrid model, the checkpoint simply counts as $$c = 98.25$$ extra pages of the document, and Quail evicts a document's KV and checkpoint together:
 
@@ -234,7 +226,7 @@ $$
 \text{priority}(d) = \frac{p_d\, s(\ell_d)}{\lceil \ell_d/16 \rceil + c}.
 $$
 
-# 4. Updated Cost Model
+## 4. Updated Cost Model
 
 Here, we describe the updates to the cost model since the [last post](/blog/ai-filter-cost-estimates/), as hybrid models break the assumption in the speed-of-light (SoL) estimates that each layer is full-attention. An SoL estimate is the time the roofline formula below<sup><a href="#note-8">8</a></sup> gives for a query: each operation would take the larger of its arithmetic time and memory-transfer time, and the times are summed over the query. For component $$j$$, let $$T_j$$ be its estimated time in seconds and $$T$$ the total. Here $$F_j$$ and $$B_j$$ are the FLOPs and HBM bytes of one piece of the forward pass, $$\Pi_j$$ the arithmetic rate for that component in floating-point operations per second, and $$\beta_{\text{hbm}} = 3.35$$ TB/s the HBM bandwidth, taking the H100 values from its datasheet<sup><a href="#note-9">9</a></sup>.
 
@@ -261,7 +253,7 @@ We keep the notation of the previous post: $$n$$ tokens computed, $$A$$ causal q
 
 The projections and the MLP are matrix multiplications, and we price them at 857 TFLOP/s (the rate we measure for bf16 matrix multiplies on our H100). We price attention and the delta rule at the dense bf16 peak, $$\Pi_{\text{bf16}} = 989.5$$ TFLOP/s.
 
-## 4.1 The Gated Delta Rule
+### 4.1 The Gated Delta Rule
 
 The recurrence of [Section 2.4](#24-gated-delta-rule) updates $$S_t$$ per token, but a GPU kernel splits the sequence into chunks of $$C_g = 64$$ tokens and rewrites most of the work as matrix multiplies on tensor cores. The cost model estimates $$f_{\text{gdn}}$$ FLOPs per token and value head. With key and value dimensions $$d_k = d_v = 128$$,
 
@@ -279,7 +271,7 @@ $$
 F_{\text{gdn}} = f_{\text{gdn}}\, H_v L_g\, n = 140{,}509{,}184\,n, \qquad T_{\text{gdn}} = \frac{F_{\text{gdn}}}{\Pi_{\text{bf16}}}.
 $$
 
-## 4.2 Example: SALES-4 on Qwen3.5-4B
+### 4.2 Example: SALES-4 on Qwen3.5-4B
 
 To understand how the above cost model would be used to evaluate the latency of a query, we exemplify it below on the SALES-4 query from QUAIL-B. SALES-4 comes from QUAIL-B at scale factor 0.1. We use it because its two filters make the arithmetic easy to follow. [Figure 2](#figure-2) shows the discount filter $$\phi_d$$ and the commitment filter $$\phi_c$$.
 
@@ -344,7 +336,7 @@ In [Table 5](#table-5), $$T_{\text{mlp}}$$ and $$T_{\text{proj}}$$ are 96.8% of 
 
 Without the checkpoint, stage 2 would recompute 39,562 tokens (3.2% of $$n$$), or about 0.33 s for projection and MLP work alone. Checkpoint reads and writes across both stages cost an estimated 0.031 s.
 
-# 5. Results
+## 5. Results
 
 We compare Quail with vLLM on Qwen3.5-4B (bf16). The question is whether the changes of the previous sections pay off on real queries. We run QUAIL-B at scale factor 0.1 on one H100. vLLM runs each query two ways, stock (one operator at a time) and pipelined, and we compare Quail with the faster of the two on each query. Four queries do not run on vLLM, so 46 queries are compared. Model startup is excluded from every time.
 
@@ -376,11 +368,11 @@ Quail is faster on 45 of the 46 queries and on par on the last one. On REL-AGENT
 
 **Limitations and follow-ups.** Quail’s [roofline model](#4-updated-cost-model) already uses `max(compute time, transfer time)`. For the delta rule and short convolution, the model currently sets transfer time to zero. We could estimate transfer time for each kernel by dividing the total bytes it reads from and writes to HBM by the GPU’s memory bandwidth.
 
-# 6. Hybrid Playgrounds
+## 6. Hybrid Playgrounds
 
 Here are two playgrounds for exploring how many documents fit in GPU memory and how filter order affects estimated query time.
 
-## 6.1 Checkpoint Playground
+### 6.1 Checkpoint Playground
 
 Change the document length to see how many documents each model can keep on one H100.
 
@@ -388,7 +380,7 @@ Change the document length to see how many documents each model can keep on one 
   <noscript>The playground needs JavaScript. Table 2 gives the same numbers for four document lengths.</noscript>
 </div>
 
-## 6.2 Cost-Model Playground
+### 6.2 Cost-Model Playground
 
 Start with SALES-4 on Qwen3.5-4B. Change a filter to see how it affects the estimated query time.
 
@@ -397,17 +389,17 @@ Start with SALES-4 on Qwen3.5-4B. Change a filter to see how it affects the esti
 </div>
 <script src="{{ '/assets/js/hybrid-playground.js' | relative_url }}" defer></script>
 
-# 7. Conclusion
+## 7. Conclusion
 
 In this post, we walked through how Quail now supports hybrid models and what we changed to keep document reuse working under the new architecture. Quail saves a checkpoint of the GDN state for the recurrent layers and keeps the KV cache for the attention layers, and both share one pool in HBM. On QUAIL-B, Quail is 3.2&times; faster (geometric mean) than the faster of two vLLM configurations on Qwen3.5-4B.
 
 The machinery we added for hybrids also lets us integrate decision models built on top of the models we now support. We would also like to explore making checkpoints smaller in HBM, for example by replaying a short suffix of each document instead of storing the full state, as proposed in SuffixReplay.<sup><a href="#note-11">11</a></sup> If this is the kind of work that excites you, please reach out! In the meantime, try out [Quail](https://github.com/fsdatalab/quail), let us know your feedback, and if you like what we're building, give it a star on GitHub!
 
-# Acknowledgements
+## Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in this research.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> Shreya Shankar, Charles Frye, Fergus Finn, Arnav Dhariya, Joseph Barrow, and Meryem Arik. 2026. Building an Ultra-High Throughput AI-SQL Engine. [https://fsdatalab.github.io/blog/introducing-quail/](https://fsdatalab.github.io/blog/introducing-quail/)
 
@@ -431,7 +423,7 @@ We thank [Modal](https://modal.com/) for sponsoring the compute used in this res
 
 <span id="note-11"><strong>11.</strong></span> Yirui Liu, Ruoling Qi, Xuaner Wu, Yuxin Jin, Jian Chen, Penghang Liu, Yafei Huang, Jiawei Shao, and Xuelong Li. 2026. Just Let Linear States Forget the Distant Past: Prefix Caching via Suffix Replay for Hybrid LLMs. [arXiv:2609.33477](https://arxiv.org/abs/2609.33477).
 
-# Cite this article
+## Cite this article
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>
