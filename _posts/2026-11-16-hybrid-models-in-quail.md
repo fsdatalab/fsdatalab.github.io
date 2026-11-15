@@ -2,8 +2,11 @@
 layout: post
 title: "Supporting Hybrid Models in Quail"
 date: 2026-11-16
-author: "Arnav Dhariya, Shreya Shankar"
+authors:
+  - arnav-dhariya
+  - shreya-shankar
 permalink: /blog/hybrid-models-in-quail/
+tags: [ai-sql]
 math: true
 typora-root-url: ..
 description: "How Quail supports hybrid models that mix full attention with Gated DeltaNet layers: checkpoints of the recurrent state, retention and eviction, and the cost-model changes."
@@ -15,10 +18,6 @@ image:
 ---
 
 <style>
-.prose sup:has(> a[href^="#note-"]) {
-  font-size: .75em;
-  top: -.45em;
-}
 .prose .hybrid-table.table-wrap {
   margin-block: 1.25rem;
 }
