@@ -2,72 +2,271 @@
  * Interactive Speed-of-Light calculator for chains of AI-powered filters.
  *
  * Implements the cost model of "How to Cost Your AI-Powered Filters"
- * (Sections 3-5) for one fixed configuration: Qwen3-4B (FP8 weights, BF16
- * attention and KV) on an NVIDIA H100 SXM.
+ * (Sections 3-5) on an NVIDIA H100 SXM, for Qwen3-4B (FP8 weights, BF16
+ * attention and KV) and for the hybrid Qwen3.5 models, whose Gated DeltaNet
+ * layers are priced as in Quail's quail/cost/dense_decoder_cost.py.
  */
 (function (root) {
   'use strict';
 
-  // ── Hardware (Table 1) and model (Table 2) ─────────────────────────────
+  // ── Hardware (Table 1) and models ──────────────────────────────────────
   const HW = {
     pi8: 1.979e15, // FLOP/s, FP8 GEMMs
     pi16: 989.5e12, // FLOP/s, BF16 attention
+    pi32: 67e12, // FLOP/s, FP32 on the CUDA cores (convolutions)
     beta: 3.35e12, // bytes/s, HBM bandwidth
     capacity: 80e9, // bytes, HBM capacity
   };
-  const LLM = {
-    layers: 36,
-    dModel: 2560,
-    nHeads: 32,
-    nKv: 8,
-    dHead: 128,
-    dMlp: 9728,
-    vocab: 151936,
-    bw: 1, // bytes per weight (FP8)
-    bkv: 2, // bytes per KV element (BF16)
+  // Qwen3-4B is the dense model of Table 2. The Qwen3.5 models are hybrids,
+  // with Quail's specs (quail/specs/qwen3_5_*.py): every fourth layer is full
+  // attention and the other three are Gated DeltaNet, which keep a fixed-size
+  // state per sequence instead of KV. Their query projection also emits an
+  // output gate as wide as the query.
+  const MODELS = {
+    'qwen3-4b-fp8': {
+      label: 'Qwen3-4B-fp8',
+      layers: 36,
+      attnLayers: 36,
+      dModel: 2560,
+      nHeads: 32,
+      nKv: 8,
+      dHead: 128,
+      dMlp: 9728,
+      bw: 1, // bytes per weight (FP8)
+      bkv: 2, // bytes per KV element (BF16)
+      // Section 4.1 / Table 4: resident weights include embeddings and FP8 scales.
+      residentBytes: 4.5e9,
+    },
+    'qwen3.5-4b-fp8': {
+      label: 'Qwen3.5-4B-fp8',
+      hybrid: true,
+      layers: 32,
+      attnLayers: 8,
+      dModel: 2560,
+      nHeads: 16,
+      nKv: 4,
+      dHead: 256,
+      dMlp: 9216,
+      bw: 1,
+      bkv: 2,
+      outputGate: true,
+      gdnLayers: 24,
+      gdnKeyHeads: 16,
+      gdnValueHeads: 32,
+      gdnKeyDim: 128,
+      gdnValueDim: 128,
+      gdnBw: 2, // the FP8 checkpoint keeps its Gated DeltaNet projections in BF16
+      convWidth: 4,
+      residentBytes: 6_023_951_872, // vLLM's loaded weights
+    },
+    'qwen3.5-27b-fp8': {
+      label: 'Qwen3.5-27B-fp8',
+      hybrid: true,
+      layers: 64,
+      attnLayers: 16,
+      dModel: 5120,
+      nHeads: 24,
+      nKv: 4,
+      dHead: 256,
+      dMlp: 17408,
+      bw: 1,
+      bkv: 2,
+      outputGate: true,
+      gdnLayers: 48,
+      gdnKeyHeads: 16,
+      gdnValueHeads: 48,
+      gdnKeyDim: 128,
+      gdnValueDim: 128,
+      gdnBw: 1,
+      convWidth: 4,
+      residentBytes: 29_638_887_936,
+    },
   };
-
-  const P_PROJ = LLM.layers * 2 * LLM.dModel * LLM.dHead * (LLM.nHeads + LLM.nKv);
-  const P_MLP = 3 * LLM.layers * LLM.dModel * LLM.dMlp;
-  const ATTN_FLOPS_PER_CMP = 4 * LLM.nHeads * LLM.dHead * LLM.layers;
-  const B_KV = 2 * LLM.bkv * LLM.layers * LLM.nKv * LLM.dHead; // bytes/token
-  const CHUNK = Math.floor((Math.pow(2, 31) - 1) / (2 * LLM.dMlp));
-  // Section 4.1 / Table 4: resident weights include embeddings and FP8 scales.
-  const RESIDENT_WEIGHT_BYTES = 4.5e9;
+  const DEFAULT_MODEL = 'qwen3-4b-fp8';
   const USABLE_HBM_BYTES = 0.95 * HW.capacity;
-  const ACTIVATION_BYTES = 2 * CHUNK * 32 * LLM.dModel;
+  const GDN_CHUNK = 64; // tokens per chunk of the chunked gated delta rule
+  const GDN_STATE_ELEMENT_BYTES = 4; // FP32 recurrent state
+  const CONV_STATE_ELEMENT_BYTES = 2; // BF16 convolution columns
 
-  // ── Roofline pieces ────────────────────────────────────────────────────
   function roof(compute, memory) {
     return { compute, memory, t: Math.max(compute, memory), bound: memory > compute ? 'memory' : 'compute' };
   }
+  const ZERO = roof(0, 0);
 
-  // Latency of one forward-pass stage that processes n tokens, makes A
-  // attention comparisons, and writes W / reads R KV tokens (Sections 3.2-3.5).
-  function stageTimes(n, A, W, R) {
-    if (n <= 0) {
-      const z = roof(0, 0);
-      return { proj: z, attn: z, mlp: z, total: 0, passes: 0 };
+  // Build the cost model (Sections 3-5) for one model on the H100.
+  function costModel(LLM) {
+    const qWidth = LLM.outputGate ? 2 : 1;
+    const P_PROJ = LLM.attnLayers * LLM.dModel * LLM.dHead * ((qWidth + 1) * LLM.nHeads + 2 * LLM.nKv);
+    const P_MLP = 3 * LLM.layers * LLM.dModel * LLM.dMlp;
+    const ATTN_FLOPS_PER_CMP = 4 * LLM.nHeads * LLM.dHead * LLM.attnLayers;
+    const B_KV = 2 * LLM.bkv * LLM.attnLayers * LLM.nKv * LLM.dHead; // bytes/token
+    // Rows x widest projection must stay under the int32 offset limit.
+    const CHUNK = Math.floor((Math.pow(2, 31) - 1) / Math.max(2 * LLM.dMlp, (LLM.nHeads + 2 * LLM.nKv) * LLM.dHead));
+    const ACTIVATION_BYTES = 2 * CHUNK * 32 * LLM.dModel;
+
+    // Gated DeltaNet layers (zero for a dense model). Per layer, the
+    // projections are q, k, v, the z gate, the two per-head gates, and the
+    // output; the chunked delta rule costs 6CK + 4CV + 6KV + 2C^2/3 FLOPs per
+    // token and value head; the depthwise convolution over q, k, and v costs
+    // one multiply-add per channel and tap; and a sequence's state is one
+    // K x V FP32 matrix per value head plus the last convWidth - 1 inputs.
+    const G = LLM.gdnLayers || 0;
+    const kw = (LLM.gdnKeyHeads || 0) * (LLM.gdnKeyDim || 0);
+    const vw = (LLM.gdnValueHeads || 0) * (LLM.gdnValueDim || 0);
+    const convChannels = 2 * kw + vw;
+    const P_GDN = G * (LLM.dModel * (2 * kw + 2 * vw + 2 * (LLM.gdnValueHeads || 0)) + vw * LLM.dModel);
+    const GDN_FLOPS_PER_TOKEN = G
+      ? G * LLM.gdnValueHeads * (6 * GDN_CHUNK * LLM.gdnKeyDim + 4 * GDN_CHUNK * LLM.gdnValueDim
+        + 6 * LLM.gdnKeyDim * LLM.gdnValueDim + (2 * GDN_CHUNK * GDN_CHUNK) / 3)
+      : 0;
+    const CONV_FLOPS_PER_TOKEN = 2 * (LLM.convWidth || 0) * G * convChannels;
+    const B_STATE = G
+      ? G * (LLM.gdnValueHeads * LLM.gdnValueDim * LLM.gdnKeyDim * GDN_STATE_ELEMENT_BYTES
+        + convChannels * (LLM.convWidth - 1) * CONV_STATE_ELEMENT_BYTES)
+      : 0; // bytes per sequence checkpoint
+    // Gated DeltaNet projections stored at the weight precision are priced
+    // with the other projections; BF16 ones are their own component.
+    const gdnSeparate = G > 0 && LLM.gdnBw !== LLM.bw;
+    const P_PROJ_ALL = P_PROJ + (gdnSeparate ? 0 : P_GDN);
+
+    // Latency of one forward-pass stage that processes n tokens, makes A
+    // attention comparisons, writes W / reads R KV tokens, and writes SW /
+    // reads SR state checkpoints (Sections 3.2-3.5).
+    function stageTimes(n, A, W, R, SW, SR) {
+      if (n <= 0) return { proj: ZERO, attn: ZERO, mlp: ZERO, lin: ZERO, total: 0, passes: 0 };
+      const K = Math.ceil(n / CHUNK);
+      let proj = roof((2 * P_PROJ_ALL * n) / HW.pi8, (LLM.bw * P_PROJ_ALL * K) / HW.beta);
+      if (gdnSeparate) {
+        const g = roof((2 * P_GDN * n) / HW.pi16, (LLM.gdnBw * P_GDN * K) / HW.beta);
+        proj = { compute: proj.compute + g.compute, memory: proj.memory + g.memory, t: proj.t + g.t, bound: g.t > proj.t ? g.bound : proj.bound };
+      }
+      const mlp = roof((2 * P_MLP * n) / HW.pi8, (LLM.bw * P_MLP * K) / HW.beta);
+      const attn = roof((ATTN_FLOPS_PER_CMP * A) / HW.pi16, (B_KV * (W + R)) / HW.beta);
+      // Linear-attention work: the delta rule and convolution are compute
+      // only, and the state checkpoints are memory only, each its own roofline.
+      let lin = ZERO;
+      if (G) {
+        const core = (GDN_FLOPS_PER_TOKEN * n) / HW.pi16;
+        const conv = (CONV_FLOPS_PER_TOKEN * n) / HW.pi32;
+        const state = (B_STATE * ((SW || 0) + (SR || 0))) / HW.beta;
+        lin = { compute: core + conv, memory: state, t: core + conv + state, bound: state > core + conv ? 'memory' : 'compute' };
+      }
+      return { proj, attn, mlp, lin, total: proj.t + attn.t + mlp.t + lin.t, passes: K };
     }
-    const K = Math.ceil(n / CHUNK);
-    const proj = roof((2 * P_PROJ * n) / HW.pi8, (LLM.bw * P_PROJ * K) / HW.beta);
-    const mlp = roof((2 * P_MLP * n) / HW.pi8, (LLM.bw * P_MLP * K) / HW.beta);
-    const attn = roof((ATTN_FLOPS_PER_CMP * A) / HW.pi16, (B_KV * (W + R)) / HW.beta);
-    return { proj, attn, mlp, total: proj.t + attn.t + mlp.t, passes: K };
-  }
 
-  // Per-document ask / scan cost used for ranking (Section 5.1): projections and
-  // MLP at their compute time, attention at max(compute, KV traffic).
-  function docCosts(p, q) {
-    const cost = (n, A, kvTokens) =>
-      (2 * P_PROJ * n) / HW.pi8 +
-      (2 * P_MLP * n) / HW.pi8 +
-      Math.max((ATTN_FLOPS_PER_CMP * A) / HW.pi16, (B_KV * kvTokens) / HW.beta);
-    const r = p + q;
-    return {
-      ask: cost(q, q * p + (q * (q + 1)) / 2, p + q),
-      scan: cost(r, (r * (r + 1)) / 2, r),
-    };
+    // Per-document ask / scan cost used for ranking (Section 5.1): projections,
+    // MLP, and linear-attention arithmetic at their compute time, attention at
+    // max(compute, KV traffic), and a hybrid's state checkpoint at its memory
+    // time (a scan writes one, an ask reads one).
+    function docCosts(p, q) {
+      const perToken =
+        (2 * P_PROJ_ALL) / HW.pi8 + (gdnSeparate ? (2 * P_GDN) / HW.pi16 : 0) +
+        (2 * P_MLP) / HW.pi8 + GDN_FLOPS_PER_TOKEN / HW.pi16 + CONV_FLOPS_PER_TOKEN / HW.pi32;
+      const cost = (n, A, kvTokens) =>
+        perToken * n + Math.max((ATTN_FLOPS_PER_CMP * A) / HW.pi16, (B_KV * kvTokens) / HW.beta) + B_STATE / HW.beta;
+      const r = p + q;
+      return {
+        ask: cost(q, q * p + (q * (q + 1)) / 2, p + q),
+        scan: cost(r, (r * (r + 1)) / 2, r),
+      };
+    }
+
+    // Stage-by-stage work of a fixed order (Section 4.2, Table 7), and its
+    // Speed-of-Light: Quail sums each stage's tokens, attention comparisons,
+    // and KV traffic first, then applies the roofline once per component to
+    // the totals (Section 5.2, Table 8) rather than adding each stage's own
+    // roofline latency. Per-stage times are still kept for the breakdown
+    // table to show each filter's arithmetic and memory bottlenecks.
+    function evaluateOrder(order, cfg) {
+      const { N, len, qpre } = cfg;
+      const p = qpre + len;
+      const stages = [];
+      let expected = N;
+      let nTot = 0, ATot = 0, WTot = 0, RTot = 0, SWTot = 0, SRTot = 0;
+      order.forEach((f, j) => {
+        const q = f.q;
+        let docsIn, n, A, W, R, SW, SR;
+        if (j === 0) {
+          const r = p + q;
+          docsIn = N;
+          n = N * r;
+          A = (N * r * (r + 1)) / 2;
+          W = n;
+          R = 0;
+          SW = N;
+          SR = 0;
+        } else {
+          docsIn = expected;
+          n = docsIn * q;
+          A = docsIn * (q * p + (q * (q + 1)) / 2);
+          W = n;
+          R = docsIn * p;
+          SW = 0;
+          SR = docsIn;
+        }
+        stages.push(Object.assign({ filter: f, docsIn, n, A, W, R }, stageTimes(n, A, W, R, SW, SR)));
+        nTot += n;
+        ATot += A;
+        WTot += W;
+        RTot += R;
+        SWTot += SW;
+        SRTot += SR;
+        expected *= f.s;
+      });
+      const chain = stageTimes(nTot, ATot, WTot, RTot, SWTot, SRTot);
+      return {
+        stages,
+        proj: chain.proj.t,
+        attn: chain.attn.t,
+        mlp: chain.mlp.t,
+        lin: chain.lin.t,
+        total: chain.total,
+      };
+    }
+
+    function kvBatching(cfg) {
+      const p = cfg.qpre + cfg.len;
+      const perDoc = B_KV * p + B_STATE;
+      const free = USABLE_HBM_BYTES - LLM.residentBytes - ACTIVATION_BYTES;
+      const perBatch = Math.floor(free / perDoc);
+      return {
+        perDocBytes: perDoc,
+        freeBytes: free,
+        perBatch,
+        batches: perBatch > 0 ? Math.ceil(cfg.N / perBatch) : Infinity,
+      };
+    }
+
+    // filters: [{name, s, q}] in the order the user entered them.
+    function solve(cfg, filterInputs) {
+      const p = cfg.qpre + cfg.len;
+      const filters = filterInputs.map((f, index) => {
+        const { ask, scan } = docCosts(p, f.q);
+        return Object.assign({}, f, {
+          index,
+          ask,
+          scan,
+          rank: f.s >= 1 ? Infinity : ask / (1 - f.s),
+        });
+      });
+      const { ranked, candidates, best } = chooseOrder(filters, cfg.N);
+      return {
+        filters,
+        ranked,
+        candidates,
+        best,
+        optimal: evaluateOrder(best.order, cfg),
+        entered: evaluateOrder(filters, cfg),
+        kv: kvBatching(cfg),
+      };
+    }
+
+    // Exact SoL of every ordering (only sensible for a handful of filters).
+    function allOrders(filters, cfg) {
+      return permutations(filters).map((order) => ({ order, total: evaluateOrder(order, cfg).total }));
+    }
+
+    return { LLM, P_PROJ, P_GDN, P_MLP, B_KV, B_STATE, CHUNK, stageTimes, docCosts, evaluateOrder, kvBatching, solve, allOrders };
   }
 
   // S(pi) = N scan_{pi1} + sum_{j>=2} ask_{pi_j} N prod_{k<j} s_{pi_k}  (Section 4.2)
@@ -96,89 +295,6 @@
     return { ranked, candidates, best };
   }
 
-  // Stage-by-stage work of a fixed order (Section 4.2, Table 7), and its
-  // Speed-of-Light: Quail sums each stage's tokens, attention comparisons,
-  // and KV traffic first, then applies the roofline once per component to
-  // the totals (Section 5.2, Table 8) rather than adding each stage's own
-  // roofline latency. Per-stage times are still kept for the breakdown
-  // table to show each filter's arithmetic and memory bottlenecks.
-  function evaluateOrder(order, cfg) {
-    const { N, len, qpre } = cfg;
-    const p = qpre + len;
-    const stages = [];
-    let expected = N;
-    let nTot = 0, ATot = 0, WTot = 0, RTot = 0;
-    order.forEach((f, j) => {
-      const q = f.q;
-      let docsIn, n, A, W, R;
-      if (j === 0) {
-        const r = p + q;
-        docsIn = N;
-        n = N * r;
-        A = (N * r * (r + 1)) / 2;
-        W = n;
-        R = 0;
-      } else {
-        docsIn = expected;
-        n = docsIn * q;
-        A = docsIn * (q * p + (q * (q + 1)) / 2);
-        W = n;
-        R = docsIn * p;
-      }
-      stages.push(Object.assign({ filter: f, docsIn, n, A, W, R }, stageTimes(n, A, W, R)));
-      nTot += n;
-      ATot += A;
-      WTot += W;
-      RTot += R;
-      expected *= f.s;
-    });
-    const chain = stageTimes(nTot, ATot, WTot, RTot);
-    return {
-      stages,
-      proj: chain.proj.t,
-      attn: chain.attn.t,
-      mlp: chain.mlp.t,
-      total: chain.total,
-    };
-  }
-
-  function kvBatching(cfg) {
-    const p = cfg.qpre + cfg.len;
-    const perDoc = B_KV * p;
-    const free = USABLE_HBM_BYTES - RESIDENT_WEIGHT_BYTES - ACTIVATION_BYTES;
-    const perBatch = Math.floor(free / perDoc);
-    return {
-      perDocBytes: perDoc,
-      freeBytes: free,
-      perBatch,
-      batches: perBatch > 0 ? Math.ceil(cfg.N / perBatch) : Infinity,
-    };
-  }
-
-  // filters: [{name, s, q}] in the order the user entered them.
-  function solve(cfg, filterInputs) {
-    const p = cfg.qpre + cfg.len;
-    const filters = filterInputs.map((f, index) => {
-      const { ask, scan } = docCosts(p, f.q);
-      return Object.assign({}, f, {
-        index,
-        ask,
-        scan,
-        rank: f.s >= 1 ? Infinity : ask / (1 - f.s),
-      });
-    });
-    const { ranked, candidates, best } = chooseOrder(filters, cfg.N);
-    return {
-      filters,
-      ranked,
-      candidates,
-      best,
-      optimal: evaluateOrder(best.order, cfg),
-      entered: evaluateOrder(filters, cfg),
-      kv: kvBatching(cfg),
-    };
-  }
-
   function permutations(items) {
     if (items.length <= 1) return [items.slice()];
     const out = [];
@@ -188,12 +304,11 @@
     return out;
   }
 
-  // Exact SoL of every ordering (only sensible for a handful of filters).
-  function allOrders(filters, cfg) {
-    return permutations(filters).map((order) => ({ order, total: evaluateOrder(order, cfg).total }));
-  }
+  const COST_MODELS = {};
+  Object.keys(MODELS).forEach((k) => (COST_MODELS[k] = costModel(MODELS[k])));
 
-  const model = { HW, LLM, P_PROJ, P_MLP, B_KV, CHUNK, stageTimes, permutations, allOrders, docCosts, orderCost, chooseOrder, evaluateOrder, kvBatching, solve };
+  // The default (Qwen3-4B) model's functions stay at the top level.
+  const model = Object.assign({ HW, MODELS, COST_MODELS, costModel, permutations, orderCost, chooseOrder }, COST_MODELS[DEFAULT_MODEL]);
 
   if (typeof module === 'object' && module.exports) module.exports = model;
   root.FilterChainModel = model;
@@ -244,7 +359,7 @@
   }
 
   function defaultState() {
-    const state = Object.assign({ nextId: 1, filters: [] }, DEFAULT_WORK);
+    const state = Object.assign({ nextId: 1, filters: [], model: DEFAULT_MODEL }, DEFAULT_WORK);
     DEFAULT_FILTERS.forEach((f) => state.filters.push(newFilter(state, f[0], f[1], f[2])));
     return state;
   }
@@ -284,10 +399,15 @@
     return '<label class="pg-field"><span>' + label + '</span><input class="pg-num" type="number" inputmode="decimal" step="any" ' + attrs + '></label>';
   }
 
+  const subtitle = (key) => esc(MODELS[key].label) + ' on H100, IMDB conjunction (Section 5)';
+
   function skeleton(state) {
     return (
-      '<div class="pg-bar"><span class="pg-title">Filter Playground <span class="pg-sub">Qwen3-4B-fp8 on H100, IMDB conjunction (Section 5)</span></span>' +
+      '<div class="pg-bar"><span class="pg-title">Filter Playground <span class="pg-sub">' + subtitle(state.model) + '</span></span>' +
       '<div class="pg-bar-actions">' +
+      '<select class="pg-select" data-model aria-label="Model">' +
+      Object.keys(MODELS).map((k) => '<option value="' + k + '"' + (k === state.model ? ' selected' : '') + '>' + esc(MODELS[k].label) + (MODELS[k].hybrid ? ' (hybrid)' : '') + '</option>').join('') +
+      '</select>' +
       '<button type="button" class="pg-btn" data-action="reset">Reset</button>' +
       '<button type="button" class="pg-btn" data-action="shuffle">Shuffle</button>' +
       '<button type="button" class="pg-btn pg-btn-primary" data-action="apply">Apply ordering rule</button></div></div>' +
@@ -446,17 +566,18 @@
       return order.map((f) => (alive *= f.s));
     }
 
-    function stageRow(s, j) {
+    function stageRow(s, j, hybrid) {
       const cell = (r) => fmtTime(r.t) + (r.bound === 'memory' && r.t > 0 ? ' <span class="pg-tag">memory-bound</span>' : '');
       return (
         '<tr><td>' + (j + 1) + '</td><td class="pg-left"><span class="pg-dot-c" style="--c:' + s.filter.color + '"></span>' + esc(s.filter.name) + '</td>' +
         '<td>' + fmtInt(s.docsIn) + '</td><td>' + fmtInt(s.n) + '</td>' +
-        '<td>' + cell(s.proj) + '</td><td>' + cell(s.attn) + '</td><td>' + cell(s.mlp) + '</td>' +
+        '<td>' + cell(s.proj) + '</td><td>' + cell(s.attn) + '</td>' + (hybrid ? '<td>' + cell(s.lin) + '</td>' : '') + '<td>' + cell(s.mlp) + '</td>' +
         '<td><strong>' + fmtTime(s.total) + '</strong></td></tr>'
       );
     }
 
-    function resultsHTML(cfg, sol) {
+    function resultsHTML(cfg, sol, cm) {
+      const hybrid = !!cm.LLM.hybrid;
       const m = sol.filters.length;
       const opt = sol.optimal;
       const ent = sol.entered;
@@ -483,7 +604,7 @@
 
       let plot = '';
       if (m > 1 && m <= MAX_BRUTE_FORCE) {
-        const all = allOrders(sol.filters, cfg);
+        const all = cm.allOrders(sol.filters, cfg);
         const rank = 1 + all.filter((a) => a.total < opt.total - 1e-12).length;
         const bestTotal = Math.min.apply(null, all.map((a) => a.total));
         const key = (order) => order.map((f) => f.id).join('-');
@@ -523,16 +644,19 @@
           '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-left">Order</th><th>S(&pi;)</th></tr></thead><tbody>' + candRows + '</tbody></table></div>';
       }
       const kv = sol.kv;
+      const kvWhat = hybrid ? 'KV and Gated DeltaNet state' : 'KV';
       const kvNote =
         kv.perBatch < 1
-          ? 'One document’s prefix KV (' + (kv.perDocBytes / 1e9).toFixed(2) + ' GB) does not fit in the free HBM (' + (kv.freeBytes / 1e9).toFixed(2) + ' GB).'
-          : 'KV per document ' + (kv.perDocBytes / 1e9).toFixed(3) + ' GB; ' + (kv.freeBytes / 1e9).toFixed(2) + ' GB free, so ' + fmtInt(kv.perBatch) + ' documents per batch (' + fmtInt(kv.batches) + (kv.batches === 1 ? ' batch' : ' batches') + ').';
+          ? 'One document’s prefix ' + kvWhat + ' (' + (kv.perDocBytes / 1e9).toFixed(2) + ' GB) does not fit in the free HBM (' + (kv.freeBytes / 1e9).toFixed(2) + ' GB).'
+          : kvWhat + ' per document ' + (kv.perDocBytes / 1e9).toFixed(3) + ' GB; ' + (kv.freeBytes / 1e9).toFixed(2) + ' GB free, so ' + fmtInt(kv.perBatch) + ' documents per batch (' + fmtInt(kv.batches) + (kv.batches === 1 ? ' batch' : ' batches') + ').';
       math +=
         '<div class="pg-h-small pg-mt">Stage costs, ordering rule</div>' +
-        '<div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>Docs in</th><th>Tokens</th><th><i>T</i><sub>proj</sub></th><th><i>T</i><sub>attn</sub></th><th><i>T</i><sub>mlp</sub></th><th>Stage</th></tr></thead><tbody>' +
-        opt.stages.map(stageRow).join('') +
-        '<tr class="pg-total"><td></td><td class="pg-left">Conjunction SoL</td><td></td><td>' + fmtInt(opt.stages.reduce((a, s) => a + s.n, 0)) + '</td><td>' + fmtTime(opt.proj) + '</td><td>' + fmtTime(opt.attn) + '</td><td>' + fmtTime(opt.mlp) + '</td><td><strong>' + fmtTime(opt.total) + '</strong></td></tr>' +
-        '</tbody></table></div><div class="pg-note">The total applies the roofline to combined work, so it can be lower than the sum of stage times.</div><div class="pg-note">' + kvNote + '</div>';
+        '<div class="pg-scroll"><table class="pg-table"><thead><tr><th>#</th><th class="pg-left">Filter</th><th>Docs in</th><th>Tokens</th><th><i>T</i><sub>proj</sub></th><th><i>T</i><sub>attn</sub></th>' + (hybrid ? '<th><i>T</i><sub>lin</sub></th>' : '') + '<th><i>T</i><sub>mlp</sub></th><th>Stage</th></tr></thead><tbody>' +
+        opt.stages.map((s, j) => stageRow(s, j, hybrid)).join('') +
+        '<tr class="pg-total"><td></td><td class="pg-left">Conjunction SoL</td><td></td><td>' + fmtInt(opt.stages.reduce((a, s) => a + s.n, 0)) + '</td><td>' + fmtTime(opt.proj) + '</td><td>' + fmtTime(opt.attn) + '</td>' + (hybrid ? '<td>' + fmtTime(opt.lin) + '</td>' : '') + '<td>' + fmtTime(opt.mlp) + '</td><td><strong>' + fmtTime(opt.total) + '</strong></td></tr>' +
+        '</tbody></table></div><div class="pg-note">The total applies the roofline to combined work, so it can be lower than the sum of stage times.</div>' +
+        (hybrid ? '<div class="pg-note"><i>T</i><sub>proj</sub> includes the Gated DeltaNet projections; <i>T</i><sub>lin</sub> is the chunked delta rule, the short convolutions, and reading or writing each document’s state checkpoint (' + (cm.B_STATE / 1e6).toFixed(1) + ' MB).</div>' : '') +
+        '<div class="pg-note">' + kvNote + '</div>';
 
       return (
         '<div class="pg-label-row"><span class="pg-h">Ordering rule</span></div>' +
@@ -568,10 +692,11 @@
         lastSol = null;
         return;
       }
-      const sol = solve(cfg, filters);
+      const cm = COST_MODELS[state.model];
+      const sol = cm.solve(cfg, filters);
       const open = [].map.call(resultsEl.querySelectorAll('details'), (d) => d.open);
       flip(resultsEl, '[data-chip]', 'chip', () => {
-        resultsEl.innerHTML = resultsHTML(cfg, sol);
+        resultsEl.innerHTML = resultsHTML(cfg, sol, cm);
         resultsEl.querySelectorAll('details').forEach((d, i) => {
           if (open[i]) d.open = true;
         });
@@ -611,7 +736,7 @@
     }
 
     function loadDefault() {
-      Object.assign(state, defaultState());
+      Object.assign(state, defaultState(), { model: state.model });
       ['N', 'len', 'qpre'].forEach((k) => (el.querySelector('[data-global="' + k + '"]').value = state[k]));
       flip(rowsEl, '.pg-row', 'id', renderRows, 380);
       update();
@@ -626,6 +751,13 @@
         if (f) f[target.dataset.field] = target.value;
       }
     }
+
+    el.addEventListener('change', (e) => {
+      if (!e.target.matches('[data-model]')) return;
+      state.model = e.target.value;
+      el.querySelector('.pg-sub').innerHTML = subtitle(state.model);
+      update();
+    });
 
     el.addEventListener('input', (e) => {
       const t = e.target;
