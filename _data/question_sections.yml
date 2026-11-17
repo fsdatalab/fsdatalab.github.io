@@ -1,5 +1,7 @@
 - key: human-behavior
   name: "Human behavior"
+- key: evals
+  name: "Evals"
 - key: interfaces
   name: "Interfaces"
 - key: database-systems

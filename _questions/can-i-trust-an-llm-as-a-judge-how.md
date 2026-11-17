@@ -1,6 +1,6 @@
 ---
 title: "Can I trust an LLM-as-a-judge? How do I know it agrees with human reviewers?"
-section: human-behavior
+section: evals
 order: 2
 description: "Only after you check it against your own labels on a sample of real outputs. Our EvalGen paper describes a tool for this: you grade a subset of outputs, and it uses your grades to pick the candidate judge prompts and code checks that best match them. Our user study found that alignment is subjective and iterative, so keep checking as outputs change. The FAQ entry \"How do I know if I can trust my automated eval?\" gives a workflow."
 sources:

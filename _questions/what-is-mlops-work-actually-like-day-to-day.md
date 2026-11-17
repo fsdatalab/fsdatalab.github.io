@@ -1,7 +1,7 @@
 ---
 title: "What is MLOps work actually like day to day?"
 section: human-behavior
-order: 8
+order: 3
 description: "Mostly data work, evaluation, deployment, and responding to drops in production, more than modeling. In Operationalizing Machine Learning, we interviewed 18 ML engineers across areas such as chatbots, autonomous vehicles, and finance; three things governed success: velocity, validation, and versioning. A follow-up blog post describes Task MLEs, who keep specific pipelines running, and Platform MLEs, who automate shared work."
 sources:
   - title: "Operationalizing Machine Learning: An Interview Study (CSCW 2024)"

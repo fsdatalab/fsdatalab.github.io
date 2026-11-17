@@ -1,6 +1,6 @@
 ---
 title: "Should I write my eval criteria or rubric before I look at model outputs?"
-section: human-behavior
+section: evals
 order: 3
 description: "Draft some, but expect to revise them once you read outputs. In our EvalGen study, we named this criteria drift: people need criteria to grade outputs, but grading outputs changes the criteria they want, and some criteria depended on the specific outputs people saw. In Data Flywheels for LLM Applications, we argue you cannot find good criteria by theorizing about failure modes alone."
 sources:

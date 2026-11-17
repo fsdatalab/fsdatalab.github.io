@@ -1,0 +1,13 @@
+{%- comment -%}
+  Lists the published questions in section `include.section`, linking each
+  to its own page.
+{%- endcomment -%}
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
+{%- assign items = site.questions | where: "section", include.section | sort: "order" -%}
+<ul>
+{%- for item in items %}
+{%- include question-available.html question=item %}
+{%- unless question_available %}{% continue %}{% endunless %}
+  <li><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></li>
+{%- endfor %}
+</ul>
