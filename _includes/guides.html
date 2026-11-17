@@ -1,0 +1,10 @@
+{%- assign guides = site.pages | where: "guide", true | sort: "title" -%}
+{%- if guides.size > 0 %}
+<h2 class="section-heading">Guides</h2>
+{%- for guide in guides %}
+<a href="{{ guide.url | relative_url }}" class="post-item">
+  <div class="post-title">{{ guide.title }}</div>
+  <div class="post-meta">{{ guide.description }}</div>
+</a>
+{%- endfor %}
+{%- endif %}
