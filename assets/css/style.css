@@ -1310,4 +1310,3 @@ a:hover { opacity: 0.75; }
 .prose .question-sources { font-size: 0.875rem; color: var(--muted); }
 .question-breadcrumb { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; }
 .prose .question-guide { font-size: 0.875rem; }
-.post-item + .section-heading { margin-top: 2rem; }
