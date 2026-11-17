@@ -6,6 +6,8 @@ description: "We recommend pairwise choices instead of 1-to-5 scores, and checki
 sources:
   - title: "What We've Learned From a Year of Building with LLMs (O'Reilly Radar)"
     url: https://applied-llms.org
+  - title: "What should I do when I can’t get my LLM judge to agree with human reviewers? (AI Evals FAQ, Hamel Husain and Shreya Shankar)"
+    url: https://hamel.dev/blog/posts/evals-faq/what-should-i-do-when-i-cant-get-my-llm-judge-to-agree-with-human-reviewers.html
 asked:
   - https://reddit.com/r/LocalLLM/comments/1t81626/llmasjudge_scoring_is_noisier_than_i_expected/
   - https://news.ycombinator.com/item?id=40920731

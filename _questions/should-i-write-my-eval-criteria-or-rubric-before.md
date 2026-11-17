@@ -8,6 +8,8 @@ sources:
     url: https://arxiv.org/abs/2404.12272
   - title: "Data Flywheels for LLM Applications"
     url: https://www.sh-reya.com/blog/ai-engineering-flywheel/
+  - title: "Do I need a reference answer or rubric before annotating data? (AI Evals FAQ, Hamel Husain and Shreya Shankar)"
+    url: https://hamel.dev/blog/posts/evals-faq/do-i-need-a-reference-answer-before-annotating-data.html
 asked:
   - https://www.reddit.com/r/LLMDevs/comments/1r7bve3/evaluationfirst_vs_observabilityfirst_how_are_you/
   - https://www.reddit.com/r/LLMDevs/comments/1tocdg1/my_llmasjudge_had_cohens_kappa_of_047_promptfoo/

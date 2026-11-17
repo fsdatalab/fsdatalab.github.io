@@ -2,10 +2,10 @@
 title: "How should I evaluate a RAG system in production?"
 section: database-systems
 order: 30
-description: "We recommend evaluating retrieval and generation separately, using failures you find in real traces; the evals FAQ entry \"How should I approach evaluating my RAG system?\" covers this. For pipelines with several LLM steps, Data Flywheels for LLM Applications recommends placing validators at each step and computing per-step accuracy, so you can see where errors compound."
+description: "We recommend evaluating retrieval and generation separately, using failures you find in real traces. For pipelines with several LLM steps, Data Flywheels for LLM Applications recommends placing validators at each step and computing per-step accuracy, so you can see where errors compound."
 sources:
-  - title: "AI Evals: Everything You Need to Know (Hamel Husain and Shreya Shankar)"
-    url: https://hamel.dev/blog/posts/evals-faq/
+  - title: "How should I approach evaluating my RAG system? (AI Evals FAQ, Hamel Husain and Shreya Shankar)"
+    url: https://hamel.dev/blog/posts/evals-faq/how-should-i-approach-evaluating-my-rag-system.html
   - title: "Data Flywheels for LLM Applications"
     url: https://www.sh-reya.com/blog/ai-engineering-flywheel/
 asked:
