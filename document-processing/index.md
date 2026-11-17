@@ -13,7 +13,7 @@ LLMs can classify, extract from, and summarize documents that no rule-based
 pipeline could handle. Running one over every document in a large collection
 is expensive, though, and the cheapest model is often not accurate enough.
 Our work cuts the cost in four ways, most of it with Aditya Parameswaran and
-Sepanta Zeighami at UC Berkeley.
+Sepanta Zeighami.
 
 ## Let an optimizer rewrite the pipeline
 
