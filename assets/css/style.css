@@ -1306,7 +1306,7 @@ a:hover { opacity: 0.75; }
 /* ── questions ─────────────────────────────────────────── */
 .questions h3 a { color: inherit; text-decoration: none; }
 .questions h3 a:hover { color: var(--red); }
-.question-item { margin-bottom: 1.75rem; }
 .prose .question-sources { font-size: 0.875rem; color: var(--muted); }
 .question-breadcrumb { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; }
 .prose .question-guide { font-size: 0.875rem; }
+.prose .question-list li { margin-bottom: 0.4rem; }

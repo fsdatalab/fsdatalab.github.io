@@ -48,21 +48,25 @@
 {%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
 {
   "@context": "https://schema.org",
-  "@type": "FAQPage",
+  "@type": "CollectionPage",
+  "name": {{ page.title | jsonify }},
   "url": {{ page_url | jsonify }},
   "isPartOf": {"@id": {{ site_id | jsonify }}},
-  "mainEntity": [
-    {%- assign first = true %}
-    {%- for section in site.data.question_sections %}
-    {%- assign items = site.questions | where: "section", section.key | sort: "order" %}
-    {%- for item in items %}
-    {%- include question-available.html question=item %}
-    {%- unless question_available %}{% continue %}{% endunless %}
-    {% unless first %},{% endunless %}{% include question-json.html question=item %}
-    {%- assign first = false %}
-    {%- endfor %}
-    {%- endfor %}
-  ]
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {%- assign position = 0 %}
+      {%- for section in site.data.question_sections %}
+      {%- assign items = site.questions | where: "section", section.key | sort: "order" %}
+      {%- for item in items %}
+      {%- include question-available.html question=item %}
+      {%- unless question_available %}{% continue %}{% endunless %}
+      {%- assign position = position | plus: 1 %}
+      {% unless position == 1 %},{% endunless %}{"@type": "ListItem", "position": {{ position }}, "name": {{ item.title | jsonify }}, "url": {{ item.url | absolute_url | jsonify }}}
+      {%- endfor %}
+      {%- endfor %}
+    ]
+  }
 }
 {%- elsif page.layout == "question" %}
 {%- assign section = site.data.question_sections | where: "key", page.section | first %}
