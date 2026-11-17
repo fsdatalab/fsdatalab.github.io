@@ -1,6 +1,6 @@
 ---
 title: "Can I use ChatGPT or Claude to do qualitative coding or thematic analysis?"
-section: human-behavior
+section: working-with-ai
 order: 1
 description: "They can speed up the mechanical parts, but in our tests they did not do the analysis well. In Exploring Agent-Assisted Qualitative Analysis, we ran six agent setups for grounded theory on 451 tweets. The agents mostly paraphrased tweets instead of analyzing them, coded at most 68% of the tweets, and overfit to feedback or forgot it."
 sources:

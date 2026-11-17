@@ -29,7 +29,7 @@ layout: default
   {%- endfor %}
 
   {%- assign related = site.questions | where: "section", page.section | sort: "order" %}
-  <h2>More questions about {{ section.name | downcase }}</h2>
+  <h2>More questions on this topic</h2>
   <ul>
     {%- for item in related %}
     {%- if item.url == page.url %}{% continue %}{% endif %}

@@ -32,7 +32,7 @@ People from non-traditional backgrounds (in industry, outside CS, or in high sch
 
 ## Questions about using AI for data and knowledge work
 
-Questions people ask, answered from our papers and posts, by layer of the stack: {{ '/questions/' | absolute_url }}
+Questions people ask, answered from our papers and posts, grouped by topic: {{ '/questions/' | absolute_url }}
 {% for section in site.data.question_sections %}
 ### {{ section.name }}
 {% assign items = site.questions | where: "section", section.key | sort: "order" -%}

@@ -1,6 +1,6 @@
 ---
 title: "Should I spend more time on the model or on the data?"
-section: human-behavior
+section: working-with-ai
 order: 4
 description: "Usually the data. In Reflecting on a Year of Making Machine Learning Actually Useful, the biggest gains as a startup ML engineer came from adding features or redefining the train and validation splits, not from new model types. About 90% of the work was independent of the modeling library, and a shallow decision tree on the predictions helped find bugs."
 sources:

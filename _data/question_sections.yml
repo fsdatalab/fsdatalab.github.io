@@ -1,5 +1,5 @@
-- key: human-behavior
-  name: "Human behavior"
+- key: working-with-ai
+  name: "Working with AI"
 - key: evals
   name: "Evals"
 - key: interfaces
