@@ -1,0 +1,15 @@
+{%- comment -%}
+  Lists the published questions whose `guides` include `include.guide`, in
+  the order of the questions page, linking each to its own page.
+{%- endcomment -%}
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
+<ul>
+{%- for section in site.data.question_sections %}
+{%- assign items = site.questions | where: "section", section.key | where_exp: "item", "item.guides contains include.guide" | sort: "order" %}
+{%- for item in items %}
+{%- include question-available.html question=item %}
+{%- unless question_available %}{% continue %}{% endunless %}
+  <li><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></li>
+{%- endfor %}
+{%- endfor %}
+</ul>

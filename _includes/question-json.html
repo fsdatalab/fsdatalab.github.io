@@ -1,0 +1,12 @@
+{%- capture answer %}{{ include.question.description }}{% if include.question.how %} {{ include.question.how }}{% endif %}{% endcapture -%}
+{
+      "@type": "Question",
+      "name": {{ include.question.title | jsonify }},
+      "url": {{ include.question.url | absolute_url | jsonify }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ answer | jsonify }},
+        "url": {{ include.question.url | absolute_url | jsonify }},
+        "citation": [{% for source in include.question.sources %}{"@type": "CreativeWork", "name": {{ source.title | jsonify }}, "url": {{ source.url | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
+      }
+    }

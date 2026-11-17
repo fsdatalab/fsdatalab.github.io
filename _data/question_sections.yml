@@ -1,0 +1,12 @@
+- key: working-with-ai
+  name: "Working with AI"
+- key: evals
+  name: "Evals"
+- key: interfaces
+  name: "Interfaces"
+- key: database-systems
+  name: "Database systems"
+- key: inference
+  name: "Inference"
+- key: models
+  name: "Models"

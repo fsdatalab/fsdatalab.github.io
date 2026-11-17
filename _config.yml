@@ -10,6 +10,12 @@ image:
   alt: "Full Stack Data Lab, Carnegie Mellon University"
 future: true
 
+# One page per question at /questions/<file name>/; /questions/ lists them all.
+collections:
+  questions:
+    output: true
+    permalink: /questions/:name/
+
 defaults:
   - scope:
       path: ""
@@ -24,6 +30,11 @@ defaults:
       type: posts
     values:
       layout: post
+  - scope:
+      path: ""
+      type: questions
+    values:
+      layout: question
   - scope:
       path: "assets"
     values:

@@ -1,0 +1,9 @@
+{%- comment -%}
+  Sets `question_available` to false when `include.question` requires a post
+  that is not listed yet. Callers assign `listed_posts` first.
+{%- endcomment -%}
+{%- assign question_available = true -%}
+{%- if include.question.requires -%}
+  {%- assign required = listed_posts | where: "url", include.question.requires -%}
+  {%- if required.size == 0 %}{% assign question_available = false %}{% endif -%}
+{%- endif -%}

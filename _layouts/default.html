@@ -17,7 +17,12 @@
   {%- if page.layout == "post" %}
   {% include citation-meta.html %}
   {%- endif %}
-  {%- if page.unlisted or page.noindex %}
+  {%- assign question_available = true %}
+  {%- if page.requires %}
+  {%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
+  {%- include question-available.html question=page %}
+  {%- endif %}
+  {%- if page.unlisted or page.noindex or question_available == false %}
   <meta name="robots" content="noindex">
   {%- endif %}
   <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | absolute_url }}">
