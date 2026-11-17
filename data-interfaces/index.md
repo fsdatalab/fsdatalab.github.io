@@ -18,8 +18,10 @@ build interfaces that make it faster.
 ## Steering an LLM pipeline over many documents
 
 A prompt that works on one example often fails on the hundredth document.
-[DocWrangler](https://arxiv.org/abs/2504.14764) (UIST 2025), an IDE for
-[DocETL](https://docetl.org) pipelines, lets you annotate documents and
+[DocWrangler](https://arxiv.org/abs/2504.14764) (UIST 2025 Best Paper
+Honorable Mention), with Bhavya Chopra, Mawil Hasan, Stephen Lee, Björn
+Hartmann, Joe Hellerstein, Aditya Parameswaran, and Eugene Wu, is an IDE for
+[DocETL](https://docetl.org) pipelines. It lets you annotate documents and
 outputs in place; an LLM turns your notes into revised prompts, or suggests
 splitting an operation that is too hard. In our study and public deployment,
 users often turned open-ended operations into classifiers so they were easier
@@ -28,7 +30,8 @@ to check.
 ## Debugging retrieval-augmented generation
 
 When a RAG answer is wrong, the fault can be in retrieval or in generation.
-[RAGGY](https://arxiv.org/abs/2504.13587) (CHI 2026) pairs composable RAG
+[RAGGY](https://arxiv.org/abs/2504.13587) (CHI 2026 Best Paper), led by
+Quentin Romero Lauro, with Sepanta Zeighami and Aditya Parameswaran, pairs composable RAG
 building blocks with an interface for fast, interactive debugging, based on a
 study of how 12 engineers debug RAG pipelines.
 
@@ -36,7 +39,9 @@ study of how 12 engineers debug RAG pipelines.
 
 Keyword search sees only titles and tags, so you often can't tell whether a
 dataset fits your task until you inspect its rows.
-[DataScout](https://arxiv.org/abs/2507.18971) (UIST 2025) suggests query
+[DataScout](https://arxiv.org/abs/2507.18971) (UIST 2025), led by Rachel
+Lin, with Bhavya Chopra, Wenjing Lin, Madelon Hulsebos, and Aditya
+Parameswaran, suggests query
 rewrites, searches dataset contents, and shows how relevant each dataset is to
 your task.
 
