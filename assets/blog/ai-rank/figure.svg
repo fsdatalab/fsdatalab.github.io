@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="471pt" height="177.75pt" viewBox="0 0 471 177.75" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <title>Precision@25 versus cost per query</title>
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title>Precision@25 versus cost per query</dc:title>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 177.75
+L 471 177.75
+L 471 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="line2d_1">
+    <path d="M 33.75 137.232759
+L 454.5 137.232759
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #dde1e3; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 33.75 110.163793
+L 454.5 110.163793
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #dde1e3; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 33.75 83.094828
+L 454.5 83.094828
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #dde1e3; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 33.75 56.025862
+L 454.5 56.025862
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #dde1e3; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 33.75 28.956897
+L 454.5 28.956897
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #dde1e3; stroke-width: 0.6; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 59.637709 26.25
+L 59.637709 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 114.261059 26.25
+L 114.261059 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_8">
+    <path d="M 200.83702 26.25
+L 200.83702 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_9">
+    <path d="M 295.715899 26.25
+L 295.715899 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 382.291859 26.25
+L 382.291859 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_11">
+    <path d="M 436.915209 26.25
+L 436.915209 144
+" clip-path="url(#p09988b35f1)" style="fill: none; stroke: #edeef0; stroke-width: 0.45; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #26313a" x="1.5" y="11.720156" transform="rotate(-0 1.5 11.720156)">Precision@25</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #9b3e53" x="267" y="13.214414" transform="rotate(-0 267 13.214414)">Sales</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #427343" x="324.75" y="13.214414" transform="rotate(-0 324.75 13.214414)">Contract</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #386789" x="396" y="13.216875" transform="rotate(-0 396 13.216875)">Drug Safety</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #52606a" x="27.75" y="139.947173" transform="rotate(-0 27.75 139.947173)">20%</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #52606a" x="27.75" y="112.878207" transform="rotate(-0 27.75 112.878207)">40%</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #52606a" x="27.75" y="85.809242" transform="rotate(-0 27.75 85.809242)">60%</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #52606a" x="27.75" y="58.740276" transform="rotate(-0 27.75 58.740276)">80%</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #52606a" x="27.75" y="31.671311" transform="rotate(-0 27.75 31.671311)">100%</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="59.637709" y="155.725078" transform="rotate(-0 59.637709 155.725078)">0.5¢</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="114.261059" y="155.725078" transform="rotate(-0 114.261059 155.725078)">1¢</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="200.83702" y="155.725078" transform="rotate(-0 200.83702 155.725078)">3¢</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="295.715899" y="155.725078" transform="rotate(-0 295.715899 155.725078)">10¢</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="382.291859" y="155.725078" transform="rotate(-0 382.291859 155.725078)">30¢</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #52606a" x="436.915209" y="155.725078" transform="rotate(-0 436.915209 155.725078)">60¢</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #26313a" x="244.125" y="172.216875" transform="rotate(-0 244.125 172.216875)">Cost per query (log scale)</text>
+   </g>
+   <g id="text_17">
+    <g id="patch_2">
+     <path d="M 29.839825 98.166289
+L 74.986544 98.166289
+Q 76.246544 98.166289 76.246544 96.906289
+L 76.246544 87.093711
+Q 76.246544 85.833711 74.986544 85.833711
+L 29.839825 85.833711
+Q 28.579825 85.833711 28.579825 87.093711
+L 28.579825 96.906289
+Q 28.579825 98.166289 29.839825 98.166289
+z
+" style="fill: #fff0b8"/>
+    </g>
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #9b3e53" x="52.413185" y="94.714414" transform="rotate(-0 52.413185 94.714414)">Pointwise</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #9b3e53" x="201.386456" y="105.964414" transform="rotate(-0 201.386456 105.964414)">Pairwise</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #9b3e53" x="79.909515" y="98.464414" transform="rotate(-0 79.909515 98.464414)">Reranker</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: middle; fill: #9b3e53" x="91.274469" y="123.378207" transform="rotate(-0 91.274469 123.378207)">Retrieval</text>
+   </g>
+   <g id="text_21">
+    <g id="patch_3">
+     <path d="M 192.275556 40.536979
+L 237.422275 40.536979
+Q 238.682275 40.536979 238.682275 39.276979
+L 238.682275 29.464401
+Q 238.682275 28.204401 237.422275 28.204401
+L 192.275556 28.204401
+Q 191.015556 28.204401 191.015556 29.464401
+L 191.015556 39.276979
+Q 191.015556 40.536979 192.275556 40.536979
+z
+" style="fill: #fff0b8"/>
+    </g>
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #427343" x="237.317275" y="37.085104" transform="rotate(-0 237.317275 37.085104)">Pointwise</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #427343" x="437.630727" y="58.740276" transform="rotate(-0 437.630727 58.740276)">Pairwise</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #427343" x="271.35202" y="34.835104" transform="rotate(-0 271.35202 34.835104)">Reranker</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #427343" x="279.46606" y="69.567862" transform="rotate(-0 279.46606 69.567862)">Retrieval</text>
+   </g>
+   <g id="text_25">
+    <g id="patch_4">
+     <path d="M 136.409728 132.571461
+L 181.556447 132.571461
+Q 182.816447 132.571461 182.816447 131.311461
+L 182.816447 121.498883
+Q 182.816447 120.238883 181.556447 120.238883
+L 136.409728 120.238883
+Q 135.149728 120.238883 135.149728 121.498883
+L 135.149728 131.311461
+Q 135.149728 132.571461 136.409728 132.571461
+z
+" style="fill: #fff0b8"/>
+    </g>
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: end; fill: #386789" x="181.451447" y="129.119586" transform="rotate(-0 181.451447 129.119586)">Pointwise</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #386789" x="348.584682" y="139.947173" transform="rotate(-0 348.584682 139.947173)">Pairwise</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #386789" x="218.351865" y="122.369586" transform="rotate(-0 218.351865 122.369586)">Reranker</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 10.5px; font-family: 'Arial'; text-anchor: start; fill: #386789" x="223.903359" y="145.78338" transform="rotate(-0 223.903359 145.78338)">Retrieval</text>
+   </g>
+   <g id="line2d_12">
+    <defs>
+     <path id="mf40b227e96" d="M 0 3.05
+C 0.808869 3.05 1.584719 2.728633 2.156676 2.156676
+C 2.728633 1.584719 3.05 0.808869 3.05 0
+C 3.05 -0.808869 2.728633 -1.584719 2.156676 -2.156676
+C 1.584719 -2.728633 0.808869 -3.05 0 -3.05
+C -0.808869 -3.05 -1.584719 -2.728633 -2.156676 -2.156676
+C -2.728633 -1.584719 -3.05 -0.808869 -3.05 0
+C -3.05 0.808869 -2.728633 1.584719 -2.156676 2.156676
+C -1.584719 2.728633 -0.808869 3.05 0 3.05
+z
+" style="stroke: #ffffff; stroke-width: 0.6"/>
+    </defs>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#mf40b227e96" x="259.5" y="10.5" style="fill: #9b3e53; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="line2d_13">
+    <defs>
+     <path id="m6ca8d19ef5" d="M 0 3.05
+C 0.808869 3.05 1.584719 2.728633 2.156676 2.156676
+C 2.728633 1.584719 3.05 0.808869 3.05 0
+C 3.05 -0.808869 2.728633 -1.584719 2.156676 -2.156676
+C 1.584719 -2.728633 0.808869 -3.05 0 -3.05
+C -0.808869 -3.05 -1.584719 -2.728633 -2.156676 -2.156676
+C -2.728633 -1.584719 -3.05 -0.808869 -3.05 0
+C -3.05 0.808869 -2.728633 1.584719 -2.156676 2.156676
+C -1.584719 2.728633 -0.808869 3.05 0 3.05
+z
+" style="stroke: #ffffff; stroke-width: 0.6"/>
+    </defs>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m6ca8d19ef5" x="317.25" y="10.5" style="fill: #427343; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="line2d_14">
+    <defs>
+     <path id="m0278b67c2c" d="M 0 3.05
+C 0.808869 3.05 1.584719 2.728633 2.156676 2.156676
+C 2.728633 1.584719 3.05 0.808869 3.05 0
+C 3.05 -0.808869 2.728633 -1.584719 2.156676 -2.156676
+C 1.584719 -2.728633 0.808869 -3.05 0 -3.05
+C -0.808869 -3.05 -1.584719 -2.728633 -2.156676 -2.156676
+C -2.728633 -1.584719 -3.05 -0.808869 -3.05 0
+C -3.05 0.808869 -2.728633 1.584719 -2.156676 2.156676
+C -1.584719 2.728633 -0.808869 3.05 0 3.05
+z
+" style="stroke: #ffffff; stroke-width: 0.6"/>
+    </defs>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m0278b67c2c" x="388.5" y="10.5" style="fill: #386789; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Sales-Pointwise"><title>Sales · Pointwise — 11/25, $0.00435/query, 3.97 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#mf40b227e96" x="48.663185" y="104.75" style="fill: #9b3e53; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Sales-Pairwise"><title>Sales · Pairwise — 11/25, $0.02773/query, 25.28 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#mf40b227e96" x="194.636456" y="104.75" style="fill: #9b3e53; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Sales-Reranker"><title>Sales · Reranker — 11/25, $0.00605/query, 5.52 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#mf40b227e96" x="74.659515" y="104.75" style="fill: #9b3e53; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Sales-Retrieval"><title>Sales · Retrieval — 10/25, $0.00747/query, 6.81 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#mf40b227e96" x="91.274469" y="110.163793" style="fill: #9b3e53; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Contract-Pointwise"><title>Contract · Pointwise — 24/25, $0.05242/query, 47.79 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m6ca8d19ef5" x="244.817275" y="34.37069" style="fill: #427343; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Contract-Pairwise"><title>Contract · Pairwise — 20/25, $0.65962/query, 601.29 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m6ca8d19ef5" x="444.380727" y="56.025862" style="fill: #427343; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Contract-Reranker"><title>Contract · Reranker — 24/25, $0.06738/query, 61.43 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m6ca8d19ef5" x="264.60202" y="34.37069" style="fill: #427343; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Contract-Retrieval"><title>Contract · Retrieval — 18/25, $0.07398/query, 67.44 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m6ca8d19ef5" x="271.96606" y="66.853448" style="fill: #427343; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Drug-Safety-Pointwise"><title>Drug Safety · Pointwise — 7/25, $0.02580/query, 23.52 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m0278b67c2c" x="188.951447" y="126.405172" style="fill: #386789; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Drug-Safety-Pairwise"><title>Drug Safety · Pairwise — 5/25, $0.17954/query, 163.66 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m0278b67c2c" x="341.834682" y="137.232759" style="fill: #386789; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Drug-Safety-Reranker"><title>Drug Safety · Reranker — 7/25, $0.03472/query, 31.65 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m0278b67c2c" x="212.351865" y="126.405172" style="fill: #386789; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+   <g id="Drug-Safety-Retrieval"><title>Drug Safety · Retrieval — 6/25, $0.03797/query, 34.61 s</title>
+    <g clip-path="url(#p09988b35f1)">
+     <use xlink:href="#m0278b67c2c" x="219.403359" y="131.818966" style="fill: #386789; stroke: #ffffff; stroke-width: 0.6"/>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p09988b35f1">
+   <rect x="0" y="0" width="471" height="177.75"/>
+  </clipPath>
+ </defs>
+</svg>
