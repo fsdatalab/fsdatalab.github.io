@@ -4,6 +4,7 @@ title: How to Process Documents with LLMs Cheaply
 description: "Running an LLM over every document is expensive. How query optimizers, model cascades with accuracy guarantees, and cheaper semantic joins cut the cost, from our work on DocETL, MOAR, BARGAIN, Task Cascades, FDJ, and ZenDB."
 permalink: /document-processing/
 guide: true
+key: document-processing
 ---
 <article class="content-narrow prose" markdown="1">
 
@@ -73,6 +74,8 @@ When the pipeline runs on open-weight models, the inference engine decides
 much of the cost. [Quail]({{ '/ai-sql/' | relative_url }}), our engine for
 AI functions in SQL, plans the query and the LLM inference together.
 
-For common questions, see our [questions on database systems]({{ '/questions/#database-systems' | relative_url }}).
+## Questions
+
+{% include question-list.html guide="document-processing" %}
 
 </article>

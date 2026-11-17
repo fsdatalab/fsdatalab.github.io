@@ -3,6 +3,7 @@ title: "My LLM misses items when I ask it to find every instance of something in
 section: database-systems
 order: 3
 description: "Usually split: models miss instances in long inputs even when the input fits in the context window. DocETL, our open-source system, rewrites pipelines to decompose the document or the operation; our DocETL paper uses this exact case, finding every force majeure or indemnification clause in long contracts. In MOAR, our later optimizer for DocETL, one example rewrite turns one compound filter into two simpler filters."
+guides: [document-processing]
 sources:
   - title: "DocETL: Agentic Query Rewriting and Evaluation for Complex Document Processing (VLDB 2025)"
     url: https://arxiv.org/abs/2410.12189

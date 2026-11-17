@@ -1309,3 +1309,4 @@ a:hover { opacity: 0.75; }
 .question-item { margin-bottom: 1.75rem; }
 .prose .question-sources { font-size: 0.875rem; color: var(--muted); }
 .question-breadcrumb { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; }
+.prose .question-guide { font-size: 0.875rem; }

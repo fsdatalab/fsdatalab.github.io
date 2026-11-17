@@ -3,6 +3,7 @@ title: "What is the fastest, cheapest way to run an LLM over every row of a larg
 section: inference
 order: 1
 description: "Use Quail, our open-source engine for AI functions in SQL: it runs an open model as an offline batch job, keeps the GPU full, and plans the query and the inference together to reuse work across rows. Two AI filters over all 100,000 IMDB reviews cost $0.37 on one H100 at Modal's price, including model startup. The same workload at GPT-5 nano prices would cost about $1.75."
+guides: [document-processing, ai-sql]
 sources:
   - title: "Building an Ultra-High Throughput AI-SQL Engine"
     url: https://fsdatalab.github.io/blog/introducing-quail/

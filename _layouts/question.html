@@ -21,6 +21,13 @@ layout: default
     {%- endfor %}
   </p>
 
+  {%- for key in page.guides %}
+  {%- assign guide = site.pages | where: "key", key | first %}
+  {%- if guide %}
+  <p class="question-guide">Guide: <a href="{{ guide.url | relative_url }}">{{ guide.title }}</a></p>
+  {%- endif %}
+  {%- endfor %}
+
   {%- assign related = site.questions | where: "section", page.section | sort: "order" %}
   <h2>More questions about {{ section.name | downcase }}</h2>
   <ul>

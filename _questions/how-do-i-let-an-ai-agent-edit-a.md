@@ -5,6 +5,7 @@ order: 8
 requires: /blog/introducing-docwriter/
 sitemap: false
 description: "Check each agent edit against the current text before applying it, and reject edits based on text the user has since changed. In our DocWriter post, the agent's edit tool names the exact text it replaces. If that text is gone or appears more than once, the tool returns an error, and the agent rereads the document and retries or drops the edit. The user's own keystrokes always apply right away."
+guides: [data-interfaces]
 sources:
   - title: "Don't Make Me Wait! Enabling Concurrency in Human-Agent Collaboration"
     url: https://fsdatalab.github.io/blog/introducing-docwriter/

@@ -3,6 +3,7 @@ title: "My RAG answers are wrong. How do I tell whether retrieval or generation 
 section: interfaces
 order: 5
 description: "We recommend testing the pieces separately; for example, give the model known-good context and see whether the answer improves. In RAG Without the Lag (CHI 2026 Best Paper), we studied how 12 engineers debug RAG pipelines and built RAGGY, which pairs composable RAG building blocks with an interface for fast, interactive debugging. We found the settings that matter most often need hours of preprocessing after each change, which slows debugging."
+guides: [data-interfaces]
 sources:
   - title: "RAG Without the Lag: Interactive Debugging for Retrieval-Augmented Generation Pipelines (CHI 2026)"
     url: https://arxiv.org/abs/2504.13587

@@ -3,6 +3,7 @@ title: "Can I trust an LLM-as-a-judge? How do I know it agrees with human review
 section: evals
 order: 2
 description: "Only after you check it against your own labels on a sample of real outputs. Our EvalGen paper describes a tool for this: you grade a subset of outputs, and it uses your grades to pick the candidate judge prompts and code checks that best match them. Our user study found that alignment is subjective and iterative, so keep checking as outputs change."
+guides: [llm-evals]
 sources:
   - title: "Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences (UIST 2024)"
     url: https://arxiv.org/abs/2404.12272

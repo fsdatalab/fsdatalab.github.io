@@ -3,6 +3,7 @@ title: "How do I make AI-generated summaries in a dashboard or table easy to ski
 section: interfaces
 order: 1
 description: "We recommend giving every item the same structure and the same words for the same things, and putting the words that set an item apart first. Our post Five Principles for Generating Readable AI Text in Bulk draws on reading research for five rules, such as starting each item with its subject or verb and using variation only to mark a real difference. It shows fixes for a Notion AI summary column and a theme dashboard Claude generated."
+guides: [data-interfaces]
 sources:
   - title: "Five Principles for Generating Readable AI Text in Bulk"
     url: https://fsdatalab.github.io/blog/agent-text-at-scale/

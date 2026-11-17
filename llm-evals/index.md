@@ -4,6 +4,7 @@ title: What Are LLM Evals?
 description: "LLM evals are code checks and LLM judges that tell you whether an LLM app's outputs are good enough. Where to start in the AI Evals FAQ, and our research on aligning LLM judges."
 permalink: /llm-evals/
 guide: true
+key: llm-evals
 ---
 <article class="content-narrow prose" markdown="1">
 
@@ -40,6 +41,6 @@ evals in [AI Evals: Everything You Need to Know](https://hamel.dev/blog/posts/ev
 
 ## Questions
 
-{% include question-list.html section="evals" %}
+{% include question-list.html guide="llm-evals" %}
 
 </article>

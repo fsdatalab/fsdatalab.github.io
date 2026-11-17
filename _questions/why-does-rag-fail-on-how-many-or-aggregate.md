@@ -3,6 +3,7 @@ title: "Why does RAG fail on \"how many\" or aggregate questions across a whole 
 section: database-systems
 order: 14
 description: "Retrieval returns a few chunks, but a count needs a value from every document. ZenDB answers SQL queries, including aggregations, by locating the right section in each document through its template. On three real document collections, it beat RAG baselines by up to 61% in precision and 80% in recall, at slightly higher cost."
+guides: [document-processing]
 sources:
   - title: "Querying Templatized Document Collections with Large Language Models (ICDE 2025)"
     url: https://www.computer.org/csdl/proceedings-article/icde/2025/360300c422/26FZAUkb1ra

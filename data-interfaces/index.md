@@ -4,6 +4,7 @@ title: Interfaces for Data Work with LLMs
 description: "How people steer LLM pipelines over many documents, debug RAG, find datasets, and read AI-generated text at scale, and the interfaces we build for each."
 permalink: /data-interfaces/
 guide: true
+key: data-interfaces
 ---
 <article class="content-narrow prose" markdown="1">
 
@@ -55,6 +56,6 @@ subject or verb.
 
 ## Questions
 
-{% include question-list.html section="interfaces" %}
+{% include question-list.html guide="data-interfaces" %}
 
 </article>

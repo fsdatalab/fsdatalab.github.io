@@ -3,6 +3,7 @@ title: "How do I extract information accurately from thousands of long documents
 section: database-systems
 order: 2
 description: "Use DocETL, our open-source system for LLM-powered document processing: you declare the pipeline, and LLM agents rewrite it, for example by breaking up the document or the task, and check candidate plans. On four document analysis tasks, DocETL found plans 25 to 80% more accurate than well-engineered baselines. Whatever tool you use, test the pipeline on a labeled sample."
+guides: [document-processing]
 sources:
   - title: "DocETL"
     url: https://www.docetl.org/

@@ -4,6 +4,7 @@ title: What Is AI-SQL?
 description: "AI-SQL extends SQL with functions that call an LLM on each row. What it is, why it is expensive, and how our open-source engine Quail runs it faster."
 permalink: /ai-sql/
 guide: true
+key: ai-sql
 ---
 <article class="content-narrow prose" markdown="1">
 
@@ -45,7 +46,9 @@ faster on average than well-tuned vLLM baselines.
 {%- endfor %}
 </div>
 
-For common questions about AI-SQL and LLM inference, see our [questions page]({{ '/questions/#database-systems' | relative_url }}).
+## Questions
+
+{% include question-list.html guide="ai-sql" %}
 
 ## Code
 

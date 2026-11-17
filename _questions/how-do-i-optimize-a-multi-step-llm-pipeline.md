@@ -3,6 +3,7 @@ title: "How do I optimize a multi-step LLM pipeline for both accuracy and cost, 
 section: database-systems
 order: 5
 description: "Use MOAR, our optimizer for DocETL: it searches over whole-pipeline rewrites with over 30 rewrite rules and a multi-armed bandit, because operators interact and tuning each alone can give a worse plan. Across six workloads, MOAR reached 27% higher accuracy than the next-best optimizer, and matched that optimizer's best accuracy at 55% of its cost."
+guides: [document-processing]
 sources:
   - title: "Multi-Objective Agentic Rewrites for Unstructured Data Processing (VLDB 2026)"
     url: https://arxiv.org/abs/2512.02289
