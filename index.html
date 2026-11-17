@@ -23,6 +23,8 @@ title: Full Stack Data Lab
 
   {% include subscribe.html %}
 
+  {% include guides.html %}
+
   <h2 class="section-heading">Blog</h2>
   {% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
   {% if listed_posts.size > 0 %}

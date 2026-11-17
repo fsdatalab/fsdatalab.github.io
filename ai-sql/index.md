@@ -3,6 +3,7 @@ layout: default
 title: What Is AI-SQL?
 description: "AI-SQL extends SQL with functions that call an LLM on each row. What it is, why it is expensive, and how our open-source engine Quail runs it faster."
 permalink: /ai-sql/
+guide: true
 ---
 <article class="content-narrow prose" markdown="1">
 

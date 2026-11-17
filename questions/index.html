@@ -5,8 +5,8 @@ description: "Answers to questions people ask about using AI for data analysis a
 permalink: /questions/
 ---
 {%- comment -%}
-  An entry with `requires` appears only once the post at that URL is listed.
-  The same rule applies to the FAQPage JSON-LD in structured-data.html.
+  Each question is a file in _questions/ with its own page. A question with
+  `requires` appears only once the post at that URL is listed.
 {%- endcomment -%}
 {%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
 <article class="content-narrow prose questions">
@@ -16,22 +16,21 @@ permalink: /questions/
   <nav class="post-toc" aria-label="Layers">
     <strong>Layers</strong>
     <ol>
-      {%- for section in site.data.questions %}
+      {%- for section in site.data.question_sections %}
       <li><a href="#{{ section.key }}">{{ section.name }}</a></li>
       {%- endfor %}
     </ol>
   </nav>
 
-  {%- for section in site.data.questions %}
+  {%- for section in site.data.question_sections %}
   <h2 id="{{ section.key }}">{{ section.name }}</h2>
-  {%- for item in section.items %}
-  {%- if item.requires %}
-    {%- assign required = listed_posts | where: "url", item.requires -%}
-    {%- if required.size == 0 %}{% continue %}{% endif -%}
-  {%- endif %}
+  {%- assign items = site.questions | where: "section", section.key | sort: "order" %}
+  {%- for item in items %}
+  {%- include question-available.html question=item %}
+  {%- unless question_available %}{% continue %}{% endunless %}
   <section class="question-item">
-    <h3 id="{{ item.id }}"><a href="#{{ item.id }}">{{ item.q | escape }}</a></h3>
-    <p>{{ item.a | escape }}</p>
+    <h3 id="{{ item.slug }}"><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></h3>
+    <p>{{ item.description | escape }}</p>
     {%- if item.how %}
     <p><strong>How it works.</strong> {{ item.how | escape }}</p>
     {%- endif %}
