@@ -7,10 +7,13 @@ layout: default
     <h1>{{ page.title }}</h1>
     <div class="post-meta">
       <div>{{ page.date | date: "%b %-d, %Y" }}</div>
-      {% if page.author %}<div class="post-authors">{{ page.author }}</div>{% endif %}
+      {% if page.authors %}<div class="post-authors">{% include author-names.html authors=page.authors %}</div>{% endif %}
     </div>
   </div>
   {{ content }}
+  {%- if page.tags contains "ai-sql" %}
+  <p class="topic-link">More on AI-SQL: <a href="{{ '/ai-sql/' | relative_url }}">all our posts on AI-SQL</a>.</p>
+  {%- endif %}
   {% include subscribe.html %}
 </article>
 <script>

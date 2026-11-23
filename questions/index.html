@@ -1,0 +1,54 @@
+---
+layout: default
+title: Questions About Using AI for Data and Knowledge Work
+description: "Answers to questions people ask about using AI for data analysis and knowledge work, from evals to inference, each citing the paper or post it comes from."
+permalink: /questions/
+---
+{%- comment -%}
+  Each question is a file in _questions/ with its own page. A question with
+  `requires` appears only once the post at that URL is listed.
+{%- endcomment -%}
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
+<article class="content-narrow prose questions">
+  <div class="post-header"><h1>Questions about using AI for data and knowledge work</h1></div>
+  <p>Answers to questions people ask about using AI for data analysis and knowledge work. Each answer describes how one of our papers or posts approached the problem and links to it.</p>
+
+  {%- assign guides = site.pages | where: "guide", true | sort: "title" %}
+  <h2 id="guides">Guides</h2>
+  <p>Each guide explains one topic and lists its papers, posts, and questions.</p>
+  <ul>
+    {%- for guide in guides %}
+    <li><a href="{{ guide.url | relative_url }}">{{ guide.title }}</a></li>
+    {%- endfor %}
+  </ul>
+
+  <nav class="post-toc" aria-label="Topics">
+    <strong>Topics</strong>
+    <ol>
+      {%- for section in site.data.question_sections %}
+      <li><a href="#{{ section.key }}">{{ section.name }}</a></li>
+      {%- endfor %}
+    </ol>
+  </nav>
+
+  {%- for section in site.data.question_sections %}
+  <h2 id="{{ section.key }}">{{ section.name }}</h2>
+  {%- assign items = site.questions | where: "section", section.key | sort: "order" %}
+  {%- for item in items %}
+  {%- include question-available.html question=item %}
+  {%- unless question_available %}{% continue %}{% endunless %}
+  <section class="question-item">
+    <h3 id="{{ item.slug }}"><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></h3>
+    <p>{{ item.description | escape }}</p>
+    {%- if item.how %}
+    <p><strong>How it works.</strong> {{ item.how | escape }}</p>
+    {%- endif %}
+    <p class="question-sources">Sources:
+      {%- for source in item.sources %}
+      <a href="{{ source.url }}">{{ source.title | escape }}</a>{% unless forloop.last %};{% endunless %}
+      {%- endfor %}
+    </p>
+  </section>
+  {%- endfor %}
+  {%- endfor %}
+</article>

@@ -1,0 +1,109 @@
+{%- assign org_id = "/#organization" | absolute_url -%}
+{%- assign site_id = "/#website" | absolute_url -%}
+{%- assign page_url = page.url | absolute_url -%}
+<script type="application/ld+json">
+{%- if page.layout == "post" %}
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ page.title | jsonify }},
+  {%- if page.description %}
+  "description": {{ page.description | jsonify }},
+  {%- endif %}
+  "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+  "dateModified": {{ page.last_modified_at | default: page.date | date_to_xmlschema | jsonify }},
+  "url": {{ page_url | jsonify }},
+  "mainEntityOfPage": {{ page_url | jsonify }},
+  {%- if page.image.path %}
+  "image": {{ page.image.path | absolute_url | jsonify }},
+  {%- endif %}
+  "author": {% include author-json.html authors=page.authors %},
+  "publisher": {"@id": {{ org_id | jsonify }}},
+  "isPartOf": {"@id": {{ site_id | jsonify }}}
+}
+{%- elsif page.url == "/" %}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ResearchOrganization",
+      "@id": {{ org_id | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "url": {{ "/" | absolute_url | jsonify }},
+      "description": {{ site.description | jsonify }},
+      "logo": {{ "/assets/logo.png" | absolute_url | jsonify }},
+      "founder": {% include author-json.html authors=site.lab_founders %},
+      "sameAs": {{ site.lab_profiles | jsonify }}
+    },
+    {
+      "@type": "WebSite",
+      "@id": {{ site_id | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "url": {{ "/" | absolute_url | jsonify }},
+      "publisher": {"@id": {{ org_id | jsonify }}}
+    }
+  ]
+}
+{%- elsif page.url == "/questions/" %}
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "url": {{ page_url | jsonify }},
+  "isPartOf": {"@id": {{ site_id | jsonify }}},
+  "mainEntity": [
+    {%- assign first = true %}
+    {%- for section in site.data.question_sections %}
+    {%- assign items = site.questions | where: "section", section.key | sort: "order" %}
+    {%- for item in items %}
+    {%- include question-available.html question=item %}
+    {%- unless question_available %}{% continue %}{% endunless %}
+    {% unless first %},{% endunless %}{% include question-json.html question=item %}
+    {%- assign first = false %}
+    {%- endfor %}
+    {%- endfor %}
+  ]
+}
+{%- elsif page.layout == "question" %}
+{%- assign section = site.data.question_sections | where: "key", page.section | first %}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "FAQPage",
+      "url": {{ page_url | jsonify }},
+      "isPartOf": {"@id": {{ site_id | jsonify }}},
+      "mainEntity": [{% include question-json.html question=page %}]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Questions", "item": {{ "/questions/" | absolute_url | jsonify }}},
+        {"@type": "ListItem", "position": 2, "name": {{ section.name | jsonify }}, "item": {{ "/questions/" | absolute_url | append: "#" | append: section.key | jsonify }}},
+        {"@type": "ListItem", "position": 3, "name": {{ page.title | jsonify }}}
+      ]
+    }
+  ]
+}
+{%- elsif page.guide %}
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ page.title | jsonify }},
+  "description": {{ page.description | jsonify }},
+  "url": {{ page_url | jsonify }},
+  "mainEntityOfPage": {{ page_url | jsonify }},
+  "author": {"@id": {{ org_id | jsonify }}},
+  "publisher": {"@id": {{ org_id | jsonify }}},
+  "isPartOf": {"@id": {{ site_id | jsonify }}}
+}
+{%- else %}
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": {{ page.title | default: site.title | jsonify }},
+  "url": {{ page_url | jsonify }},
+  "isPartOf": {"@id": {{ site_id | jsonify }}}
+}
+{%- endif %}
+</script>

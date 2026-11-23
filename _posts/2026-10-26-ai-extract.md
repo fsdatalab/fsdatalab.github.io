@@ -2,18 +2,20 @@
 layout: post
 title: "Copy That? Faster AI-Powered Extraction by Drafting from the Document"
 date: 2026-11-09
-author: "Shreya Shankar, Charles Frye"
+authors:
+  - shreya-shankar
+  - charles-frye
 permalink: /blog/ai-extract/
-unlisted: true
-sitemap: false
+tags: [ai-sql]
+sitemap: true
 math: true
 typora-root-url: ..
-description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 3x speedups over vLLM."
+description: "How Quail speeds up LLM extraction with drafts copied from the document, a draft length chosen for each request, and up to 19x speedups over naive vLLM."
 image:
   path: /assets/blog/ai-extract/social-preview.png
   width: 1200
   height: 630
-  alt: "Copy That? Faster AI-Powered Extraction by Drafting from the Document: a command in an agent trace, copied from the document into the answer."
+  alt: "Copy That? Faster AI-Powered Extraction by Drafting from the Document: Figure 1, with Quail 4.7x faster than naive vLLM (tuned vLLM 2.6x) and $0.07 per query, compared with $0.69 and $0.13."
 ---
 
 <aside class="tldr"><strong>TL;DR:</strong> Our implementation of <code>AI.EXTRACT</code> in <a href="https://github.com/fsdatalab/quail">Quail</a> is <strong>4.7x faster on average (up to 19x)</strong> than a naive vLLM baseline, and <strong>1.8x faster on average (up to 3.0x)</strong> than a hand-written, well-tuned vLLM baseline. The key technique is a novel “inference-time-learned” adaptive draft length, used for speculative decoding with draft tokens copied from the document. Read this post for the details!</aside>
@@ -41,7 +43,7 @@ image:
 </ol>
 </nav>
 
-# 1. Introduction
+## 1. Introduction
 
 Extraction is one of the most common AI operations over data: given a document and a question, return the part of the document that answers it. For example, we might want to, from contracts, extract the governing law; from clinical notes, extract drug doses; from agent traces, extract signs of reward hacking (e.g., commands that peek at the grader code).
 
@@ -54,7 +56,7 @@ We’ll cover:
 - [How Quail adapts to each query and document as the query runs](#4-key-idea-adaptive-and-per-request-draft-lengths).
 - [Results on QUAIL-B compared with vLLM](#5-experiments-on-quail-b).
 
-# 2. AI.EXTRACT in Quail
+## 2. AI.EXTRACT in Quail
 
 `AI.EXTRACT` is a SQL function that takes in a document and a set of questions, and returns a struct with the answers, one field for each question. Each answer is a substring of the document. If the document does not answer a question, the field is `NULL`. `AI.EXTRACT` can also return the start and end of each answer (i.e., the span) in the document.
 
@@ -69,7 +71,7 @@ SELECT m.id,
 FROM messages m;
 ```
 
-# 3. Extracting with an Off-the-Shelf LLM
+## 3. Extracting with an Off-the-Shelf LLM
 
 Suppose that we want to run `AI.EXTRACT` with an off-the-shelf LLM (i.e., any autoregressive LLM, not a model trained specifically for extraction). The simplest way is to send the LLM one request for each document and field, and get one answer for each request, as in Figure 2.
 
@@ -93,7 +95,7 @@ Contemporary speculative decoding methods like DFlash<sup><a href="#note-7">7</a
 
 So, how should Quail set $$\gamma$$?
 
-# 4. Key Idea: Adaptive Draft Lengths for Each Request
+## 4. Key Idea: Adaptive Draft Lengths for Each Request
 {: #4-key-idea-adaptive-and-per-request-draft-lengths }
 
 Quail chooses a draft length for each request and updates its choice as the query runs. We first model the cost of a draft, then show how Quail learns the model's inputs during execution. Finally, we compare the approach with prior work. Table 1 lists the symbols.
@@ -117,7 +119,7 @@ Quail chooses a draft length for each request and updates its choice as the quer
 </div>
 </details>
 
-## 4.1 The Cost of a Draft
+### 4.1 The Cost of a Draft
 
 At each step, the target model checks a draft of $$\gamma$$ tokens. A longer draft may produce more output tokens, but takes longer to check. Quail chooses the $$\gamma$$ that minimizes expected time per output token:
 
@@ -149,7 +151,7 @@ $$
 
 Quail computes $$m$$ and estimates $$\rho$$ for each document and step. It must learn $$\alpha(m)$$ and the answer-length probabilities for each query.
 
-## 4.2 Learning the Draft Length During Execution
+### 4.2 Learning the Draft Length During Execution
 {: #42-learning-the-length-gamma-during-execution }
 
 A query processes many documents, so Quail learns from decoding steps and completed requests. It keeps two histograms for each extracted field:
@@ -173,7 +175,7 @@ Figure 5 shows one reason the choices change: as answers finish, Quail's estimat
 <figcaption>Figure 5. Estimated <em>P</em>(<em>N</em> &gt; <em>i</em>) for CUAD-1 and CUAD-3 before any answers finish and after 8, 32, and 128 answers, compared with the final curve.</figcaption>
 </figure>
 
-## 4.3 Reflecting on Prior Work
+### 4.3 Reflecting on Prior Work
 
 Perhaps the best-known recent method that chooses a draft length for each request is DeepSeek's DSpark,<sup><a href="#note-8">8</a></sup> whose scheduler is confidence-aware and hardware-aware. DSpark trains a small neural network to estimate how likely each draft token is to be accepted. The scheduler then compares these estimates with the engine's measured throughput at the current load. DSpark calibrates its estimates offline, before deployment. Interestingly, in Quail we can learn these estimates online (with simple histograms rather than a neural network), _separately_ for each query, as the query runs!
 
@@ -183,12 +185,12 @@ SuffixDecoding, by Oliaro et al.,<sup><a href="#note-17">17</a></sup> both copie
 
 When the answer so far has many matches, Quail may draft no tokens and decode one at a time. Instead, Quail could copy the continuation after each match and have the target model check them in one pass. Sequoia, by Chen et al.,<sup><a href="#note-18">18</a></sup> uses dynamic programming to choose which tokens to draft within a budget, then tunes the draft's size and depth for the GPU. Quail could incorporate $$\alpha(m)$$ into a similar cost model for choosing a draft tree. We leave this to future work.
 
-# 5. Experiments on QUAIL-B
+## 5. Experiments on QUAIL-B
 
 **Setup.** All systems run Qwen3-4B (FP8) on one H100 with the same prompts. We test Quail with adaptive draft lengths and fixed lengths $$\gamma \in \{0, 2, 4, 8, 16, 32, 63\}$$. Quail limits each extracted answer to 64 tokens. We compare Quail with two vLLM baselines:<sup><a href="#note-19">19</a></sup>
 
-- *Stock vLLM*, our naive baseline. We compile each query into LLM calls, one for every field of every document. Then we pass all of the calls to `LLM.generate` in one batch, in random order. vLLM generates each answer one token at a time.
-- *vLLM sorted + n-gram*, our tuned baseline. Same as stock vLLM, but we sort the calls so that the fields of one document are next to each other, so that vLLM's prefix caching computes each document once. We also turn on n-gram speculation: vLLM finds the last few answer tokens in the prompt and drafts the next five tokens.
+- **Naive vLLM**, our naive baseline. We compile each query into LLM calls, one for every field of every document. Then we pass all of the calls to stock vLLM's `LLM.generate` in one batch, in random order. vLLM generates each answer one token at a time.
+- **Tuned vLLM**, our hand-tuned baseline. Same as naive vLLM, but we sort the calls so that the fields of one document are next to each other, so that vLLM's prefix caching computes each document once. We also turn on n-gram speculation: vLLM finds the last few answer tokens in the prompt and drafts the next five tokens.
 
 We use two groups of QUAIL-B queries.
 
@@ -210,17 +212,17 @@ We use two groups of QUAIL-B queries.
 <figcaption>Figure 6. Query time with each fixed draft length, relative to adaptive, on three QUAIL-B datasets: legal contracts from CUAD, movie reviews from IMDB, and messages of coding agents from Terminal Wrench. The wrong fixed length costs up to 20%.</figcaption>
 </figure>
 
-**Quail is faster than vLLM.** As Figure 1 shows, Quail is 4.7x faster than stock vLLM and 1.8x faster than vLLM sorted + n-gram (geometric mean), and costs $0.07 per query on average, compared with $0.69 and $0.13. Figure 7 shows the query time of the three systems on each query. Quail is 2.0–19x faster than stock vLLM, and 1.2–3.0x faster than vLLM sorted + n-gram. Stock vLLM sends the fields of each document in random order, so its prefix cache rarely still holds the document when the next field arrives. On CUAD-16, where each contract of about 7,500 tokens has 41 fields, stock vLLM computes nearly every prompt from scratch and takes 2,079 s. Sorting the calls removes most of this waste. Against vLLM sorted + n-gram, on the queries with only extractions, the more fields a query extracts, the larger the gain: 1.2x on WRENCH-8 (2 fields), 1.4x on SEC-9 (4 fields), and 2.0x on CUAD-16 (41 fields). Each field needs its own answer, so a query with more fields spends more of its time on decoding. N-gram speculation removes part of the gap, but the draft length of vLLM is fixed. The gain is largest on SEC-10 (3.0x), because vLLM runs one operator at a time: vLLM computes each filing again for the filters, the classification, and the extractions. Quail computes each filing once for all of them.<sup><a href="#note-23">23</a></sup>
+**Quail is faster than vLLM.** As Figure 1 shows, Quail is 4.7x faster than naive vLLM and 1.8x faster than tuned vLLM (geometric mean), and costs $0.07 per query on average, compared with $0.69 and $0.13. Figure 7 shows the query time of the three systems on each query. Quail is 2.0–19x faster than naive vLLM, and 1.2–3.0x faster than tuned vLLM. Naive vLLM sends the fields of each document in random order, so its prefix cache rarely still holds the document when the next field arrives. On CUAD-16, where each contract of about 7,500 tokens has 41 fields, naive vLLM computes nearly every prompt from scratch and takes 2,079 s. Sorting the calls removes most of this waste. Against tuned vLLM, on the queries with only extractions, the more fields a query extracts, the larger the gain: 1.2x on WRENCH-8 (2 fields), 1.4x on SEC-9 (4 fields), and 2.0x on CUAD-16 (41 fields). Each field needs its own answer, so a query with more fields spends more of its time on decoding. N-gram speculation removes part of the gap, but the draft length of vLLM is fixed. The gain is largest on SEC-10 (3.0x), because vLLM runs one operator at a time: vLLM computes each filing again for the filters, the classification, and the extractions. Quail computes each filing once for all of them.<sup><a href="#note-23">23</a></sup>
 
 <figure id="figure-7" style="width: min(52rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/quail-vs-vllm.svg' | relative_url }}?v=14" alt="Query time of stock vLLM in random order, vLLM sorted with n-gram speculation, and Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16. Quail takes 36.1, 55.0, 52.4, and 108.3 seconds; vLLM sorted with n-gram speculation is 1.22, 1.37, 2.95, and 1.99 times slower; stock vLLM is 2.02, 3.73, 3.26, and 19.19 times slower.">
-<figcaption>Figure 7. Query time of stock vLLM (random order), vLLM sorted + n-gram speculation, and Quail on four queries that ask several questions of each document. Quail is the fastest on every query. The bar of stock vLLM on CUAD-16 is cut off at 300 s.</figcaption>
+<img src="{{ '/assets/blog/ai-extract/quail-vs-vllm.svg' | relative_url }}?v=15" alt="Query time of naive vLLM, tuned vLLM, and Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16. Quail takes 36.1, 55.0, 52.4, and 108.3 seconds; tuned vLLM is 1.22, 1.37, 2.95, and 1.99 times slower; naive vLLM is 2.02, 3.73, 3.26, and 19.19 times slower.">
+<figcaption>Figure 7. Query time of naive vLLM, tuned vLLM, and Quail on four queries that ask several questions of each document. Quail is the fastest on every query. The bar of naive vLLM on CUAD-16 is cut off at 300 s.</figcaption>
 </figure>
 
-**Quail runs at 38–42% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}),<sup><a href="#note-24">24</a></sup> the *speed-of-light* (SoL) time of a query is a lower bound from the peak FLOPs and the memory bandwidth of one H100. To extract a field from a document, the SoL time counts two forward passes. The first pass prefills the document and the question, and picks the first token of the answer. The second pass checks the whole answer at once, as if speculation drafted the entire answer perfectly on the first try. We use the most stringent and extreme version of the SoL so that we never fool ourselves into complacency. If there are several fields, we count the prefill of the document only once. Figure 8 compares the throughput of each system, in tokens per second, with the SoL throughput. Quail reaches 38–42% of the SoL throughput, vLLM sorted + n-gram 14–32%, and stock vLLM 2–20%.
+**Quail runs at 38–42% of the speed of light.** As in [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}),<sup><a href="#note-24">24</a></sup> the *speed-of-light* (SoL) time of a query is a lower bound from the peak FLOPs and the memory bandwidth of one H100. To extract a field from a document, the SoL time counts two forward passes. The first pass prefills the document and the question, and picks the first token of the answer. The second pass checks the whole answer at once, as if speculation drafted the entire answer perfectly on the first try. We use the most stringent and extreme version of the SoL so that we never fool ourselves into complacency. If there are several fields, we count the prefill of the document only once. Figure 8 compares the throughput of each system, in tokens per second, with the SoL throughput. Quail reaches 38–42% of the SoL throughput, tuned vLLM 14–32%, and naive vLLM 2–20%.
 
 <figure id="figure-8" style="width: min(52rem, calc(100vw - 3rem));">
-<img src="{{ '/assets/blog/ai-extract/throughput-vs-sol.svg' | relative_url }}?v=13" alt="Tokens per second of stock vLLM in random order, vLLM sorted with n-gram speculation, and Quail, against the speed of light, on WRENCH-8, SEC-9, SEC-10, and CUAD-16. Quail reaches 39%, 41%, 42%, and 38% of the speed of light.">
+<img src="{{ '/assets/blog/ai-extract/throughput-vs-sol.svg' | relative_url }}?v=14" alt="Tokens per second of naive vLLM, tuned vLLM, and Quail, against the speed of light, on WRENCH-8, SEC-9, SEC-10, and CUAD-16. Quail reaches 39%, 41%, 42%, and 38% of the speed of light.">
 <figcaption>Figure 8. Tokens per second of each system on the queries of Figure 7, against the speed of light. Each system gets the tokens of the speed-of-light run: each document once, and each question and answer. The percentages are the shares of the speed-of-light throughput.</figcaption>
 </figure>
 
@@ -228,18 +230,18 @@ Where does the shortfall from the SoL come from? One source is [host overhead](h
 
 Another important source is rejected draft tokens. To reach the SoL as defined above, Quail would need to predict all output tokens from the first token, perfectly and instantly, on every query. Of course, if we could do that, we would just run that system instead of the target model! We suspect that rejected draft tokens account for a large part of the remaining shortfall, but we have not measured this yet. If that is right, improving drafting methods strikes us as a better target for research than chasing host overhead, which costs only a few percentage points.
 
-# 6. Conclusion and Future Work
+## 6. Conclusion and Future Work
 
-In this article, we walked through how Quail executes `AI.EXTRACT`, a SQL function that extracts the answers to questions from documents. We use speculative decoding to accelerate `AI.EXTRACT`, with drafts copied from the document, and a draft length that adapts to the document and to the answer lengths that Quail learns while the query runs. On extraction tasks over agent traces, SEC filings, and legal contracts, Quail is up to 3.0x faster than vLLM with sorted prompts and n-gram speculation, and up to 19x faster than stock vLLM.
+In this article, we walked through how Quail executes `AI.EXTRACT`, a SQL function that extracts the answers to questions from documents. We use speculative decoding to accelerate `AI.EXTRACT`, with drafts copied from the document, and a draft length that adapts to the document and to the answer lengths that Quail learns while the query runs. On extraction tasks over agent traces, SEC filings, and legal contracts, Quail is up to 3.0x faster than tuned vLLM, and up to 19x faster than naive vLLM.
 
 Looking forward, it would be great if we didn't have to decode answers token by token at all. Perhaps one can train a "System One"-like model, in the spirit of TypeSafe's [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)<sup><a href="#note-27">27</a></sup> and Cloudflare's [Clairic](https://blog.cloudflare.com/clairic-extraction-model),<sup><a href="#note-28">28</a></sup> that points to the start and the end of each answer in the document in one forward pass. If this kind of research is interesting to you, reach out! In the meantime, try out [Quail](https://github.com/fsdatalab/quail), and if you like what we're building, give it a star on GitHub!
 
-# Acknowledgements
+## Acknowledgements
 
 We thank [Modal](https://modal.com/) for sponsoring the compute used in
 this research.
 
-# Notes
+## Notes
 
 <span id="note-1"><strong>1.</strong></span> Modal. [What does it mean to be memory-bound?](https://modal.com/gpu-glossary/perf/memory-bound) *GPU Glossary*.
 
@@ -277,7 +279,7 @@ this research.
 
 <span id="note-18"><strong>18.</strong></span> Zhuoming Chen, Avner May, Ruslan Svirschevski, Yuhsun Huang, Max Ryabinin, Zhihao Jia, and Beidi Chen. [Sequoia: Scalable, Robust, and Hardware-aware Speculative Decoding](https://arxiv.org/abs/2402.12374). arXiv:2402.12374, 2024.
 
-<span id="note-19"><strong>19.</strong></span> Both vLLM baselines run vLLM 0.29.0 with up to 25,305 tokens and 4,096 requests per forward pass, 91% of the GPU memory, and prefix caching. Stock vLLM shuffles the calls with a fixed seed. The sorted baseline also uses <code>speculative_config={"method": "ngram", "num_speculative_tokens": 5, "prompt_lookup_max": 4}</code>, the example in the vLLM documentation. vLLM writes the answer freely, without the constraint that the answer is a substring of the document. Both baselines run filters and classifications one operator at a time, before the extractions.
+<span id="note-19"><strong>19.</strong></span> Both vLLM baselines run vLLM 0.29.0 with up to 25,305 tokens and 4,096 requests per forward pass, 91% of the GPU memory, and prefix caching. Naive vLLM shuffles the calls with a fixed seed. Tuned vLLM also uses <code>speculative_config={"method": "ngram", "num_speculative_tokens": 5, "prompt_lookup_max": 4}</code>, the example in the vLLM documentation. vLLM writes the answer freely, without the constraint that the answer is a substring of the document. Both baselines run filters and classifications one operator at a time, before the extractions.
 
 <span id="note-20"><strong>20.</strong></span> Dan Hendrycks, Collin Burns, Anya Chen, and Spencer Ball. <a href="https://arxiv.org/abs/2103.06268">CUAD: An Expert-Annotated NLP Dataset for Legal Contract Review</a>. In <em>NeurIPS Datasets and Benchmarks</em>, 2021.
 
@@ -285,7 +287,7 @@ this research.
 
 <span id="note-22"><strong>22.</strong></span> Ivan Bercovich, Ivgeni Segal, Kexun Zhang, Shashwat Saxena, Aditi Raghunathan, and Ziqian Zhong. <a href="https://github.com/few-sh/terminal-wrench">Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories</a>. 2026.
 
-<span id="note-23"><strong>23.</strong></span> The *KV regret*, i.e., the input tokens that a system computes beyond the minimum, is 5.0%, 5.0%, 0.9%, and 15.8% for Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16; 3.4%, 2.8%, 63.8%, and 7.9% for vLLM sorted + n-gram; and 43.3%, 71.3%, 68.6%, and 96.0% for stock vLLM.
+<span id="note-23"><strong>23.</strong></span> The *KV regret*, i.e., the input tokens that a system computes beyond the minimum, is 5.0%, 5.0%, 0.9%, and 15.8% for Quail on WRENCH-8, SEC-9, SEC-10, and CUAD-16; 3.4%, 2.8%, 63.8%, and 7.9% for tuned vLLM; and 43.3%, 71.3%, 68.6%, and 96.0% for naive vLLM.
 
 <span id="note-24"><strong>24.</strong></span> Arnav Dhariya and Shreya Shankar. [How to Cost Your AI-Powered Filters]({{ '/blog/ai-filter-cost-estimates/' | relative_url }}). *Full Stack Data Lab Blog*, October 2026.
 
@@ -297,7 +299,7 @@ this research.
 
 <span id="note-28"><strong>28.</strong></span> Alex Reneau, Michelle Chen, and Kevin Flansburg. [Introducing Clairic, a New System One Class of Extraction Models](https://blog.cloudflare.com/clairic-extraction-model). *Cloudflare Blog*, October 2026.
 
-# Cite this article
+## Cite this article
 
 <div class="bibtex-block" markdown="1">
 <button class="copy-bibtex" type="button">Copy BibTeX</button>

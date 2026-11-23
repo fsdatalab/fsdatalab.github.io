@@ -1,0 +1,45 @@
+---
+layout: default
+---
+{%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
+{%- include question-available.html question=page -%}
+{%- assign section = site.data.question_sections | where: "key", page.section | first -%}
+<article class="content-narrow prose questions">
+  {%- if question_available %}
+  <nav class="question-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ '/questions/' | relative_url }}">Questions</a> &rsaquo;
+    <a href="{{ '/questions/' | relative_url }}#{{ section.key }}">{{ section.name }}</a>
+  </nav>
+  <div class="post-header"><h1>{{ page.title | escape }}</h1></div>
+  <p>{{ page.description | escape }}</p>
+  {%- if page.how %}
+  <p><strong>How it works.</strong> {{ page.how | escape }}</p>
+  {%- endif %}
+  <p class="question-sources">Sources:
+    {%- for source in page.sources %}
+    <a href="{{ source.url }}">{{ source.title | escape }}</a>{% unless forloop.last %};{% endunless %}
+    {%- endfor %}
+  </p>
+
+  {%- for key in page.guides %}
+  {%- assign guide = site.pages | where: "key", key | first %}
+  {%- if guide %}
+  <p class="question-guide">Guide: <a href="{{ guide.url | relative_url }}">{{ guide.title }}</a></p>
+  {%- endif %}
+  {%- endfor %}
+
+  {%- assign related = site.questions | where: "section", page.section | sort: "order" %}
+  <h2>More questions on this topic</h2>
+  <ul>
+    {%- for item in related %}
+    {%- if item.url == page.url %}{% continue %}{% endif %}
+    {%- include question-available.html question=item %}
+    {%- unless question_available %}{% continue %}{% endunless %}
+    <li><a href="{{ item.url | relative_url }}">{{ item.title | escape }}</a></li>
+    {%- endfor %}
+  </ul>
+  <p><a href="{{ '/questions/' | relative_url }}">All questions about using AI for data and knowledge work</a></p>
+  {%- else %}
+  <p>This answer is not published yet. See <a href="{{ '/questions/' | relative_url }}">all questions</a>.</p>
+  {%- endif %}
+</article>

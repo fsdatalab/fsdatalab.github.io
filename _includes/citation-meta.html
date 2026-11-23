@@ -1,0 +1,7 @@
+<meta name="citation_title" content="{{ page.title | escape }}">
+{%- for key in page.authors %}
+<meta name="citation_author" content="{{ site.data.authors[key].name | escape }}">
+{%- endfor %}
+<meta name="citation_publication_date" content="{{ page.date | date: '%Y/%m/%d' }}">
+<meta name="citation_fulltext_html_url" content="{{ page.url | absolute_url }}">
+<meta name="citation_language" content="en">

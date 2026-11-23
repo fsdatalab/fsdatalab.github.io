@@ -30,6 +30,10 @@ Apply to the [CMU CSD PhD program](https://csd.cmu.edu/academics/doctoral/admiss
 
 Email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu) with why you want to work with us, your CV, and your transcript. Please write the email yourself, without AI.
 
+### People from non-traditional backgrounds
+
+If you work in industry, study outside CS, or are in high school, see [Working with us]({{ '/working-with-us/' | relative_url }}). You start by analyzing a dataset with Quail and sending us a short video about it.
+
 ### People outside computer science
 
 If you have a data analysis problem and no engineering team, see [Work with us](/collaborate/).
