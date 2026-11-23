@@ -1,0 +1,130 @@
+# Questions people ask an AI assistant before they would find Quail, DocETL, or the lab.
+#
+# Fields:
+#   id        stable key; keep it fixed so runs can be compared over time
+#   audience  practitioner | student | collaborator
+#   project   quail | docetl | lab
+#   branded   true if the prompt names us (these always mention us, so the
+#             report keeps them out of the headline rates)
+#   text      the prompt, written the way a person would type it
+#
+# Add prompts freely. Change the text of an existing prompt only if you also
+# change its id, or the month-over-month comparison will mix two questions.
+
+prompts:
+  # ---- Practitioners choosing how to run AI functions over their data (Quail).
+  # The alternatives they weigh are the AI functions built into their warehouse.
+  - id: quail-open-alt-warehouse
+    audience: practitioner
+    project: quail
+    text: Is there an open source alternative to Snowflake Cortex AI functions or Databricks ai_query for running LLMs inside SQL?
+  - id: quail-cost-10m-rows
+    audience: practitioner
+    project: quail
+    text: What is the cheapest way to run an LLM classifier over 10 million rows in my data warehouse?
+  - id: quail-open-weights-sql
+    audience: practitioner
+    project: quail
+    text: How can I call open-weight LLMs from SQL queries without sending my data to a closed model API?
+  - id: quail-bigquery-cost
+    audience: practitioner
+    project: quail
+    text: BigQuery AI.GENERATE is getting expensive for my batch jobs. What are my alternatives?
+  - id: quail-own-gpus
+    audience: practitioner
+    project: quail
+    text: I want AI_CLASSIFY and AI_FILTER style SQL functions, but running on my own GPUs. What should I use?
+  - id: quail-cortex-vs-selfhost
+    audience: practitioner
+    project: quail
+    text: Should I use Snowflake Cortex AISQL or self-host an open model for classifying millions of support tickets?
+  - id: quail-optimize-ai-sql
+    audience: practitioner
+    project: quail
+    text: Are there query engines that optimize SQL queries containing LLM calls, like AI filters and AI joins?
+  - id: quail-gpu-throughput
+    audience: practitioner
+    project: quail
+    text: How do I maximize GPU throughput when running the same LLM prompt over millions of database rows?
+  - id: quail-duckdb-postgres
+    audience: practitioner
+    project: quail
+    text: How can I run LLM functions over a table in DuckDB or Postgres using a local open-weight model?
+
+  # ---- Practitioners processing documents (DocETL).
+  - id: docetl-pdfs-extract
+    audience: practitioner
+    project: docetl
+    text: What tools can extract structured data from thousands of PDFs with LLMs, beyond one prompt per document?
+  - id: docetl-llm-pipelines
+    audience: practitioner
+    project: docetl
+    text: Is there an open source framework for building LLM pipelines that map, filter, and summarize large document collections?
+
+  # ---- Prospective students and postdocs (lab signup).
+  - id: lab-phd-ai-data-systems
+    audience: student
+    project: lab
+    text: I'm applying to CS PhD programs. Which professors work on data systems for AI or LLM-powered data processing?
+  - id: lab-cmu-db-hci
+    audience: student
+    project: lab
+    text: Which CMU faculty work at the intersection of databases, HCI, and LLMs?
+  - id: lab-ai-sql-research
+    audience: student
+    project: lab
+    text: Which research labs work on running LLMs inside SQL or on LLM-powered document processing systems?
+  - id: lab-undergrad-reachout
+    audience: student
+    project: lab
+    text: I'm an undergrad interested in research on LLMs and databases. Which labs should I reach out to?
+  - id: lab-hci-data-groups
+    audience: student
+    project: lab
+    text: What are good research groups for human-centered data systems and LLM evaluation?
+
+  # Broad field questions. Harder to win than the specific ones above, but this
+  # is how many students and reporters start.
+  - id: lab-ai-and-data-researchers
+    audience: student
+    project: lab
+    text: Who are the leading researchers working on AI and data?
+  - id: lab-hci-and-data-researchers
+    audience: student
+    project: lab
+    text: Who are the leading researchers working on HCI and data?
+  - id: lab-ai-data-phd-advisors
+    audience: student
+    project: lab
+    text: Which professors should I consider for a PhD in AI and data systems?
+  - id: lab-hci-data-phd-advisors
+    audience: student
+    project: lab
+    text: Which professors should I consider for a PhD in HCI and data science?
+  - id: lab-junior-faculty-ai-data
+    audience: student
+    project: lab
+    text: Which junior faculty are doing exciting work on AI for data analysis?
+
+  # ---- People with data problems but no engineering team.
+  - id: lab-collab-no-eng
+    audience: collaborator
+    project: lab
+    text: I'm a journalist with thousands of documents to analyze but no engineering team. Are there research groups or tools that can help?
+
+  # ---- Branded checks: does the answer describe us correctly?
+  - id: brand-quail-what
+    audience: practitioner
+    project: quail
+    branded: true
+    text: What is Quail, the query-aware inference layer for AI-SQL, and when should I use it?
+  - id: brand-quail-vs-cortex
+    audience: practitioner
+    project: quail
+    branded: true
+    text: How does the Quail AI-SQL engine compare to Snowflake Cortex and Databricks AI functions?
+  - id: brand-lab-hiring
+    audience: student
+    project: lab
+    branded: true
+    text: Is Shreya Shankar's lab hiring PhD students, and which CMU programs should I apply through?

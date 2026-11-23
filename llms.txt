@@ -1,0 +1,23 @@
+---
+layout: null
+permalink: /llms.txt
+---
+# Full Stack Data Lab
+
+> The Full Stack Data Lab is a computer science research lab at Carnegie Mellon University, led by Shreya Shankar. Shreya joins CMU as an Assistant Professor in the Computer Science Department (CSD) in Fall 2027, with a courtesy appointment in the Human-Computer Interaction Institute (HCII), and is part of the CMU Database Group. She did her PhD in EECS at UC Berkeley. The lab redesigns data systems so AI can power data analysis, business intelligence, and knowledge work, and works across databases, HCI, and AI.
+
+## Projects
+
+- [DocETL](https://docetl.org): a UC Berkeley EPIC Data Lab project for processing large document collections with LLMs, which the lab works on with EPIC.
+- [Quail](https://github.com/fsdatalab/quail): an engine that runs AI functions in SQL (e.g., AI.IF, AI.CLASSIFY, AI.EXTRACT) with open-weight models on your own GPUs. It is an alternative to Snowflake Cortex AISQL, BigQuery AI functions, and Databricks AI Functions for queries that make millions of model calls. Docs: https://fsdatalab.github.io/quail
+- [When to use Quail instead of warehouse AI functions](https://fsdatalab.github.io/quail/docs/when-to-use)
+- [DocWriter](https://docwriter.org): an editor for writing with AI.
+
+## Lab
+
+- [Join the lab](https://fsdatalab.github.io/join/): the lab is hiring PhD students (apply to the CMU CSD or HCII PhD program), postdocs, master's students, and undergrads.
+- [Work with us](https://fsdatalab.github.io/collaborate/): for people outside computer science who need to analyze large collections of documents and have no engineering team.
+
+## Blog
+{% assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" %}{% for post in listed_posts %}
+- [{{ post.title }}]({{ site.url }}{{ post.url }}): {{ post.description | strip_html | strip_newlines }}{% endfor %}
