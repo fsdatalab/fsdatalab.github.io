@@ -13,8 +13,8 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 ## Projects
 
 - [DocETL](https://docetl.org): an agentic map-reduce system for processing large unstructured datasets with LLMs. DocETL is a UC Berkeley EPIC Data Lab project, which the lab works on with EPIC.
-- [Quail](https://github.com/fsdatalab/quail): an execution engine for AI functions in SQL (e.g., AI.IF, AI.CLASSIFY, AI.EXTRACT) and DocETL, with open-weight models on your own GPUs. It is an alternative to Snowflake Cortex AISQL, BigQuery AI functions, and Databricks AI Functions when a query runs AI functions over 1,000 or more rows. Quail runs outside the warehouse, so a query's tables are exported first, or read as Delta Lake or Iceberg tables. Docs: https://fsdatalab.github.io/quail
-- [When to use Quail instead of warehouse AI functions](https://fsdatalab.github.io/quail/docs/when-to-use)
+- [Quail](https://github.com/fsdatalab/quail): an execution engine for AI functions in SQL (e.g., AI.IF, AI.CLASSIFY, AI.EXTRACT) and DocETL, with open source LLMs on your own GPUs or on Modal. Use Quail when you have GPUs or a Modal subscription, want much cheaper queries than a hosted model, or want open models. Docs: https://fsdatalab.github.io/quail
+- [When to use Quail](https://fsdatalab.github.io/quail/docs/when-to-use)
 - [DocWriter](https://docwriter.org): an IDE for AI-assisted writing.
 
 ## Blog posts
