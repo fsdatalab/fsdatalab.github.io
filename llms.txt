@@ -1,18 +1,20 @@
 ---
 layout: null
+permalink: /llms.txt
 sitemap: false
 ---
 {%- assign listed_posts = site.posts | where_exp: "post", "post.unlisted != true" | where_exp: "post", "post.date <= site.time" -%}
 # {{ site.title }}
 
-> {{ site.description }}
+> The Full Stack Data Lab is a computer science research lab at Carnegie Mellon University, led by Shreya Shankar. Shreya joins CMU as an Assistant Professor in the Computer Science Department (CSD) in Fall 2027, with a courtesy appointment in the Human-Computer Interaction Institute (HCII), and is part of the CMU Database Group. She did her PhD in EECS at UC Berkeley. The lab builds next-generation systems for data analysis, business intelligence, and knowledge work, and works across databases, HCI, and AI.
 
 Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatalab](https://github.com/fsdatalab).
 
 ## Projects
 
-- [DocETL](https://docetl.org): an agentic map-reduce system for processing large unstructured datasets with LLMs.
-- [Quail](https://github.com/fsdatalab/quail): an execution engine for AI functions in SQL (and DocETL), with open source LLMs.
+- [DocETL](https://docetl.org): an agentic map-reduce system for processing large unstructured datasets with LLMs. DocETL is a UC Berkeley EPIC Data Lab project, which the lab works on with EPIC.
+- [Quail](https://github.com/fsdatalab/quail): an execution engine for AI functions in SQL (e.g., AI.IF, AI.CLASSIFY, AI.EXTRACT) and DocETL, with open-weight models on your own GPUs. It is an alternative to Snowflake Cortex AISQL, BigQuery AI functions, and Databricks AI Functions for queries that make millions of model calls. Docs: https://fsdatalab.github.io/quail
+- [When to use Quail instead of warehouse AI functions](https://fsdatalab.github.io/quail/docs/when-to-use)
 - [DocWriter](https://docwriter.org): an IDE for AI-assisted writing.
 
 ## Blog posts
@@ -28,7 +30,9 @@ Lab lead: [Shreya Shankar](https://www.sh-reya.com/). Code: [github.com/fsdatala
 
 ## Getting involved
 
-People from non-traditional backgrounds (in industry, outside CS, or in high school) can start by using Quail to analyze a dataset and sending a short video explaining the analysis. CMU students and prospective postdocs should reach out directly; prospective PhD students should apply to CMU CSD. Details and ideas: {{ '/working-with-us/' | absolute_url }}
+- [Join the lab]({{ '/join/' | absolute_url }}): the lab is hiring PhD students (apply to the CMU CSD or HCII PhD program), postdocs, master's students, and undergrads.
+- [Working with us if you have a non-traditional background]({{ '/working-with-us/' | absolute_url }}): people in industry, outside CS, or in high school can start by using Quail to analyze a dataset and sending a short video explaining the analysis.
+- [Work with us]({{ '/collaborate/' | absolute_url }}): for people outside computer science who need to analyze large collections of documents and have no engineering team.
 
 ## Questions about using AI for data and knowledge work
 
