@@ -8,35 +8,35 @@ permalink: /join/
 
 ## Join the lab
 
-The Full Stack Data Lab is a computer science research lab at Carnegie Mellon University, led by [Shreya Shankar](https://sh-reya.com). Shreya joins CMU as an Assistant Professor in the [Computer Science Department (CSD)](https://csd.cmu.edu) in Fall 2027, with a courtesy appointment in the [Human-Computer Interaction Institute (HCII)](https://www.hcii.cmu.edu), and she is part of the [CMU Database Group](https://db.cs.cmu.edu). She did her PhD in EECS at UC Berkeley.
-
-We are hiring PhD students, postdocs, master's students, and undergrads who do database, HCI, or AI research. You don't need a background in all three areas.
-
-### What we work on
-
-We redesign data systems so that AI can power data analysis, business intelligence, and knowledge work. We talk to the people who do the work, and we build open-source systems and user interfaces for them. Our current projects are:
-
-- [DocETL](https://docetl.org), a UC Berkeley [EPIC Data Lab](https://epic.berkeley.edu) project for processing large collections of documents with LLMs, which we work on with our friends at EPIC.
-- [Quail](https://github.com/fsdatalab/quail), an engine that runs AI functions in SQL with open-weight models on GPUs.
-- [DocWriter](https://docwriter.org), an editor for writing with AI.
-
-The [blog](/blog/) explains our recent research in detail.
+The Full Stack Data Lab at Carnegie Mellon University is looking for highly motivated and ambitious database, HCI, or AI researchers. We are hiring PhD students, postdocs, master's students, and undergrads, and you don't need a background in all three areas.
 
 ### PhD students
 
-Apply to the [CMU CSD PhD program](https://csd.cmu.edu/academics/doctoral/admissions) or the [CMU HCII PhD program](https://www.hcii.cmu.edu/academics/phd-hci/admissions). Shreya can advise students in either program. In your application, name Shreya Shankar as a faculty member you want to work with.
+Apply through the [CMU CSD](https://csd.cmu.edu/academics/doctoral/admissions) or [HCII](https://www.hcii.cmu.edu/academics/phd-hci/admissions) PhD application, and name Shreya Shankar as a faculty member you want to work with. Shreya can advise students in both programs.
 
 ### Postdocs, master's students, and undergrads
 
-Email [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu) with why you want to work with us, your CV, and your transcript. Please write the email yourself, without AI.
+Reach out to [shreyashankar@cmu.edu](mailto:shreyashankar@cmu.edu) with why you want to work with us, your CV, and your transcript. Don't write your email with AI, please!
 
-### People from non-traditional backgrounds
+### Applicants from non-traditional backgrounds
 
-If you work in industry, study outside CS, or are in high school, see [Working with us]({{ '/working-with-us/' | relative_url }}). You start by analyzing a dataset with Quail and sending us a short video about it.
+Start with [Working with us]({{ '/working-with-us/' | relative_url }}) if you work in industry, study outside CS, or are in high school. You analyze a dataset with Quail and send us a short video about your analysis.
+
+### About the lab
+
+Shreya Shankar leads the lab. Shreya joins CMU's [Computer Science Department (CSD)](https://csd.cmu.edu) as an Assistant Professor in Fall 2027, with a courtesy appointment in the [Human-Computer Interaction Institute (HCII)](https://www.hcii.cmu.edu). She is part of the [CMU Database Group](https://db.cs.cmu.edu) and did her PhD in EECS at UC Berkeley.
+
+We build next-generation systems for data analysis, business intelligence (BI), and knowledge work. We take a user-centered and full-stack approach, so we talk to people and build open-source data systems and user interfaces. Our projects are:
+
+- [DocETL](https://docetl.org), an agentic map-reduce system for processing large unstructured datasets with LLMs. DocETL is a UC Berkeley [EPIC Data Lab](https://epic.berkeley.edu) project, which we work on with our friends at EPIC.
+- [Quail](https://github.com/fsdatalab/quail), an execution engine for AI functions in SQL (and DocETL), with open source LLMs.
+- [DocWriter](https://docwriter.org), an IDE for AI-assisted writing.
+
+Our [blog](/blog/) posts explain our recent research in detail.
 
 ### People outside computer science
 
-If you have a data analysis problem and no engineering team, see [Work with us](/collaborate/).
+[Work with us](/collaborate/) describes how we work with people who have unstructured data analysis needs but no engineering team.
 
 {% include subscribe.html %}
 
