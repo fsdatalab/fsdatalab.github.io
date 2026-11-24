@@ -9,6 +9,8 @@ sources:
     url: https://fsdatalab.github.io/blog/introducing-quail/
   - title: "What Is AI-SQL?"
     url: https://fsdatalab.github.io/ai-sql/
+  - title: "When to use Quail"
+    url: https://fsdatalab.github.io/quail/docs/when-to-use
 asked:
   - https://community.databricks.com/t5/generative-ai/ai-query-parallel-calls/td-p/146809
 ---

@@ -7,6 +7,8 @@ guides: [document-processing, ai-sql]
 sources:
   - title: "Building an Ultra-High Throughput AI-SQL Engine"
     url: https://fsdatalab.github.io/blog/introducing-quail/
+  - title: "When to use Quail"
+    url: https://fsdatalab.github.io/quail/docs/when-to-use
 asked:
   - https://www.reddit.com/r/LocalLLaMA/comments/1ohgf9t/batch_inference_locally_on_4080/
   - https://discuss.ray.io/t/offline-inference-vllm-map-batches-vs-build-llm-processor/23369
